@@ -1,0 +1,5 @@
+org.springframework.context.ApplicationListener=\
+slim.ModuleInstallerListener
+
+org.springframework.context.ApplicationContextInitializer=\
+slim.TestModuleInitializer

@@ -1,0 +1,2 @@
+org.springframework.beans.BeanInfoFactory=\
+config.SpringBootBeanInfoFactory

@@ -1,0 +1,6 @@
+slim.Module=\
+lib.enable.BarConfigurationModule
+
+foo.bar.Spam=\
+One,\
+Two
