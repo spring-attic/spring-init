@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package slim;
+package org.springframework.init;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-package slim;
+package org.springframework.init;
+
+import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
 
 /**
  * @author Dave Syer
  *
  */
-public interface ImportRegistrars {
+public interface ConditionService {
 
-	void add(Class<?> importer, Class<?> registrar);
+	boolean matches(Class<?> type, ConfigurationPhase phase);
 
-	void add(Class<?> importer, String typeName);
+	boolean matches(Class<?> type);
+
+	boolean matches(Class<?> factory, Class<?> type);
 
 }

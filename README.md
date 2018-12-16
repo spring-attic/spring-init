@@ -1,6 +1,4 @@
-Demo of an APT plugin that converts `@Configuration` to
-functional bean registrations, which are known to be faster and also
-more amenable to AOT compilation (native image building).
+Demo of an APT plugin that converts `@Configuration` to functional bean registrations, which are known to be faster and also more amenable to AOT compilation (native image building).
 
 Takes this:
 
@@ -37,20 +35,12 @@ public class SampleConfigurationInitializer
 }
 ```
 
-You then need a Spring application bootstrap utility that recognizes
-the `ApplicationContextInitializer` and treats it in a special way. 
-This is provided in the modules of this project, so just
-add them as dependencies:
+You then need a Spring application bootstrap utility that recognizes the `ApplicationContextInitializer` and treats it in a special way.  This is provided in the modules of this project, so just add them as dependencies:
 
 ```
 		<dependency>
 			<groupId>org.springframework.experimental</groupId>
-			<artifactId>library</artifactId>
-			<version>${init.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.experimental</groupId>
-			<artifactId>slim</artifactId>
+			<artifactId>spring-init-core</artifactId>
 			<version>${init.version}</version>
 		</dependency>
 
@@ -66,7 +56,7 @@ and set the APT processor up as a compiler plugin:
 					<annotationProcessorPaths>
 						<path>
 							<groupId>org.springframework.experimental</groupId>
-							<artifactId>processor</artifactId>
+							<artifactId>spring-init-processor</artifactId>
 							<version>${init.version}</version>
 						</path>
 					</annotationProcessorPaths>
@@ -75,8 +65,37 @@ and set the APT processor up as a compiler plugin:
 
 ```
 
-(Look at the samples for code to copy.) If you are using Eclipse you will need the
-M2E APT plugin.
+To use functional versions of Spring Boot autoconfiguration you need to include additional dependencies, for example (with `generated.version=2.1.1.BUILD-SNAPSHOT` for Spring Boot 2.1.1):
+
+```
+		<dependency>
+			<groupId>org.springframework.experimental</groupId>
+			<artifactId>spring-boot-autoconfigure</artifactId>
+			<version>${generated.version}</version>
+            <classifier>func</classifier>
+		</dependency>
+```
+
+The convention is that the artifact ID is the same as the Spring Boot dependency, but the group ID is different and the classifier is "func" (to make the jar file names unique). There is also a `spring-init-library` with some scraps of support for Spring Cloud.
+
+You can use `@Import` or `@ImportAutoConfiguration` (more idiomatically) to include existing autoconfigurations in your app. Example (a simple, non-web application):
+
+```java
+@SpringBootConfiguration
+@ComponentScan
+@ImportAutoConfiguration({ ConfigurationPropertiesAutoConfiguration.class,
+		PropertyPlaceholderAutoConfiguration.class })
+public class SampleApplication {
+
+	public static void main(String[] args) {
+		SpringApplication app = new SpringApplication(SampleApplication.class);
+		app.run(args);
+	}
+
+}
+```
+
+Look at the samples for code to copy. If you are using Eclipse you will need the M2E APT plugin.
 
 Build and run:
 
@@ -99,7 +118,9 @@ The command line runner output comes out on stdout after the Spring Boot app has
 
 ## Building
 
-You can build and run everything from the command line, or from an IDE. If you are using [Eclipse](https://github.com/jbosstools/m2e-apt/issues/64), you need to disable the Maven project nature for the "processor" project (or work with it in a different workspace). It only has 2 dependencies, so it's quite easy to manually set up the classpath for that project (then you have to build it on the command line before you refresh the sample apps).
+Before you build, run the `update.sh` script in the "generated" directory. It will clone Spring Boot and all the source code needed to generate initializers from Spring Boot autoconfigurations.
+
+You can then build and run everything from the command line, or from an IDE. If you are using [Eclipse](https://github.com/jbosstools/m2e-apt/issues/64), you need to disable the Maven project nature for the "processor" project (or work with it in a different workspace). It only has 2 dependencies, so it's quite easy to manually set up the classpath for that project (then you have to build it on the command line before you refresh the sample apps).
 
 You can debug the APT processor by running on the command line and attaching a debugger, e.g:
 

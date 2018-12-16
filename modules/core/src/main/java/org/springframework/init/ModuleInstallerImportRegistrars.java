@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package slim;
+package org.springframework.init;
 
 import java.io.IOException;
 import java.util.LinkedHashSet;

@@ -66,13 +66,14 @@ public class SpringClassNames {
 	public static final ClassName NULLABLE = ClassName.get("org.springframework.lang",
 			"Nullable");
 
-	public static final ClassName OBJECT_UTILS = ClassName.get("slim", "ObjectUtils");
+	public static final ClassName OBJECT_UTILS = ClassName.get("org.springframework.init",
+			"ObjectUtils");
 
-	public static final ClassName CONDITION_SERVICE = ClassName.get("slim",
-			"ConditionService");
+	public static final ClassName CONDITION_SERVICE = ClassName
+			.get("org.springframework.init", "ConditionService");
 
-	public static final ClassName IMPORT_REGISTRARS = ClassName.get("slim",
-			"ImportRegistrars");
+	public static final ClassName IMPORT_REGISTRARS = ClassName
+			.get("org.springframework.init", "ImportRegistrars");
 
 	public static final ClassName APPLICATION_CONTEXT_INITIALIZER = ClassName
 			.get("org.springframework.context", "ApplicationContextInitializer");
@@ -118,7 +119,7 @@ public class SpringClassNames {
 	public static final ClassName CLASS_UTILS = ClassName.get("org.springframework.util",
 			"ClassUtils");
 
-	public static final ClassName FACTORY_BEAN = ClassName.get("org.springframework.beans.factory",
-			"FactoryBean");
+	public static final ClassName FACTORY_BEAN = ClassName
+			.get("org.springframework.beans.factory", "FactoryBean");
 
 }
