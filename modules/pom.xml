@@ -15,7 +15,7 @@
 	<name>Spring Init Modules</name>
 
 	<modules>
-		<module>slim</module>
+		<module>core</module>
 		<module>library</module>
 		<module>processor</module>
 		<module>processor-tests</module>

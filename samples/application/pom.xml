@@ -17,13 +17,13 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>${project.groupId}</groupId>
+			<groupId>org.springframework.experimental</groupId>
 			<artifactId>spring-boot-autoconfigure</artifactId>
 			<version>${generated.version}</version>
 			<classifier>func</classifier>
 		</dependency>
 		<dependency>
-			<groupId>${project.groupId}</groupId>
+			<groupId>org.springframework.experimental</groupId>
 			<artifactId>spring-init-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -68,7 +68,7 @@
 				<configuration>
 					<annotationProcessorPaths>
 						<path>
-							<groupId>${project.groupId}</groupId>
+							<groupId>org.springframework.experimental</groupId>
 							<artifactId>spring-init-processor</artifactId>
 							<version>${project.version}</version>
 						</path>
