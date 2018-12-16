@@ -4,7 +4,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>spring-init-experiment</groupId>
+	<groupId>org.springframework.experimental</groupId>
 	<artifactId>spring-boot-autoconfigure</artifactId>
 	<version>2.1.1.BUILD-SNAPSHOT</version>
 
@@ -711,20 +711,20 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
-			<groupId>spring-init-experiment</groupId>
-			<artifactId>library</artifactId>
+			<groupId>org.springframework.experimental</groupId>
+			<artifactId>spring-init-library</artifactId>
 			<version>${slim.version}</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
-			<groupId>spring-init-experiment</groupId>
-			<artifactId>slim</artifactId>
+			<groupId>org.springframework.experimental</groupId>
+			<artifactId>spring-init-core</artifactId>
 			<version>${slim.version}</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
-			<groupId>spring-init-experiment</groupId>
-			<artifactId>processor</artifactId>
+			<groupId>org.springframework.experimental</groupId>
+			<artifactId>spring-init-processor</artifactId>
 			<version>${slim.version}</version>
 			<scope>provided</scope>
 		</dependency>
@@ -737,7 +737,7 @@
 
 	<properties>
 		<java.version>1.8</java.version>
-		<slim.version>1.0-SNAPSHOT</slim.version>
+		<slim.version>0.0.1.BUILD-SNAPSHOT</slim.version>
 	</properties>
 
 	<build>

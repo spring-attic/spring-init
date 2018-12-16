@@ -60,7 +60,7 @@ import org.springframework.util.ClassUtils;
  */
 public class Utils {
 
-	public final static String PROJECT = "spring-init-experiment";
+	public final static String PROJECT = "org.springframework.experimental";
 
 	private final static Logger logger = LoggerFactory.getLogger(Utils.class);
 
@@ -114,7 +114,7 @@ public class Utils {
 				resolvedDependencies = new ArrayList<>();
 				for (Dependency dependency : dependencies) {
 					File resolvedDependency = null;
-					// Example: spring-init-experiment:tests-lib:jar:1.0-SNAPSHOT
+					// Example: org.springframework.experimental:tests-lib:jar:1.0-SNAPSHOT
 					if (dependency.toString().startsWith(PROJECT + ":")) {
 						// Resolve locally
 						StringTokenizer st = new StringTokenizer(dependency.toString(),

@@ -9,9 +9,9 @@
 		<relativePath/>
 	</parent>
 
-	<groupId>com.example</groupId>
-	<artifactId>generated</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<groupId>org.springframework.experimental</groupId>
+	<artifactId>spring-init-generated</artifactId>
+	<version>0.0.1.BUILD-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Parent Generated</name>
 

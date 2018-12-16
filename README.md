@@ -44,12 +44,12 @@ add them as dependencies:
 
 ```
 		<dependency>
-			<groupId>spring-init-experiment</groupId>
+			<groupId>org.springframework.experimental</groupId>
 			<artifactId>library</artifactId>
 			<version>${init.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>spring-init-experiment</groupId>
+			<groupId>org.springframework.experimental</groupId>
 			<artifactId>slim</artifactId>
 			<version>${init.version}</version>
 		</dependency>
@@ -65,7 +65,7 @@ and set the APT processor up as a compiler plugin:
 				<configuration>
 					<annotationProcessorPaths>
 						<path>
-							<groupId>spring-init-experiment</groupId>
+							<groupId>org.springframework.experimental</groupId>
 							<artifactId>processor</artifactId>
 							<version>${init.version}</version>
 						</path>
