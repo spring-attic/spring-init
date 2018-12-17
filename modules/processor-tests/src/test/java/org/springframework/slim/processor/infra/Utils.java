@@ -114,13 +114,17 @@ public class Utils {
 				resolvedDependencies = new ArrayList<>();
 				for (Dependency dependency : dependencies) {
 					File resolvedDependency = null;
-					// Example: org.springframework.experimental:tests-lib:jar:1.0-SNAPSHOT
+					// Example:
+					// org.springframework.experimental:tests-lib:jar:1.0-SNAPSHOT
 					if (dependency.toString().startsWith(PROJECT + ":")) {
 						// Resolve locally
 						StringTokenizer st = new StringTokenizer(dependency.toString(),
 								":");
 						st.nextToken();
 						String submodule = st.nextToken();
+						if (submodule.startsWith("spring-init-")) {
+							submodule = submodule.substring("spring-init-".length());
+						}
 						resolvedDependency = new File(projectRootFolder,
 								"../" + submodule + "/target/classes").getCanonicalFile();
 						if (!resolvedDependency.exists()) {
@@ -128,6 +132,12 @@ public class Utils {
 							resolvedDependency = new File(projectRootFolder,
 									"../../modules/" + submodule + "/target/classes")
 											.getCanonicalFile();
+						}
+						if (!resolvedDependency.exists()) {
+							// try another place
+							resolvedDependency = new File(projectRootFolder,
+									"../../generated/" + generated(submodule)
+											+ "/target/classes").getCanonicalFile();
 						}
 						if (!resolvedDependency.exists()) {
 							System.out.println("Bad miss? "
@@ -152,6 +162,19 @@ public class Utils {
 			}
 		}
 		return resolvedDependencies;
+	}
+
+	private static String generated(String submodule) {
+		switch (submodule) {
+		case "spring-boot-autoconfigure":
+			return "autoconfigure";
+		case "spring-boot-actuator-autoconfigure":
+			return "actuator";
+		case "spring-boot-test-autoconfigure":
+			return "test";
+		default:
+			return submodule;
+		}
 	}
 
 	static class CompilationResultClassLoader extends URLClassLoader {

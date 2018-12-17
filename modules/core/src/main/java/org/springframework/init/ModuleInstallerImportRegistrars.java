@@ -17,8 +17,11 @@
 package org.springframework.init;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
@@ -27,11 +30,13 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
+import org.springframework.context.annotation.DeferredImportSelector;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.context.annotation.ImportSelector;
 import org.springframework.context.support.GenericApplicationContext;
@@ -120,7 +125,7 @@ public class ModuleInstallerImportRegistrars
 				if (ImportSelector.class.isAssignableFrom(type)) {
 					ImportSelector registrar = (ImportSelector) context
 							.getAutowireCapableBeanFactory().createBean(type);
-					String[] selected = registrar.selectImports(
+					String[] selected = selected(registrar,
 							new StandardAnnotationMetadata(imported.getSource()));
 					for (String select : selected) {
 						if (ClassUtils.isPresent(select, context.getClassLoader())) {
@@ -195,6 +200,30 @@ public class ModuleInstallerImportRegistrars
 			}
 		}
 		return added;
+	}
+
+	private String[] selected(ImportSelector registrar,
+			StandardAnnotationMetadata metadata) {
+		if (registrar instanceof DeferredImportSelector) {
+			return new DeferredConfigurations(Stream.of(registrar.selectImports(metadata))
+					.map(name -> ClassUtils.resolveClassName(name,
+							context.getClassLoader()))
+					.collect(Collectors.toList())).list();
+		}
+		return registrar.selectImports(metadata);
+	}
+
+	static class DeferredConfigurations extends AutoConfigurations {
+
+		protected DeferredConfigurations(Collection<Class<?>> classes) {
+			super(classes);
+		}
+
+		public String[] list() {
+			return getClasses().stream().map(cls -> cls.getName())
+					.collect(Collectors.toList()).toArray(new String[0]);
+		}
+
 	}
 
 	private Set<Imported> ordered(Set<Imported> registrars) {

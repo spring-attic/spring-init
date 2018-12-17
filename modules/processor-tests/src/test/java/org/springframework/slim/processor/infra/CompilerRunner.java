@@ -24,8 +24,8 @@ import java.util.List;
 import org.springframework.cloud.function.compiler.java.CompilationMessage;
 import org.springframework.cloud.function.compiler.java.CompilationOptions;
 import org.springframework.cloud.function.compiler.java.CompilationResult;
-import org.springframework.cloud.function.compiler.java.InputFileDescriptor;
 import org.springframework.cloud.function.compiler.java.InMemoryJavaFileObject;
+import org.springframework.cloud.function.compiler.java.InputFileDescriptor;
 import org.springframework.cloud.function.compiler.java.RuntimeJavaCompiler;
 
 /**
@@ -36,30 +36,35 @@ public class CompilerRunner {
 	public static CompilationResult run(InputFileDescriptor fd) {
 		List<InputFileDescriptor> sources = new ArrayList<>();
 		sources.add(fd);
-		return run(sources,Collections.emptyList(), Collections.emptyList());
+		return run(sources, Collections.emptyList(), Collections.emptyList());
 	}
 
 	public static CompilationResult run(InputFileDescriptor fd, List<File> dependencies) {
 		List<InputFileDescriptor> sources = new ArrayList<>();
 		sources.add(fd);
-		return run(sources,Collections.emptyList(), dependencies);
+		return run(sources, Collections.emptyList(), dependencies);
 	}
 
-	public static CompilationResult run(Collection<InputFileDescriptor> sources, Collection<InputFileDescriptor> resources, List<File> dependencies) {
+	public static CompilationResult run(Collection<InputFileDescriptor> sources,
+			Collection<InputFileDescriptor> resources, List<File> dependencies) {
 		RuntimeJavaCompiler compiler = new RuntimeJavaCompiler();
 		CompilationOptions options = new CompilationOptions();
 		boolean hasErrors = false;
 		System.out.println("Starting compiler...");
-		CompilationResult result = compiler.compile(sources.toArray(new InputFileDescriptor[0]),resources.toArray(new InputFileDescriptor[0]), options, dependencies);
+		CompilationResult result = compiler.compile(
+				sources.toArray(new InputFileDescriptor[0]),
+				resources.toArray(new InputFileDescriptor[0]), options, dependencies);
 		List<CompilationMessage> compilationMessages = result.getCompilationMessages();
 		for (CompilationMessage compilationMessage : compilationMessages) {
 			if (compilationMessage.getKind().toString().equals("ERROR")) {
+				System.out.print(compilationMessage.toString());
 				hasErrors = true;
 			}
 		}
 		if (hasErrors) {
 			throw new IllegalStateException("Compilation failed, see errors");
-		} else {
+		}
+		else {
 			System.out.println("Compilation completed OK");
 		}
 		// printCompilationSummary(result);
@@ -76,7 +81,8 @@ public class CompilerRunner {
 		System.out.println("Output files:");
 		for (InMemoryJavaFileObject compiledClassDefinition : compiledClasses) {
 			byte[] bytes = compiledClassDefinition.getBytes();
-			System.out.println(compiledClassDefinition.getName() + " size:" + (bytes == null ? "NULL" : bytes.length));
+			System.out.println(compiledClassDefinition.getName() + " size:"
+					+ (bytes == null ? "NULL" : bytes.length));
 		}
 	}
 

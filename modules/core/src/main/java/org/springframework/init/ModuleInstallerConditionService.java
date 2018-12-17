@@ -16,10 +16,13 @@
 
 package org.springframework.init;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.boot.context.TypeExcludeFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
@@ -28,6 +31,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
+import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -36,14 +41,21 @@ import org.springframework.util.ClassUtils;
  */
 public class ModuleInstallerConditionService implements ConditionService {
 
+	private static final String EXCLUDE_FILTER_BEAN_NAME = "org.springframework.boot.test.autoconfigure.filter.TypeExcludeFilters";
+
 	private final ConditionEvaluator evaluator;
 	private final ClassLoader classLoader;
 	private final Map<Class<?>, StandardAnnotationMetadata> metadata = new ConcurrentHashMap<>();
+	private ConfigurableListableBeanFactory beanFactory;
+	private MetadataReaderFactory metadataReaderFactory;
 
 	public ModuleInstallerConditionService(BeanDefinitionRegistry registry,
-			Environment environment, ResourceLoader resourceLoader) {
+			ConfigurableListableBeanFactory beanFactory, Environment environment,
+			ResourceLoader resourceLoader) {
+		this.beanFactory = beanFactory;
 		this.evaluator = new ConditionEvaluator(registry, environment, resourceLoader);
 		this.classLoader = resourceLoader.getClassLoader();
+		this.metadataReaderFactory = new CachingMetadataReaderFactory(this.classLoader);
 	}
 
 	@Override
@@ -76,6 +88,25 @@ public class ModuleInstallerConditionService implements ConditionService {
 			return matches(base, type);
 		}
 		return false;
+	}
+
+	@Override
+	public boolean includes(Class<?> type) {
+		// TODO: split this method off into a test component?
+		if (beanFactory.containsSingleton(EXCLUDE_FILTER_BEAN_NAME)) {
+			TypeExcludeFilter filter = (TypeExcludeFilter) beanFactory
+					.getSingleton(EXCLUDE_FILTER_BEAN_NAME);
+			try {
+				if (filter.match(metadataReaderFactory.getMetadataReader(type.getName()),
+						metadataReaderFactory)) {
+					return false;
+				}
+			}
+			catch (IOException e) {
+				throw new IllegalStateException("Cannot read metadata for " + type);
+			}
+		}
+		return true;
 	}
 
 	public StandardAnnotationMetadata getMetadata(Class<?> factory) {

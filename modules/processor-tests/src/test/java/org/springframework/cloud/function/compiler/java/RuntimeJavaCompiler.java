@@ -43,14 +43,18 @@ public class RuntimeJavaCompiler {
 
 	private JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 
-	public CompilationResult compile(InputFileDescriptor[] sources, InputFileDescriptor[] resources, CompilationOptions compilationOptions, List<File> dependencies) {
-		logger.debug("Compiling {} source{}",sources.length, sources.length==1?"":"s");
+	public CompilationResult compile(InputFileDescriptor[] sources,
+			InputFileDescriptor[] resources, CompilationOptions compilationOptions,
+			List<File> dependencies) {
+		logger.debug("Compiling {} source{}", sources.length,
+				sources.length == 1 ? "" : "s");
 		DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector<JavaFileObject>();
 		MemoryBasedJavaFileManager fileManager = new MemoryBasedJavaFileManager();
 		fileManager.addResolvedDependencies(dependencies);
 		List<JavaFileObject> compilationUnits = new ArrayList<>();
-		for (InputFileDescriptor source: sources) {
-			compilationUnits.add(InMemoryJavaFileObject.getSourceJavaFileObject(source.getClassName(), source.getContent()));
+		for (InputFileDescriptor source : sources) {
+			compilationUnits.add(InMemoryJavaFileObject
+					.getSourceJavaFileObject(source.getClassName(), source.getContent()));
 		}
 		List<String> options = new ArrayList<>();
 		options.add("-processorpath");
@@ -58,30 +62,38 @@ public class RuntimeJavaCompiler {
 		options.add("-source");
 		options.add("1.8");
 		options.add("-processor");
-		options.add("processor.SlimConfigurationProcessor");
-		CompilationTask task = compiler.getTask(null, fileManager , diagnosticCollector, options,  null, compilationUnits);
+		options.add("org.springframework.init.processor.SlimConfigurationProcessor");
+		CompilationTask task = compiler.getTask(null, fileManager, diagnosticCollector,
+				options, null, compilationUnits);
 		boolean success = task.call();
 		CompilationResult compilationResult = new CompilationResult(success);
-		compilationResult.setDependencies(new ArrayList<>(fileManager.getResolvedAdditionalDependencies().values()));
+		compilationResult.setDependencies(new ArrayList<>(
+				fileManager.getResolvedAdditionalDependencies().values()));
 		compilationResult.setInputResources(resources);
 		// If successful there may be no errors but there might be info/warnings
-		for (Diagnostic<? extends JavaFileObject> diagnostic : diagnosticCollector.getDiagnostics()) {
-			CompilationMessage.Kind kind = (diagnostic.getKind()==Kind.ERROR?CompilationMessage.Kind.ERROR:CompilationMessage.Kind.OTHER);
-			String sourceCode =null;
+		for (Diagnostic<? extends JavaFileObject> diagnostic : diagnosticCollector
+				.getDiagnostics()) {
+			CompilationMessage.Kind kind = (diagnostic.getKind() == Kind.ERROR
+					? CompilationMessage.Kind.ERROR
+					: CompilationMessage.Kind.OTHER);
+			String sourceCode = null;
 			try {
-				sourceCode = (String)diagnostic.getSource().getCharContent(true);
+				sourceCode = (String) diagnostic.getSource().getCharContent(true);
 			}
 			catch (IOException ioe) {
-				// Unexpected, but leave sourceCode null to indicate it was not retrievable
+				// Unexpected, but leave sourceCode null to indicate it was not
+				// retrievable
 			}
 			catch (NullPointerException npe) {
 				// TODO: should we skip warning diagnostics in the loop altogether?
 			}
-			int startPosition = (int)diagnostic.getPosition();
+			int startPosition = (int) diagnostic.getPosition();
 			if (startPosition == Diagnostic.NOPOS) {
-				startPosition = (int)diagnostic.getStartPosition();
+				startPosition = (int) diagnostic.getStartPosition();
 			}
-			CompilationMessage compilationMessage = new CompilationMessage(kind,diagnostic.getMessage(null),sourceCode,startPosition,(int)diagnostic.getEndPosition());
+			CompilationMessage compilationMessage = new CompilationMessage(kind,
+					diagnostic.getMessage(null), sourceCode, startPosition,
+					(int) diagnostic.getEndPosition());
 			compilationResult.recordCompilationMessage(compilationMessage);
 		}
 		compilationResult.setGeneratedFiles(fileManager.getOutputFiles());

@@ -18,9 +18,12 @@ package app.main;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.init.OverrideSelectedAutoConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -33,17 +36,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  */
 @RunWith(SpringRunner.class)
+@OverrideSelectedAutoConfiguration
 @WebMvcTest(SampleController.class)
-// @Ignore("Not working yet with @AutoConfigureWebMvc")
 public class WebMvcApplicationTests {
+
+	@MockBean
+	private Foo foo;
 
 	@Autowired
 	private MockMvc mockMvc;
 
 	@Test
 	public void test() throws Exception {
+		Mockito.when(foo.getValue()).thenReturn("Test");
 		mockMvc.perform(get("/")).andExpect(status().isOk())
-				.andExpect(content().string("Hello"));
+				.andExpect(content().string("Test"));
 	}
 
 }

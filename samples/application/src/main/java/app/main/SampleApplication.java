@@ -1,15 +1,11 @@
 package app.main;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.init.SpringInitApplication;
 
-@SpringBootConfiguration
-@ComponentScan
-@ImportAutoConfiguration({ ConfigurationPropertiesAutoConfiguration.class,
+@SpringInitApplication({ ConfigurationPropertiesAutoConfiguration.class,
 		PropertyPlaceholderAutoConfiguration.class })
 public class SampleApplication {
 

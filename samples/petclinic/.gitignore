@@ -1,0 +1,15 @@
+target/*
+.factorypath
+.settings/*
+.classpath
+.project
+.idea
+*.iml
+/target
+.sts4-cache/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+_site/

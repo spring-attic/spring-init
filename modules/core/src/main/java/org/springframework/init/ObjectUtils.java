@@ -16,6 +16,7 @@
 
 package org.springframework.init;
 
+import java.lang.reflect.Array;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -32,8 +33,10 @@ public class ObjectUtils {
 	public static <T> T generic(Object thing) {
 		return (T) thing;
 	}
-	public static <T> ObjectProvider<Map<String, T>> map(ListableBeanFactory beans, Class<T> type) {
-		return new ObjectProvider<Map<String,T>>() {
+
+	public static <T> ObjectProvider<Map<String, T>> map(ListableBeanFactory beans,
+			Class<T> type) {
+		return new ObjectProvider<Map<String, T>>() {
 
 			@Override
 			public Map<String, T> getObject() throws BeansException {
@@ -56,13 +59,18 @@ public class ObjectUtils {
 			}
 		};
 	}
-	public static <T> ObjectProvider<T[]> array(ListableBeanFactory beans, Class<T> type) {
+
+	public static <T> ObjectProvider<T[]> array(ListableBeanFactory beans,
+			Class<T> type) {
 		return new ObjectProvider<T[]>() {
 
 			@SuppressWarnings("unchecked")
+			private T[] prototype = (T[]) Array.newInstance(type, 0);
+
 			@Override
 			public T[] getObject() throws BeansException {
-				return (T[]) beans.getBeanProvider(type).orderedStream().collect(Collectors.toList()).toArray();
+				return beans.getBeanProvider(type).orderedStream()
+						.collect(Collectors.toList()).toArray(prototype);
 			}
 
 			@Override

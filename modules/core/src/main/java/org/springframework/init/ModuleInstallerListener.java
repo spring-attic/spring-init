@@ -104,7 +104,7 @@ public class ModuleInstallerListener implements SmartApplicationListener {
 			}
 			GenericApplicationContext generic = (GenericApplicationContext) context;
 			ConditionService conditions = new ModuleInstallerConditionService(generic,
-					context.getEnvironment(), context);
+					generic.getBeanFactory(), context.getEnvironment(), context);
 			initialize(generic, conditions);
 			if (!isEnabled(context.getEnvironment())) {
 				return;

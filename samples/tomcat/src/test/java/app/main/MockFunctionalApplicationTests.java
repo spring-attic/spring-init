@@ -21,11 +21,15 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.init.OverrideSelectedAutoConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.servlet.DispatcherServlet;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -35,6 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  */
 @RunWith(SpringRunner.class)
+@OverrideSelectedAutoConfiguration
 @WebMvcTest(SampleController.class)
 public class MockFunctionalApplicationTests {
 
@@ -43,6 +48,23 @@ public class MockFunctionalApplicationTests {
 
 	@Autowired
 	private MockMvc mockMvc;
+
+	@Autowired(required = false)
+	private CommandLineRunner runner;
+
+	@Autowired(required = false)
+	private DispatcherServlet servlet;
+
+	@Test
+	public void servlet() {
+		assertThat(servlet.getClass().getName())
+				.isEqualTo("org.springframework.test.web.servlet.TestDispatcherServlet");
+	}
+
+	@Test
+	public void runner() {
+		assertThat(runner).isNull();
+	}
 
 	@Test
 	public void test() throws Exception {

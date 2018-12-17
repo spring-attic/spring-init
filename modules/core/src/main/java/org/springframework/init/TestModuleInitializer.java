@@ -47,7 +47,7 @@ public class TestModuleInitializer
 			registrars = new ModuleInstallerImportRegistrars(context);
 			context.registerBean(ConditionService.class,
 					() -> new ModuleInstallerConditionService(context,
-							context.getEnvironment(), context));
+							context.getBeanFactory(), context.getEnvironment(), context));
 			context.registerBean(ImportRegistrars.class, () -> registrars);
 		}
 		else {

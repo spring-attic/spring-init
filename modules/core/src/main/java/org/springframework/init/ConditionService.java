@@ -30,4 +30,6 @@ public interface ConditionService {
 
 	boolean matches(Class<?> factory, Class<?> type);
 
+	boolean includes(Class<?> type);
+
 }

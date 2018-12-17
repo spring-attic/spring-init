@@ -22,8 +22,9 @@
                 <module>mustache</module>
                 <module>mongo</module>
                 <module>jdbc</module>
-                <module>db</module>
                 <module>actuator</module>
+                <module>db</module>
+                <module>petclinic</module>
                 <module>cloud</module>
                 <module>function</module>
 	</modules>

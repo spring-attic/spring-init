@@ -3,8 +3,6 @@ package com.example;
 import java.util.function.Function;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
@@ -17,9 +15,9 @@ import org.springframework.cloud.function.context.FunctionType;
 import org.springframework.cloud.function.context.config.ContextFunctionCatalogAutoConfiguration;
 import org.springframework.cloud.function.web.flux.ReactorAutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.init.SpringInitApplication;
 
-@SpringBootConfiguration
-@ImportAutoConfiguration({ PropertyPlaceholderAutoConfiguration.class,
+@SpringInitApplication({ PropertyPlaceholderAutoConfiguration.class,
 		ConfigurationPropertiesAutoConfiguration.class, JacksonAutoConfiguration.class,
 		ReactiveWebServerFactoryAutoConfiguration.class, WebFluxAutoConfiguration.class,
 		ErrorWebFluxAutoConfiguration.class, HttpHandlerAutoConfiguration.class,

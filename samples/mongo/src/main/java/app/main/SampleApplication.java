@@ -6,9 +6,7 @@ import java.util.Arrays;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackage;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.mongo.MongoReactiveDataAutoConfiguration;
@@ -24,6 +22,7 @@ import org.springframework.boot.autoconfigure.web.reactive.error.ErrorWebFluxAut
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import org.springframework.init.SpringInitApplication;
 import org.springframework.web.reactive.function.server.RouterFunction;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
@@ -37,8 +36,7 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
  * @author Dave Syer
  *
  */
-@SpringBootConfiguration
-@ImportAutoConfiguration({ PropertyPlaceholderAutoConfiguration.class,
+@SpringInitApplication({ PropertyPlaceholderAutoConfiguration.class,
 		ConfigurationPropertiesAutoConfiguration.class,
 		EmbeddedMongoAutoConfiguration.class, MongoReactiveAutoConfiguration.class,
 		MongoReactiveDataAutoConfiguration.class,
