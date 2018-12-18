@@ -17,16 +17,11 @@ package org.springframework.init;
 
 import java.util.Set;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.ImportSelector;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -46,13 +41,18 @@ public class TestModuleInitializer
 			// Only used in tests - could move to separate jar
 			return;
 		}
+		ImportRegistrars registrars;
 		if (!context.getBeanFactory()
 				.containsBeanDefinition(ConditionService.class.getName())) {
+			registrars = new ModuleInstallerImportRegistrars(context);
 			context.registerBean(ConditionService.class,
 					() -> new ModuleInstallerConditionService(context,
 							context.getEnvironment(), context));
-			context.registerBean(ImportRegistrars.class,
-					() -> new ModuleInstallerImportRegistrars(context));
+			context.registerBean(ImportRegistrars.class, () -> registrars);
+		}
+		else {
+			registrars = context.getBean(ImportRegistrars.class.getName(),
+					ImportRegistrars.class);
 		}
 		for (String name : context.getBeanFactory().getBeanDefinitionNames()) {
 			BeanDefinition definition = context.getBeanFactory().getBeanDefinition(name);
@@ -62,45 +62,12 @@ public class TestModuleInitializer
 						? (Class<?>) definition.getAttribute("testClass")
 						: null;
 				if (testClass != null) {
-					String enabled = context.getEnvironment().getProperty(
-							EnableAutoConfiguration.ENABLED_OVERRIDE_PROPERTY);
-					if (enabled != null) {
-						TestPropertyValues
-								.of(EnableAutoConfiguration.ENABLED_OVERRIDE_PROPERTY
-										+ "=true")
-								.applyTo(context);
-					}
 					Set<Import> merged = AnnotatedElementUtils
 							.findAllMergedAnnotations(testClass, Import.class);
 					for (Import ann : merged) {
 						for (Class<?> imported : ann.value()) {
-							if (ImportSelector.class.isAssignableFrom(imported)) {
-								ImportSelector selector = BeanUtils
-										.instantiateClass(imported, ImportSelector.class);
-								for (String selected : selector.selectImports(
-										new StandardAnnotationMetadata(testClass))) {
-									if (ClassUtils.isPresent(selected + "Initializer",
-											null)) {
-										@SuppressWarnings({ "unchecked" })
-										ApplicationContextInitializer<GenericApplicationContext> initializer = BeanUtils
-												.instantiateClass(
-														ClassUtils.resolveClassName(
-																selected + "Initializer",
-																null),
-														ApplicationContextInitializer.class);
-										initializer.initialize(context);
-									}
-								}
-							}
+							registrars.add(testClass, imported);
 						}
-					}
-					if (enabled != null) {
-						// TODO: maybe work out a better way to switch on and off the auto
-						// configs
-						TestPropertyValues
-								.of(EnableAutoConfiguration.ENABLED_OVERRIDE_PROPERTY
-										+ "=" + enabled)
-								.applyTo(context);
 					}
 				}
 			}

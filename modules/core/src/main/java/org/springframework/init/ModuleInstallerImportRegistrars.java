@@ -61,8 +61,8 @@ public class ModuleInstallerImportRegistrars
 	}
 
 	@Override
-	public void add(Class<?> importer, Class<?> registrar) {
-		this.registrars.add(new Imported(importer, registrar));
+	public void add(Class<?> importer, Class<?> imported) {
+		this.registrars.add(new Imported(importer, imported));
 	}
 
 	@Override
@@ -83,9 +83,7 @@ public class ModuleInstallerImportRegistrars
 
 	private boolean isAutoConfiguration(Class<?> importer, String typeName) {
 		// TODO: maybe work out a better way to detect auto configs
-		return typeName.endsWith("AutoConfigurationImportSelector")
-				|| importer.getName().endsWith("AutoConfiguration")
-				|| typeName.endsWith("AutoConfiguration");
+		return typeName.endsWith("AutoConfigurationImportSelector");
 	}
 
 	@Override

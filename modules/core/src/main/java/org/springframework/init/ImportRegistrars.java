@@ -22,7 +22,7 @@ package org.springframework.init;
  */
 public interface ImportRegistrars {
 
-	void add(Class<?> importer, Class<?> registrar);
+	void add(Class<?> importer, Class<?> imported);
 
 	void add(Class<?> importer, String typeName);
 
