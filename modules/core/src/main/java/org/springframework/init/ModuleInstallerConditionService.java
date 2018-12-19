@@ -92,6 +92,9 @@ public class ModuleInstallerConditionService implements ConditionService {
 
 	@Override
 	public boolean includes(Class<?> type) {
+		if (!TestModuleInitializer.enabled) {
+			return true;
+		}
 		// TODO: split this method off into a test component?
 		if (beanFactory.containsSingleton(EXCLUDE_FILTER_BEAN_NAME)) {
 			TypeExcludeFilter filter = (TypeExcludeFilter) beanFactory

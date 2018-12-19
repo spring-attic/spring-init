@@ -31,6 +31,8 @@ import org.springframework.util.ClassUtils;
 public class TestModuleInitializer
 		implements ApplicationContextInitializer<GenericApplicationContext> {
 
+	public static volatile boolean enabled = false;
+
 	@Override
 	public void initialize(GenericApplicationContext context) {
 		if (!ClassUtils.isPresent(
@@ -58,6 +60,7 @@ public class TestModuleInitializer
 			BeanDefinition definition = context.getBeanFactory().getBeanDefinition(name);
 			if (definition.getBeanClassName()
 					.contains("ImportsContextCustomizer$ImportsConfiguration")) {
+				enabled = true;
 				Class<?> testClass = (definition != null)
 						? (Class<?>) definition.getAttribute("testClass")
 						: null;
