@@ -17,6 +17,7 @@ package org.springframework.init;
 
 import java.util.List;
 
+import org.springframework.boot.test.autoconfigure.OverrideAutoConfiguration;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -35,8 +36,8 @@ public class TestAutoConfigurationContextCustomizerFactory
 	@Override
 	public ContextCustomizer createContextCustomizer(Class<?> testClass,
 			List<ContextConfigurationAttributes> configurationAttributes) {
-		OverrideSelectedAutoConfiguration annotation = AnnotatedElementUtils
-				.findMergedAnnotation(testClass, OverrideSelectedAutoConfiguration.class);
+		OverrideAutoConfiguration annotation = AnnotatedElementUtils
+				.findMergedAnnotation(testClass, OverrideAutoConfiguration.class);
 		if (annotation != null && !annotation.enabled()) {
 			return new DisableAutoConfigurationContextCustomizer();
 		}

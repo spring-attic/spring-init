@@ -22,7 +22,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.init.OverrideSelectedAutoConfiguration;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -35,7 +34,6 @@ import app.main.foo.JdbcFooRepository;
  * @author Dave Syer
  *
  */
-@OverrideSelectedAutoConfiguration
 @JdbcTest // (properties = "spring.functional.enabled=false")
 @RunWith(SpringRunner.class)
 @DirtiesContext
