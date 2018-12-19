@@ -19,10 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.boot.autoconfigure.AutoConfigurationImportSelector;
-import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.util.ClassUtils;
 
 /**
  * @author Dave Syer
@@ -42,11 +40,8 @@ public class EnableSelectedAutoConfigurationImportSelector
 	protected List<String> getCandidateConfigurations(AnnotationMetadata metadata,
 			AnnotationAttributes attributes) {
 		List<String> candidates = new ArrayList<>();
-		EnableSelectedAutoConfiguration item = AnnotatedElementUtils.findMergedAnnotation(
-				ClassUtils.resolveClassName(metadata.getClassName(), null),
-				EnableSelectedAutoConfiguration.class);
-		for (Class<?> type : item.value()) {
-			candidates.add(type.getName());
+		for (String type : (String[]) attributes.get("value")) {
+			candidates.add(type);
 		}
 		return candidates;
 	}
