@@ -37,6 +37,40 @@
         <java.version>1.8</java.version>
 	</properties>
 
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>javadoc</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<phase>package</phase>
+					</execution>
+				</executions>
+				<configuration>
+					<!-- TODO: We need to patch the javadocs instead of disabling this -->
+					<failOnError>false</failOnError>
+					<quiet>true</quiet>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<phase>package</phase>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
 	<repositories>
 		<repository>
 			<id>spring-libs-snapshot</id>
