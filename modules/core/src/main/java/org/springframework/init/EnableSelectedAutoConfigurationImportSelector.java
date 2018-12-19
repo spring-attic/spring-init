@@ -15,11 +15,7 @@
  */
 package org.springframework.init;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.boot.autoconfigure.AutoConfigurationImportSelector;
-import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 
 /**
@@ -29,21 +25,24 @@ import org.springframework.core.type.AnnotationMetadata;
 public class EnableSelectedAutoConfigurationImportSelector
 		extends AutoConfigurationImportSelector {
 
+	private static final String[] NO_IMPORTS = {};
+
+	@Override
+	public String[] selectImports(AnnotationMetadata metadata) {
+		if (!isEnabled(metadata)) {
+			return NO_IMPORTS;
+		}
+		// Don't use super.selectImports() because it does too much work with the
+		// annotation metadata
+		return (String[]) metadata.getAnnotationAttributes(
+				EnableSelectedAutoConfiguration.class.getName(), true).get("value");
+	}
+
 	@Override
 	protected boolean isEnabled(AnnotationMetadata metadata) {
 		return super.isEnabled(metadata) && getEnvironment().getProperty(
 				EnableSelectedAutoConfiguration.ENABLED_OVERRIDE_PROPERTY, Boolean.class,
 				true);
-	}
-
-	@Override
-	protected List<String> getCandidateConfigurations(AnnotationMetadata metadata,
-			AnnotationAttributes attributes) {
-		List<String> candidates = new ArrayList<>();
-		for (String type : (String[]) attributes.get("value")) {
-			candidates.add(type);
-		}
-		return candidates;
 	}
 
 	@Override

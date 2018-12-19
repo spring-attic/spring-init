@@ -125,8 +125,7 @@ public class ModuleInstallerImportRegistrars
 				if (ImportSelector.class.isAssignableFrom(type)) {
 					ImportSelector registrar = (ImportSelector) context
 							.getAutowireCapableBeanFactory().createBean(type);
-					String[] selected = selected(registrar,
-							new StandardAnnotationMetadata(imported.getSource()));
+					String[] selected = selected(registrar, imported.getSource());
 					for (String select : selected) {
 						if (ClassUtils.isPresent(select, context.getClassLoader())) {
 							Class<?> clazz = ClassUtils.resolveClassName(select,
@@ -202,15 +201,16 @@ public class ModuleInstallerImportRegistrars
 		return added;
 	}
 
-	private String[] selected(ImportSelector registrar,
-			StandardAnnotationMetadata metadata) {
-		if (registrar instanceof DeferredImportSelector) {
-			return new DeferredConfigurations(Stream.of(registrar.selectImports(metadata))
+	private String[] selected(ImportSelector registrar, Class<?> importer) {
+		if (!(registrar instanceof EnableSelectedAutoConfigurationImportSelector)
+				&& registrar instanceof DeferredImportSelector) {
+			return new DeferredConfigurations(Stream
+					.of(registrar.selectImports(new StandardAnnotationMetadata(importer)))
 					.map(name -> ClassUtils.resolveClassName(name,
 							context.getClassLoader()))
 					.collect(Collectors.toList())).list();
 		}
-		return registrar.selectImports(metadata);
+		return registrar.selectImports(new StandardAnnotationMetadata(importer));
 	}
 
 	static class DeferredConfigurations extends AutoConfigurations {
