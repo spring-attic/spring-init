@@ -54,7 +54,7 @@ public class SlimBenchmarkIT {
 		state.run();
 	}
 
-	// @Benchmark
+	@Benchmark
 	public void auto(SlimState state) throws Exception {
 		state.setMainClass(TestsApplication.class.getName());
 		state.run();

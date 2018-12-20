@@ -22,6 +22,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.experimental</groupId>
+			<artifactId>spring-boot-actuator-autoconfigure</artifactId>
+			<version>${generated.version}</version>
+			<classifier>func</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.experimental</groupId>
 			<artifactId>spring-boot-test-autoconfigure</artifactId>
 			<version>${generated.version}</version>
 			<classifier>func</classifier>
@@ -34,15 +40,21 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-webflux</artifactId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
 			<exclusions>
 				<exclusion>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-starter-logging</artifactId>
 				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
+			<exclusions>
 				<exclusion>
 					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-json</artifactId>
+					<artifactId>spring-boot-starter-logging</artifactId>
 				</exclusion>
 				<exclusion>
 					<groupId>io.netty</groupId>

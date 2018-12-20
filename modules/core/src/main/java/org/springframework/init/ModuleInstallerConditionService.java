@@ -17,7 +17,9 @@
 package org.springframework.init;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -76,13 +78,22 @@ public class ModuleInstallerConditionService implements ConditionService {
 	@Override
 	public boolean matches(Class<?> factory, Class<?> type) {
 		StandardAnnotationMetadata metadata = getMetadata(factory);
+		Set<MethodMetadata> assignable = new HashSet<>();
 		for (MethodMetadata method : metadata.getAnnotatedMethods(Bean.class.getName())) {
 			Class<?> candidate = ClassUtils.resolveClassName(method.getReturnTypeName(),
 					this.classLoader);
-			if (type.isAssignableFrom(candidate)) {
+			// Look for exact match first
+			if (type.equals(candidate)) {
 				return !this.evaluator.shouldSkip(method);
 			}
+			if (type.isAssignableFrom(candidate)) {
+				assignable.add(method);
+			}
 		}
+		if (assignable.size() == 1) {
+			return !this.evaluator.shouldSkip(assignable.iterator().next());
+		}
+		// TODO: fail if size() > 1
 		Class<?> base = factory.getSuperclass();
 		if (AnnotationUtils.isAnnotationDeclaredLocally(Configuration.class, base)) {
 			return matches(base, type);
