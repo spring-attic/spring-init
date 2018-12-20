@@ -15,6 +15,7 @@
  */
 package com.example.bench;
 
+import com.example.demo.TestsApplication;
 import com.example.init.InitApplication;
 import com.example.manual.ManualApplication;
 
@@ -50,6 +51,12 @@ public class SlimBenchmarkIT {
 	@Benchmark
 	public void manual(SlimState state) throws Exception {
 		state.setMainClass(ManualApplication.class.getName());
+		state.run();
+	}
+
+	// @Benchmark
+	public void auto(SlimState state) throws Exception {
+		state.setMainClass(TestsApplication.class.getName());
 		state.run();
 	}
 

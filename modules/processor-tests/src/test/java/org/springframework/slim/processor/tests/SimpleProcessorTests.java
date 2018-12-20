@@ -130,6 +130,24 @@ public class SimpleProcessorTests {
 		cr.printGeneratedSources(System.out);
 	}
 
+	@Test
+	public void sampleApplicationClass() {
+		CompilationResult cr = CompilerRunner.run(
+				new InputFileDescriptor(
+						new File("src/test/java/"
+								+ ClassUtils.classPackageAsResourcePath(getClass())
+								+ "/SampleApplication.java"),
+						"SampleApplication",
+						ClassUtils.getPackageName(getClass()) + ".SampleApplication"),
+				getSpringDependencies());
+		assertThat(cr.containsNewFile("SampleApplicationInitializer.class"));
+		String generated = cr.getGeneratedFileContents(
+				ClassUtils.classPackageAsResourcePath(getClass())
+						+ "/SampleApplicationInitializer.java");
+		assertThat(generated).contains("AutoConfigurationPackages.Registrar");
+		assertThat(generated).contains("AutoConfigurationImportSelector");
+	}
+
 	// ---
 
 	private void assertContainsMessage(CompilationResult cr, String expectedMessage) {

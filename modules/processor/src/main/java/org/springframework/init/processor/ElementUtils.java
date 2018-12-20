@@ -64,6 +64,44 @@ public class ElementUtils {
 		return getAnnotation(element, type) != null;
 	}
 
+	public Set<AnnotationMirror> getAnnotations(Element element, String type) {
+		Set<AnnotationMirror> set = new HashSet<>();
+		getAnnotations(element, type, set, new HashSet<>());
+		return set;
+	}
+
+	private void getAnnotations(Element element, String type, Set<AnnotationMirror> set,
+			Set<AnnotationMirror> seen) {
+
+		if (element != null) {
+			for (AnnotationMirror annotation : element.getAnnotationMirrors()) {
+				String annotationTypename = annotation.getAnnotationType().toString();
+				try {
+					if (annotationTypename.startsWith("java.lang")) {
+						continue;
+					}
+					if (annotationTypename.equals(SpringClassNames.NULLABLE.toString())) {
+						continue;
+					}
+					if (type.equals(annotationTypename)) {
+						set.add(annotation);
+						continue;
+					}
+					if (!seen.contains(annotation)) {
+						seen.add(annotation);
+						getAnnotations(annotation.getAnnotationType().asElement(), type,
+								set, seen);
+					}
+				}
+				catch (Throwable t) {
+					messager.printMessage(Kind.ERROR,
+							"Problems working with annotation " + annotationTypename);
+				}
+			}
+		}
+
+	}
+
 	public AnnotationMirror getAnnotation(Element element, String type) {
 		return getAnnotation(element, type, new HashSet<>());
 	}
@@ -624,9 +662,9 @@ public class ElementUtils {
 					.toString().equals(annotation)) {
 				list.addAll(getTypesFromAnnotation(mirror, attribute));
 			}
-			AnnotationMirror meta = getAnnotation(mirror.getAnnotationType().asElement(),
-					annotation);
-			if (meta != null) {
+			Set<AnnotationMirror> metas = getAnnotations(
+					mirror.getAnnotationType().asElement(), annotation);
+			for (AnnotationMirror meta : metas) {
 				list.addAll(getTypesFromAnnotation(meta, attribute));
 			}
 		}
