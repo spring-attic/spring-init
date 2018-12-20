@@ -6,7 +6,6 @@ import java.util.Arrays;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.AutoConfigurationPackage;
 import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.mongo.MongoReactiveDataAutoConfiguration;
@@ -20,7 +19,6 @@ import org.springframework.boot.autoconfigure.web.reactive.ReactiveWebServerFact
 import org.springframework.boot.autoconfigure.web.reactive.WebFluxAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.error.ErrorWebFluxAutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.init.SpringInitApplication;
 import org.springframework.web.reactive.function.server.RouterFunction;
@@ -43,6 +41,7 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
 		MongoReactiveRepositoriesAutoConfiguration.class, JacksonAutoConfiguration.class,
 		ReactiveWebServerFactoryAutoConfiguration.class, WebFluxAutoConfiguration.class,
 		ErrorWebFluxAutoConfiguration.class, HttpHandlerAutoConfiguration.class })
+@EntityScan
 public class SampleApplication {
 
 	private CustomerRepository foos;
@@ -70,12 +69,6 @@ public class SampleApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(SampleApplication.class, args);
-	}
-
-	@Configuration
-	@EntityScan
-	@AutoConfigurationPackage
-	protected static class Packages {
 	}
 
 }

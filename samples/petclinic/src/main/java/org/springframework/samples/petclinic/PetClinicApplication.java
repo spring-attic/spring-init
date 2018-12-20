@@ -17,7 +17,6 @@
 package org.springframework.samples.petclinic;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.AutoConfigurationPackage;
 import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration;
 import org.springframework.boot.autoconfigure.context.MessageSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
@@ -30,7 +29,6 @@ import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoC
 import org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.init.SpringInitApplication;
 
 /**
@@ -46,15 +44,11 @@ import org.springframework.init.SpringInitApplication;
         ServletWebServerFactoryAutoConfiguration.class, WebMvcAutoConfiguration.class,
         ErrorMvcAutoConfiguration.class, DispatcherServletAutoConfiguration.class,
         ThymeleafAutoConfiguration.class })
+@EntityScan
 public class PetClinicApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(PetClinicApplication.class, args);
     }
 
-    @Configuration
-    @EntityScan
-    @AutoConfigurationPackage
-    protected static class Packages {
-    }
 }
