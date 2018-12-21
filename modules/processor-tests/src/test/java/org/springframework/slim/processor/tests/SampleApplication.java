@@ -17,6 +17,7 @@ package org.springframework.slim.processor.tests;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 
 /**
  * @author Dave Syer
@@ -27,6 +28,37 @@ public class SampleApplication {
 
 	public static void main(String[] args) throws Exception {
 		SpringApplication.run(SampleApplication.class, args);
+	}
+
+	@Bean
+	public Bar bar() {
+		return new Bar();
+	}
+
+}
+
+class Bar {
+
+	private String value;
+
+	public Bar() {
+	}
+
+	public Bar(String value) {
+		this.value = value;
+	}
+
+	public String getValue() {
+		return this.value;
+	}
+
+	public void setValue(String value) {
+		this.value = value;
+	}
+
+	@Override
+	public String toString() {
+		return "Foo [value=" + this.value + "]";
 	}
 
 }

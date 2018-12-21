@@ -146,6 +146,9 @@ public class SimpleProcessorTests {
 						+ "/SampleApplicationInitializer.java");
 		assertThat(generated).contains("AutoConfigurationPackages.Registrar");
 		assertThat(generated).contains("AutoConfigurationImportSelector");
+		// bean methods come before imports
+		assertThat(generated).containsSubsequence("Bar.class",
+				"AutoConfigurationImportSelector");
 	}
 
 	// ---

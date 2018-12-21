@@ -189,14 +189,14 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		builder.beginControlFlow(
 				"if (context.getBeanFactory().getBeanNamesForType($T.class).length==0)",
 				type);
-		addResources(builder);
-		addRegistrarInvokers(builder);
 		boolean conditionsAvailable = addScannedComponents(builder, conditional);
 		addNewBeanForConfig(builder, type);
 		for (ExecutableElement method : getBeanMethods(type)) {
 			conditionsAvailable |= createBeanMethod(builder, method, type,
 					conditionsAvailable);
 		}
+		addResources(builder);
+		addRegistrarInvokers(builder);
 		builder.endControlFlow();
 		if (conditional) {
 			builder.endControlFlow();
