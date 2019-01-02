@@ -102,13 +102,13 @@ public class ModuleInstallerListener implements SmartApplicationListener {
 				throw new IllegalStateException(
 						"ApplicationContext must be a GenericApplicationContext");
 			}
+			if (!isEnabled(context.getEnvironment())) {
+				return;
+			}
 			GenericApplicationContext generic = (GenericApplicationContext) context;
 			ConditionService conditions = new ModuleInstallerConditionService(generic,
 					generic.getBeanFactory(), context.getEnvironment(), context);
 			initialize(generic, conditions);
-			if (!isEnabled(context.getEnvironment())) {
-				return;
-			}
 			functional(generic, conditions);
 			apply(generic, initialized.getSpringApplication(), conditions);
 		}
