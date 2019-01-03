@@ -18,7 +18,9 @@ package org.springframework.init;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -53,6 +55,14 @@ public class ModuleInstallerImportRegistrars
 		implements BeanDefinitionRegistryPostProcessor, ImportRegistrars {
 
 	private Set<Imported> registrars = new LinkedHashSet<>();
+
+	private Set<Imported> deferred = new LinkedHashSet<>();
+
+	private enum Phase {
+		USER, DEFERRED;
+	}
+
+	private Phase phase = Phase.USER;
 
 	private GenericApplicationContext context;
 
@@ -108,11 +118,29 @@ public class ModuleInstallerImportRegistrars
 			}
 			added = findAdded(seen, registry);
 		}
+		if (!deferred.isEmpty()) {
+			phase = Phase.DEFERRED;
+			seen.removeAll(deferred);
+			added = findAdded(seen, registry);
+			while (!added.isEmpty()) {
+				for (Imported imported : added) {
+					if (!registrars.contains(imported)) {
+						Class<?> type = imported.getType();
+						if (type != null && ImportBeanDefinitionRegistrar.class
+								.isAssignableFrom(type)) {
+							importRegistrar(registry, imported);
+						}
+					}
+				}
+				added = findAdded(seen, registry);
+			}
+		}
 	}
 
 	private Set<Imported> findAdded(Set<Imported> seen, BeanDefinitionRegistry registry) {
 		Set<Imported> added = new LinkedHashSet<>();
-		Set<Imported> start = ordered(registrars);
+		Set<Imported> start = prioritize(registrars);
+		Map<Class<?>, ApplicationContextInitializer<GenericApplicationContext>> configs = new LinkedHashMap<>();
 		Set<ApplicationContextInitializer<GenericApplicationContext>> initializers = new LinkedHashSet<>();
 		ConditionService conditions = context.getBean(ConditionService.class);
 		for (Imported imported : registrars) {
@@ -122,6 +150,12 @@ public class ModuleInstallerImportRegistrars
 			seen.add(imported);
 			Class<?> type = imported.getType();
 			if (type != null) {
+				if (DeferredImportSelector.class.isAssignableFrom(type)) {
+					if (phase == Phase.USER) {
+						deferred.add(imported);
+						continue;
+					}
+				}
 				if (ImportSelector.class.isAssignableFrom(type)) {
 					ImportSelector registrar = (ImportSelector) context
 							.getAutowireCapableBeanFactory().createBean(type);
@@ -144,7 +178,7 @@ public class ModuleInstallerImportRegistrars
 																select + "Initializer",
 																context.getClassLoader()),
 														ApplicationContextInitializer.class);
-										initializers.add(initializer);
+										configs.put(clazz, initializer);
 									}
 								}
 								else if (ImportBeanDefinitionRegistrar.class
@@ -174,7 +208,7 @@ public class ModuleInstallerImportRegistrars
 														type.getName() + "Initializer",
 														context.getClassLoader()),
 												ApplicationContextInitializer.class);
-								initializers.add(initializer);
+								configs.put(type, initializer);
 							}
 						}
 						else {
@@ -188,6 +222,15 @@ public class ModuleInstallerImportRegistrars
 			}
 			else if (imported.getResources() != null) {
 				initializers.add(new XmlInitializer(imported.getResources()));
+			}
+		}
+		if (phase == Phase.USER) {
+			initializers.addAll(configs.values());
+		}
+		else {
+			for (Class<?> config : AutoConfigurations.getClasses(
+					AutoConfigurations.of(configs.keySet().toArray(new Class<?>[0])))) {
+				initializers.add(configs.get(config));
 			}
 		}
 		for (ApplicationContextInitializer<GenericApplicationContext> initializer : initializers) {
@@ -226,7 +269,7 @@ public class ModuleInstallerImportRegistrars
 
 	}
 
-	private Set<Imported> ordered(Set<Imported> registrars) {
+	private Set<Imported> prioritize(Set<Imported> registrars) {
 		Set<Imported> result = new LinkedHashSet<>();
 		for (Imported imported : registrars) {
 			if (imported.getType() != null && imported.getType().getName()
