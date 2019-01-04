@@ -52,7 +52,7 @@ public class PetClinicBenchmarkIT {
 	public static class MainState extends ProcessLauncherState {
 
 		public static enum Sample {
-			demo, actr;
+			demo, actr, tx, cache;
 		}
 
 		@Param
@@ -82,6 +82,12 @@ public class PetClinicBenchmarkIT {
 		public void start() throws Exception {
 			if (sample != Sample.demo) {
 				setProfiles(sample.toString());
+			}
+			if (sample == Sample.tx) {
+				addArgs("-Dspring.profiles.active=tx");
+			} else
+			if (sample == Sample.cache) {
+				addArgs("-Dspring.profiles.active=tx,cache");
 			}
 			super.before();
 		}

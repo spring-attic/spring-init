@@ -1,16 +1,18 @@
 package org.springframework.samples.petclinic.system;
 
+import javax.cache.configuration.MutableConfiguration;
+
 import org.springframework.boot.autoconfigure.cache.JCacheManagerCustomizer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import javax.cache.configuration.MutableConfiguration;
+import org.springframework.context.annotation.Profile;
 
 /**
  * Cache configuration intended for caches providing the JCache API. This configuration creates the used cache for the
  * application and enables statistics that become accessible via JMX.
  */
+@Profile("cache")
 @Configuration
 @EnableCaching
 class CacheConfiguration {

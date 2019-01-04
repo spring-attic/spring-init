@@ -50,6 +50,10 @@
 			<groupId>org.springframework.experimental</groupId>
 			<artifactId>spring-init-core</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.experimental</groupId>
+			<artifactId>spring-init-library</artifactId>
+		</dependency>
 		<!-- Spring and Spring Boot dependencies -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -151,6 +155,11 @@
 			<dependency>
 				<groupId>org.springframework.experimental</groupId>
 				<artifactId>spring-init-core</artifactId>
+				<version>${slim.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.experimental</groupId>
+				<artifactId>spring-init-library</artifactId>
 				<version>${slim.version}</version>
 			</dependency>
 			<dependency>
