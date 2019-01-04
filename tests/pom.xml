@@ -17,7 +17,7 @@
 	<modules>
 		<module>tests-lib</module>
 		<module>tests</module>
-		<!--module>benchmarks</module-->
+		<module>benchmarks</module>
 	</modules>
 
 	<properties>

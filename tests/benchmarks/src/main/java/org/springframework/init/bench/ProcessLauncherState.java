@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.bench;
+package org.springframework.init.bench;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -24,10 +24,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.example.config.ShutdownApplicationListener;
-import com.example.config.StartupApplicationListener;
-import com.example.demo.TestsApplication;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +31,8 @@ import org.springframework.boot.loader.archive.Archive;
 import org.springframework.boot.loader.thin.ArchiveUtils;
 import org.springframework.boot.loader.thin.DependencyResolver;
 import org.springframework.boot.loader.thin.PathResolver;
+import org.springframework.init.config.ShutdownApplicationListener;
+import org.springframework.init.config.StartupApplicationListener;
 
 public class ProcessLauncherState {
 
@@ -46,7 +44,7 @@ public class ProcessLauncherState {
 	private static List<String> DEFAULT_JVM_ARGS = Arrays.asList("-Xmx128m", "-cp", "",
 			"-Djava.security.egd=file:/dev/./urandom", "-noverify");
 	private File home;
-	private String mainClass = TestsApplication.class.getName();
+	private String mainClass;
 	private String name = "thin";
 	private String[] profiles = new String[0];
 

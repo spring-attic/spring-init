@@ -19,6 +19,9 @@ import com.example.manual.ManualApplication;
 
 import org.openjdk.jmh.annotations.AuxCounters;
 import org.openjdk.jmh.annotations.AuxCounters.Type;
+
+import org.springframework.init.bench.ProcessLauncherState;
+
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -43,7 +46,6 @@ public class ManualBenchmarkIT {
 
 	@Benchmark
 	public void main(MainState state) throws Exception {
-		state.setMainClass(ManualApplication.class.getName());
 		state.run();
 	}
 
@@ -60,6 +62,7 @@ public class ManualBenchmarkIT {
 
 		public MainState() {
 			super("target", "--server.port=0");
+			setMainClass(ManualApplication.class.getName());
 		}
 
 		@Override

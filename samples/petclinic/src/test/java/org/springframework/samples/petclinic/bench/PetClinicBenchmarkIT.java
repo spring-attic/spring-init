@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+LazyInitBeanFactoryPostProcessor.java * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.bench;
-
-import com.example.demo.TestsApplication;
+package org.springframework.samples.petclinic.bench;
 
 import org.openjdk.jmh.annotations.AuxCounters;
 import org.openjdk.jmh.annotations.AuxCounters.Type;
-
-import org.springframework.init.bench.ProcessLauncherState;
-
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -35,18 +30,20 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Warmup;
 
+import org.springframework.init.bench.ProcessLauncherState;
+import org.springframework.samples.petclinic.PetClinicApplication;
+
 import jmh.mbr.junit5.Microbenchmark;
 
-@Measurement(iterations = 2, time = 1)
-@Warmup(iterations = 0, time = 1)
-@Fork(value = 1, warmups = 0)
+@Measurement(iterations = 5, time = 1)
+@Warmup(iterations = 1, time = 1)
+@Fork(value = 2, warmups = 0)
 @BenchmarkMode(Mode.AverageTime)
 @Microbenchmark
-public class TestBenchmarkIT {
+public class PetClinicBenchmarkIT {
 
 	@Benchmark
-	public void main(MainState state) throws Exception {
-		state.setMainClass(state.sample.getConfig().getName());
+	public void auto(MainState state) throws Exception {
 		state.run();
 	}
 
@@ -55,22 +52,15 @@ public class TestBenchmarkIT {
 	public static class MainState extends ProcessLauncherState {
 
 		public static enum Sample {
-			demo, conf;
+			demo, actr;
+		}
 
-			private Class<?> config;
+		@Param
+		private Sample sample = Sample.demo;
 
-			private Sample(Class<?> config) {
-				this.config = config;
-			}
-
-			private Sample() {
-				this.config = TestsApplication.class;
-			}
-
-			public Class<?> getConfig() {
-				return config;
-			}
-
+		public MainState() {
+			super("target", "--server.port=0");
+			setMainClass(PetClinicApplication.class.getName());
 		}
 
 		@Override
@@ -81,13 +71,6 @@ public class TestBenchmarkIT {
 		@Override
 		public int getBeans() {
 			return super.getBeans();
-		}
-
-		@Param
-		private Sample sample = Sample.demo;
-
-		public MainState() {
-			super("target", "--server.port=0");
 		}
 
 		@TearDown(Level.Invocation)

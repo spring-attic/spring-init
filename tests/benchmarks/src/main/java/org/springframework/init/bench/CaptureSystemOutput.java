@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.bench;
+package org.springframework.init.bench;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.bench;
+package org.springframework.init.bench;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +47,7 @@ public class CsvResultsWriterFactory implements ResultsWriterFactory {
 
 			@Override
 			public void write(OutputFormat output, Collection<RunResult> results) {
-				StringBuilder report = new StringBuilder();
+				StringBuilder report = new StringBuilder(System.lineSeparator());
 				try {
 					Map<String, Integer> params = new LinkedHashMap<>();
 					int paramPlaces = 0;

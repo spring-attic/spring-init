@@ -19,6 +19,9 @@ import com.example.demo.TestsApplication;
 
 import org.openjdk.jmh.annotations.AuxCounters;
 import org.openjdk.jmh.annotations.AuxCounters.Type;
+
+import org.springframework.init.bench.ProcessLauncherState;
+
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -43,7 +46,6 @@ public class LazyBenchmarkIT {
 
 	@Benchmark
 	public void auto(MainState state) throws Exception {
-		state.setMainClass(TestsApplication.class.getName());
 		state.run();
 	}
 
@@ -61,6 +63,7 @@ public class LazyBenchmarkIT {
 		public MainState() {
 			super("target", "--server.port=0",
 					"--spring.main.sources=com.example.config.LazyInitBeanFactoryPostProcessor");
+			setMainClass(TestsApplication.class.getName());
 		}
 
 		@Override

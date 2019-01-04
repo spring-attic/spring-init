@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package com.example.bench;
-
-import com.example.bench.ActrBenchmarkIT.MainState;
-import com.example.bench.ActrBenchmarkIT.MainState.Sample;
+package org.springframework.samples.petclinic.bench;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.init.bench.CaptureSystemOutput;
 import org.springframework.init.bench.CaptureSystemOutput.OutputCapture;
+import org.springframework.samples.petclinic.bench.PetClinicBenchmarkIT.MainState;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,44 +29,30 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  */
 @CaptureSystemOutput
-public class ActrStateTests {
-
-	@Test
-	public void noactr(OutputCapture output) throws Exception {
-		// System.setProperty("bench.args",
-		// "-agentlib:jdwp=transport=dt_socket,server=y,address=8000");
-		MainState state = new MainState();
-		state.setSample(Sample.noactr);
-		state.start();
-		state.run();
-		state.stop();
-		assertThat(output.toString()).contains("Benchmark app started");
-		assertThat(output.toString()).doesNotContain("/actuator");
-	}
+public class ProcessLauncherStateTests {
 
 	@Test
 	public void vanilla(OutputCapture output) throws Exception {
-		// System.setProperty("bench.args",
-		// "-agentlib:jdwp=transport=dt_socket,server=y,address=8000");
+		// System.setProperty("bench.args", "-verbose:class");
 		MainState state = new MainState();
-		state.setSample(Sample.mixed);
-		state.start();
+		// state.addArgs("-agentlib:jdwp=transport=dt_socket,server=y,address=8000");
+		state.before();
 		state.run();
-		state.stop();
+		state.after();
 		assertThat(output.toString()).contains("Benchmark app started");
-		assertThat(output.toString()).contains("/actuator");
+		assertThat(output.toString()).doesNotContain("/manage");
 	}
 
 	@Test
-	public void none(OutputCapture output) throws Exception {
+	public void actr(OutputCapture output) throws Exception {
 		// System.setProperty("bench.args", "-verbose:class");
 		MainState state = new MainState();
-		state.setSample(Sample.none);
-		state.start();
+		state.setProfiles("actr");
+		state.before();
 		state.run();
-		state.stop();
+		state.after();
 		assertThat(output.toString()).contains("Benchmark app started");
-		assertThat(output.toString()).contains("0 endpoint(s)");
+		assertThat(output.toString()).contains("/manage");
 	}
 
 }

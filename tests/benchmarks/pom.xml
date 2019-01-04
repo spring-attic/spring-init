@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -9,7 +8,7 @@
 	<version>0.0.1.BUILD-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>tests</name>
+	<name>spring-init-benchmarks</name>
 	<description>Demo project for Spring Boot</description>
 
 	<parent>
@@ -29,27 +28,27 @@
 		<thin.version>1.0.20.BUILD-SNAPSHOT</thin.version>
 		<generated.version>2.1.1.BUILD-SNAPSHOT</generated.version>
 		<slim.version>0.0.1.BUILD-SNAPSHOT</slim.version>
-		<benchmarksEnabled>true</benchmarksEnabled>
+		<benchmarksEnabled>false</benchmarksEnabled>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webflux</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
@@ -60,13 +59,11 @@
 			<groupId>com.github.mp911de.microbenchmark-runner</groupId>
 			<artifactId>microbenchmark-runner-junit5</artifactId>
 			<version>0.1.0.RELEASE</version>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot.experimental</groupId>
 			<artifactId>spring-boot-thin-launcher</artifactId>
 			<version>${thin.version}</version>
-			<scope>test</scope>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -82,10 +79,12 @@
 			<groupId>org.springframework.experimental</groupId>
 			<artifactId>spring-boot-autoconfigure</artifactId>
 			<classifier>func</classifier>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.experimental</groupId>
 			<artifactId>spring-init-core</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
@@ -128,10 +127,6 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
@@ -159,6 +154,12 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
+				<configuration>
+					<systemProperties>
+						<publishTo>csv:target/result.csv</publishTo>
+						<benchmarksEnabled>${benchmarksEnabled}</benchmarksEnabled>
+					</systemProperties>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

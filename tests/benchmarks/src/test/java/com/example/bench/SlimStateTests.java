@@ -16,11 +16,13 @@
 
 package com.example.bench;
 
-import com.example.bench.CaptureSystemOutput.OutputCapture;
 import com.example.bench.SlimBenchmarkIT.SlimState;
 import com.example.bench.SlimBenchmarkIT.SlimState.Sample;
 
 import org.junit.jupiter.api.Test;
+
+import org.springframework.init.bench.CaptureSystemOutput;
+import org.springframework.init.bench.CaptureSystemOutput.OutputCapture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
