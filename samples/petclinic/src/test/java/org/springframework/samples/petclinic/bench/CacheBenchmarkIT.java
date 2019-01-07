@@ -52,97 +52,100 @@ import jmh.mbr.junit5.Microbenchmark;
 @Microbenchmark
 public class CacheBenchmarkIT {
 
-	@Benchmark
-	public void launch(MainState state) throws Exception {
-		state.isolated();
-	}
+    @Benchmark
+    public void launch(MainState state) throws Exception {
+        state.isolated();
+    }
 
-	@State(Scope.Thread)
-	public static class MainState extends LauncherState {
+    @State(Scope.Thread)
+    public static class MainState extends LauncherState {
 
-		public static enum Sample {
-			empty(EmptyApplication.class), simple(CacheApplication.class), cache(CacheApplication.class);
-			private Class<?> config;
+        public static enum Sample {
+            empty(EmptyApplication.class), simple(CacheApplication.class), cache(
+                    CacheApplication.class), jcache(CacheApplication.class);
+            private Class<?> config;
 
-			private Sample(Class<?> config) {
-				this.config = config;
-			}
-		}
+            private Sample(Class<?> config) {
+                this.config = config;
+            }
+        }
 
-		@Param
-		private Sample sample = Sample.simple;
+        @Param
+        private Sample sample = Sample.simple;
 
-		public MainState() {
-			super(CacheApplication.class);
-			addProperties("spring.main.web-application-type=none");
-		}
+        public MainState() {
+            super(CacheApplication.class);
+            addProperties("spring.main.web-application-type=none");
+        }
 
-		@TearDown(Level.Invocation)
-		public void stop() throws Exception {
-			super.close();
-		}
+        @TearDown(Level.Invocation)
+        public void stop() throws Exception {
+            super.close();
+        }
 
-		@Setup(Level.Invocation)
-		public void start() throws Exception {
-			setMainClass(sample.config);
-			switch (sample) {
-			case simple:
-				addProperties("spring.cache.cache-names=app");
-				addProperties("spring.cache.type=simple");
-				break;
+        @Override
+        @Setup(Level.Invocation)
+        public void start() throws Exception {
+            setMainClass(sample.config);
+            switch (sample) {
+            case simple:
+            case cache:
+                addProperties("spring.cache.cache-names=app");
+                addProperties("spring.cache.type=simple");
+                break;
 
-			case cache:
-				addProperties("spring.cache.cache-names=app");
-				break;
+            case jcache:
+                addProperties("spring.cache.cache-names=app");
+                break;
 
-			default:
-				break;
-			}
-			super.start();
-		}
+            default:
+                break;
+            }
+            super.start();
+        }
 
-		public void setSample(Sample sample) {
-			this.sample = sample;
-		}
-		
-		@Override
-		protected URL[] filterClassPath(URL[] urls) {
-			if (sample==Sample.simple) {
-				List<URL> list = new ArrayList<>();
-				for (URL url : urls) {
-					if (!url.toString().contains("cache-api")) {
-						list.add(url);
-					}
-				}
-				return list.toArray(new URL[0]);
-			}
-			return super.filterClassPath(urls);
-		}
-	}
+        public void setSample(Sample sample) {
+            this.sample = sample;
+        }
 
-	@EnableCaching
-	@SpringBootConfiguration
-	@EnableSelectedAutoConfiguration({ CacheAutoConfiguration.class,
-			ConfigurationPropertiesAutoConfiguration.class })
-	public static class CacheApplication extends LauncherApplication {
+        @Override
+        protected URL[] filterClassPath(URL[] urls) {
+            if (sample == Sample.simple) {
+                List<URL> list = new ArrayList<>();
+                for (URL url : urls) {
+                    if (!url.toString().contains("cache-api")) {
+                        list.add(url);
+                    }
+                }
+                return list.toArray(new URL[0]);
+            }
+            return super.filterClassPath(urls);
+        }
+    }
 
-		public static void main(String[] args) throws Exception {
-			LauncherApplication.run(CacheApplication.class, args);
-		}
+    @EnableCaching
+    @SpringBootConfiguration
+    @EnableSelectedAutoConfiguration({ CacheAutoConfiguration.class,
+            ConfigurationPropertiesAutoConfiguration.class })
+    public static class CacheApplication extends LauncherApplication {
 
-		@Override
-		public void run() {
-			super.run();
-			assertThat(getContext().getBean(CacheManager.class)).isNotNull();
-		}
+        public static void main(String[] args) throws Exception {
+            LauncherApplication.run(CacheApplication.class, args);
+        }
 
-	}
+        @Override
+        public void run() {
+            super.run();
+            assertThat(getContext().getBean(CacheManager.class)).isNotNull();
+        }
 
-	@SpringBootConfiguration
-	@EnableSelectedAutoConfiguration({ ConfigurationPropertiesAutoConfiguration.class })
-	public static class EmptyApplication extends LauncherApplication {
-		public static void main(String[] args) throws Exception {
-			LauncherApplication.run(EmptyApplication.class, args);
-		}
-	}
+    }
+
+    @SpringBootConfiguration
+    @EnableSelectedAutoConfiguration({ ConfigurationPropertiesAutoConfiguration.class })
+    public static class EmptyApplication extends LauncherApplication {
+        public static void main(String[] args) throws Exception {
+            LauncherApplication.run(EmptyApplication.class, args);
+        }
+    }
 }
