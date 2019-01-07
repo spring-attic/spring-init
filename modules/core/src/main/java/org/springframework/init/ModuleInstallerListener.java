@@ -147,12 +147,11 @@ public class ModuleInstallerListener implements SmartApplicationListener {
 		for (Object source : application.getAllSources()) {
 			if (source instanceof Class<?>) {
 				Class<?> type = (Class<?>) source;
-				if (ClassUtils.isPresent(type.getName() + "Initializer",
-						application.getClassLoader())) {
+				String cls = type.getName().replace("$", "_") + "Initializer";
+				if (ClassUtils.isPresent(cls, application.getClassLoader())) {
 					@SuppressWarnings("unchecked")
 					Class<? extends ApplicationContextInitializer<?>> initializer = (Class<? extends ApplicationContextInitializer<?>>) ClassUtils
-							.resolveClassName(type.getName() + "Initializer",
-									application.getClassLoader());
+							.resolveClassName(cls, application.getClassLoader());
 					addInitializer(initializer);
 					remove(application, source);
 				}
