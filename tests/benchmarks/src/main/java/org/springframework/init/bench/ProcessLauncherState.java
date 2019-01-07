@@ -50,7 +50,8 @@ public class ProcessLauncherState {
 
 	private BufferedReader buffer;
 
-	public ProcessLauncherState(String dir, String... args) {
+	public ProcessLauncherState(Class<?> mainClass, String dir, String... args) {
+		this.mainClass = mainClass.getName();
 		this.args.addAll(DEFAULT_JVM_ARGS);
 		String vendor = System.getProperty("java.vendor", "").toLowerCase();
 		if (vendor.contains("ibm") || vendor.contains("j9")) {

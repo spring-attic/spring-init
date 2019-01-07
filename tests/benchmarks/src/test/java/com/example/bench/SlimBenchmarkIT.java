@@ -75,8 +75,7 @@ public class SlimBenchmarkIT {
 		protected Sample sample = Sample.demo;
 
 		public SlimState() {
-			super("target", "--server.port=0");
-			setMainClass(InitApplication.class.getName());
+			super(InitApplication.class, "target", "--server.port=0");
 		}
 
 		@Override

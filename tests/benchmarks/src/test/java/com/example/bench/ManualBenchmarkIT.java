@@ -61,8 +61,7 @@ public class ManualBenchmarkIT {
 		private Sample sample = Sample.demo;
 
 		public MainState() {
-			super("target", "--server.port=0");
-			setMainClass(ManualApplication.class.getName());
+			super(ManualApplication.class, "target", "--server.port=0");
 		}
 
 		@Override

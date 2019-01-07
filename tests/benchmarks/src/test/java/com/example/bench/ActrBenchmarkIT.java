@@ -79,8 +79,7 @@ public class ActrBenchmarkIT {
 		}
 
 		public MainState() {
-			super("target", "--server.port=0");
-			setMainClass(TestsApplication.class.getName());
+			super(TestsApplication.class, "target", "--server.port=0");
 		}
 
 		@Override

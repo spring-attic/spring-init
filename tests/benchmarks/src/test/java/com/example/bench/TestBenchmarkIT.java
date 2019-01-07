@@ -87,7 +87,7 @@ public class TestBenchmarkIT {
 		private Sample sample = Sample.demo;
 
 		public MainState() {
-			super("target", "--server.port=0");
+			super(TestsApplication.class, "target", "--server.port=0");
 		}
 
 		@TearDown(Level.Invocation)

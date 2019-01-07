@@ -16,13 +16,16 @@
 
 package com.example.bench;
 
-import com.example.manual.ManualApplication;
-
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.init.EnableSelectedAutoConfiguration;
 import org.springframework.init.bench.CaptureSystemOutput;
+import org.springframework.init.bench.LauncherApplication;
 import org.springframework.init.bench.CaptureSystemOutput.OutputCapture;
-import org.springframework.init.bench.ProcessLauncherState;
+import org.springframework.init.bench.LauncherState;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,32 +34,45 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  */
 @CaptureSystemOutput
-public class ProcessLauncherStateTests {
+public class LauncherStateTests {
 
-	@Test
-	public void vanilla(OutputCapture output) throws Exception {
-		// System.setProperty("bench.args", "-verbose:class");
-		ProcessLauncherState state = new ProcessLauncherState(ManualApplication.class,
-				"target", "--server.port=0");
-		// state.setProfiles("actr");
-		state.before();
-		state.run();
-		state.after();
-		assertThat(output.toString()).contains("Benchmark app started");
-		assertThat(output.toString()).doesNotContain("/actuator");
+	private LauncherState state;
+
+	@BeforeEach
+	public void init() throws Exception {
+		state = new LauncherState(PrivateApplication.class);
+		state.start();
+	}
+
+	@AfterEach
+	public void close() throws Exception {
+		if (state != null) {
+			state.close();
+		}
 	}
 
 	@Test
-	public void actr(OutputCapture output) throws Exception {
-		// System.setProperty("bench.args", "-verbose:class");
-		ProcessLauncherState state = new ProcessLauncherState(ManualApplication.class, "target",
-				"--server.port=0");
-		state.setProfiles("actr");
-		state.before();
-		state.run();
-		state.after();
+	public void isolated(OutputCapture output) throws Exception {
+		state.isolated();
 		assertThat(output.toString()).contains("Benchmark app started");
-		assertThat(output.toString()).contains("/actuator");
 	}
 
+	@Test
+	public void shared(OutputCapture output) throws Exception {
+		// System.setProperty("bench.args", "-verbose:class");
+		state.shared();
+		assertThat(output.toString()).contains("Benchmark app started");
+	}
+
+	@SpringBootConfiguration
+	@EnableSelectedAutoConfiguration
+	public static class PrivateApplication extends LauncherApplication {
+
+		public static void main(String[] args) throws Exception {
+			try (PrivateApplication app = new PrivateApplication()) {
+				app.run();
+			}
+		}
+
+	}
 }

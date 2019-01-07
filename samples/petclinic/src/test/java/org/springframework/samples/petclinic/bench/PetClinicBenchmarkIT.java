@@ -59,8 +59,7 @@ public class PetClinicBenchmarkIT {
 		private Sample sample = Sample.demo;
 
 		public MainState() {
-			super("target", "--server.port=0");
-			setMainClass(PetClinicApplication.class.getName());
+			super(PetClinicApplication.class, "target", "--server.port=0");
 		}
 
 		@Override
@@ -85,8 +84,8 @@ public class PetClinicBenchmarkIT {
 			}
 			if (sample == Sample.tx) {
 				addArgs("-Dspring.profiles.active=tx");
-			} else
-			if (sample == Sample.cache) {
+			}
+			else if (sample == Sample.cache) {
 				addArgs("-Dspring.profiles.active=tx,cache");
 			}
 			super.before();

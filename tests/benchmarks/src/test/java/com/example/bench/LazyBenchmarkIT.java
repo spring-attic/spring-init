@@ -61,9 +61,8 @@ public class LazyBenchmarkIT {
 		private Sample sample = Sample.demo;
 
 		public MainState() {
-			super("target", "--server.port=0",
+			super(TestsApplication.class, "target", "--server.port=0",
 					"--spring.main.sources=com.example.config.LazyInitBeanFactoryPostProcessor");
-			setMainClass(TestsApplication.class.getName());
 		}
 
 		@Override
