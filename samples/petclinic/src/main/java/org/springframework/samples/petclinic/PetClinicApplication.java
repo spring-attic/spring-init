@@ -27,22 +27,15 @@ import org.springframework.boot.actuate.autoconfigure.web.servlet.ServletManagem
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration;
 import org.springframework.boot.autoconfigure.context.MessageSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
-import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.autoconfigure.thymeleaf.ThymeleafAutoConfiguration;
 import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.init.SpringInitApplication;
+import org.springframework.init.config.JpaDataConfigurations;
+import org.springframework.init.config.WebMvcConfigurations;
 
 /**
  * PetClinic Spring Boot Application.
@@ -51,11 +44,7 @@ import org.springframework.init.SpringInitApplication;
  *
  */
 @SpringInitApplication({ MessageSourceAutoConfiguration.class,
-		PropertyPlaceholderAutoConfiguration.class,
-		ConfigurationPropertiesAutoConfiguration.class, DataSourceAutoConfiguration.class,
-		HibernateJpaAutoConfiguration.class, JpaRepositoriesAutoConfiguration.class,
-		ServletWebServerFactoryAutoConfiguration.class, WebMvcAutoConfiguration.class,
-		ErrorMvcAutoConfiguration.class, DispatcherServletAutoConfiguration.class,
+		JpaDataConfigurations.class, WebMvcConfigurations.class,
 		ThymeleafAutoConfiguration.class })
 @EntityScan
 public class PetClinicApplication {
@@ -78,7 +67,7 @@ class ApplicationCacheConfiguration {
 class ApplicationTxConfiguration {
 }
 
-@ConditionalOnClass(name="org.springframework.boot.actuate.endpoint.annotation.Endpoint")
+@ConditionalOnClass(name = "org.springframework.boot.actuate.endpoint.annotation.Endpoint")
 @Configuration
 @ImportAutoConfiguration({ EndpointAutoConfiguration.class,
 		HealthIndicatorAutoConfiguration.class, HealthEndpointAutoConfiguration.class,

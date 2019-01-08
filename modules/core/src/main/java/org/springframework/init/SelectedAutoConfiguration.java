@@ -22,8 +22,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.boot.autoconfigure.AutoConfigurationPackage;
-import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.AliasFor;
 
 /**
@@ -34,21 +32,14 @@ import org.springframework.core.annotation.AliasFor;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Import(EnableSelectedAutoConfigurationImportSelector.class)
-@AutoConfigurationPackage
-public @interface EnableSelectedAutoConfiguration {
-
-	String ENABLED_OVERRIDE_PROPERTY = "spring.init.enableautoconfiguration";
+public @interface SelectedAutoConfiguration {
 
 	@AliasFor("classes")
 	Class<?>[] value() default {};
 
 	@AliasFor("value")
 	Class<?>[] classes() default {};
+	
+	Class<?>[] depends() default {};
 
-	// For compatiblility with @EnableAutoConfiguration
-	Class<?>[] exclude() default {};
-
-	// For compatiblility with @EnableAutoConfiguration
-	String[] excludeName() default {};
 }

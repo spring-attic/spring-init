@@ -2,17 +2,10 @@ package app.main;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration;
-import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
-import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.reactive.HttpHandlerAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.reactive.ReactiveWebServerFactoryAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.reactive.WebFluxAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.reactive.error.ErrorWebFluxAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.init.SpringInitApplication;
+import org.springframework.init.config.JdbcConfigurations;
+import org.springframework.init.config.WebFluxConfigurations;
 import org.springframework.web.reactive.function.server.RouterFunction;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
@@ -24,11 +17,7 @@ import app.main.foo.FooRepository;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
-@SpringInitApplication({ PropertyPlaceholderAutoConfiguration.class,
-		ConfigurationPropertiesAutoConfiguration.class, DataSourceAutoConfiguration.class,
-		JdbcTemplateAutoConfiguration.class, JacksonAutoConfiguration.class,
-		ReactiveWebServerFactoryAutoConfiguration.class, WebFluxAutoConfiguration.class,
-		ErrorWebFluxAutoConfiguration.class, HttpHandlerAutoConfiguration.class })
+@SpringInitApplication({ JdbcConfigurations.class, WebFluxConfigurations.class })
 public class SampleApplication {
 
 	private FooRepository entities;

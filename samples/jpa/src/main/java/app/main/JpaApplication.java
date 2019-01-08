@@ -2,8 +2,8 @@ package app.main;
 
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
-import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -12,7 +12,7 @@ import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.init.SpringInitApplication;
-import org.springframework.init.config.JdbcDataConfigurations;
+import org.springframework.init.config.JpaDataConfigurations;
 import org.springframework.init.config.WebFluxConfigurations;
 import org.springframework.web.reactive.function.server.RouterFunction;
 
@@ -23,24 +23,18 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
-@SpringInitApplication({ JdbcDataConfigurations.class, WebFluxConfigurations.class,
-	JacksonAutoConfiguration.class })
+@SpringInitApplication({ JpaDataConfigurations.class, WebFluxConfigurations.class,
+		JacksonAutoConfiguration.class })
 @EntityScan
-public class SampleApplication {
+public class JpaApplication {
 
-	private CustomerRepository foos;
-
-	public SampleApplication(CustomerRepository foos) {
-		this.foos = foos;
-	}
+	@Autowired
+	private FooRepository foos;
 
 	@Bean
 	public CommandLineRunner runner(ConfigurableListableBeanFactory beans) {
 		return args -> {
-			Optional<Foo> foo = foos.findById(1L);
-			if (!foo.isPresent()) {
-				foos.save(new Foo("Hello"));
-			}
+			foos.findById(1L).orElseGet(() -> foos.save(new Foo("Hello")));
 			System.err.println("Class count: " + ManagementFactory.getClassLoadingMXBean()
 					.getTotalLoadedClassCount());
 			System.err.println("Bean count: " + beans.getBeanDefinitionNames().length);
@@ -57,10 +51,10 @@ public class SampleApplication {
 	}
 
 	public static void main(String[] args) {
-		SpringApplication.run(SampleApplication.class, args);
+		SpringApplication.run(JpaApplication.class, args);
 	}
 
 }
 
-interface CustomerRepository extends CrudRepository<Foo, Long> {
+interface FooRepository extends CrudRepository<Foo, Long> {
 }

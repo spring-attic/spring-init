@@ -6,21 +6,13 @@ import java.util.Arrays;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration;
-import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
-import org.springframework.boot.autoconfigure.data.mongo.MongoReactiveDataAutoConfiguration;
-import org.springframework.boot.autoconfigure.data.mongo.MongoReactiveRepositoriesAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
-import org.springframework.boot.autoconfigure.mongo.MongoReactiveAutoConfiguration;
-import org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.reactive.HttpHandlerAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.reactive.ReactiveWebServerFactoryAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.reactive.WebFluxAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.reactive.error.ErrorWebFluxAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.init.SpringInitApplication;
+import org.springframework.init.config.JacksonConfigurations;
+import org.springframework.init.config.ReactiveMongoDataConfigurations;
+import org.springframework.init.config.WebFluxConfigurations;
 import org.springframework.web.reactive.function.server.RouterFunction;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
@@ -34,13 +26,8 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
  * @author Dave Syer
  *
  */
-@SpringInitApplication({ PropertyPlaceholderAutoConfiguration.class,
-		ConfigurationPropertiesAutoConfiguration.class,
-		EmbeddedMongoAutoConfiguration.class, MongoReactiveAutoConfiguration.class,
-		MongoReactiveDataAutoConfiguration.class,
-		MongoReactiveRepositoriesAutoConfiguration.class, JacksonAutoConfiguration.class,
-		ReactiveWebServerFactoryAutoConfiguration.class, WebFluxAutoConfiguration.class,
-		ErrorWebFluxAutoConfiguration.class, HttpHandlerAutoConfiguration.class })
+@SpringInitApplication({ ReactiveMongoDataConfigurations.class,
+		JacksonConfigurations.class, WebFluxConfigurations.class })
 @EntityScan
 public class SampleApplication {
 

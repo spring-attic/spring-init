@@ -10,22 +10,12 @@ import org.springframework.boot.actuate.autoconfigure.web.reactive.ReactiveManag
 import org.springframework.boot.actuate.autoconfigure.web.server.ManagementContextAutoConfiguration;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration;
-import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.reactive.HttpHandlerAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.reactive.ReactiveWebServerFactoryAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.reactive.WebFluxAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.reactive.error.ErrorWebFluxAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.init.EnableSelectedAutoConfiguration;
 import org.springframework.init.SpringInitApplication;
+import org.springframework.init.config.WebFluxConfigurations;
 
-@SpringInitApplication({ PropertyPlaceholderAutoConfiguration.class,
-		ConfigurationPropertiesAutoConfiguration.class,
-		ReactiveWebServerFactoryAutoConfiguration.class, WebFluxAutoConfiguration.class,
-		ErrorWebFluxAutoConfiguration.class, HttpHandlerAutoConfiguration.class })
-@Import(ActuatorConfiguration.class)
+@SpringInitApplication(WebFluxConfigurations.class)
 public class InitApplication {
 
 	public static void main(String[] args) {
