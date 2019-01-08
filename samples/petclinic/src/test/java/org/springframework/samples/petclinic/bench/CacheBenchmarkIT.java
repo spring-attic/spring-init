@@ -32,11 +32,17 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Warmup;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
+import org.springframework.boot.autoconfigure.cache.CacheProperties;
 import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import org.springframework.context.annotation.Bean;
 import org.springframework.init.EnableSelectedAutoConfiguration;
 import org.springframework.init.bench.LauncherApplication;
 import org.springframework.init.bench.LauncherState;
@@ -53,7 +59,7 @@ import jmh.mbr.junit5.Microbenchmark;
 public class CacheBenchmarkIT {
 
     @Benchmark
-    public void launch(MainState state) throws Exception {
+    public void bench(MainState state) throws Exception {
         state.isolated();
     }
 
@@ -62,7 +68,8 @@ public class CacheBenchmarkIT {
 
         public static enum Sample {
             empty(EmptyApplication.class), simple(CacheApplication.class), cache(
-                    CacheApplication.class), jcache(CacheApplication.class);
+                    CacheApplication.class), jcache(
+                            CacheApplication.class), manual(ManualCacheApplication.class);
             private Class<?> config;
 
             private Sample(Class<?> config) {
@@ -70,8 +77,15 @@ public class CacheBenchmarkIT {
             }
         }
 
+        public static enum Config {
+            functional, annotation;
+        }
+
         @Param
         private Sample sample = Sample.simple;
+
+        @Param
+        private Config config = Config.functional;
 
         public MainState() {
             super(CacheApplication.class);
@@ -89,6 +103,7 @@ public class CacheBenchmarkIT {
             setMainClass(sample.config);
             switch (sample) {
             case simple:
+            case manual:
             case cache:
                 addProperties("spring.cache.cache-names=app");
                 addProperties("spring.cache.type=simple");
@@ -101,6 +116,15 @@ public class CacheBenchmarkIT {
             default:
                 break;
             }
+            if (config == Config.annotation) {
+                addProperties("spring.functional.enabled=false");
+                if (sample.config == CacheApplication.class) {
+                    setMainClass(AnnoCacheApplication.class);
+                }
+                else if (sample.config == EmptyApplication.class) {
+                    setMainClass(AnnoEmptyApplication.class);
+                }
+            }
             super.start();
         }
 
@@ -108,18 +132,27 @@ public class CacheBenchmarkIT {
             this.sample = sample;
         }
 
+        public void setConfig(Config config) {
+            this.config = config;
+        }
+
         @Override
         protected URL[] filterClassPath(URL[] urls) {
-            if (sample == Sample.simple) {
-                List<URL> list = new ArrayList<>();
-                for (URL url : urls) {
-                    if (!url.toString().contains("cache-api")) {
-                        list.add(url);
+            List<URL> list = new ArrayList<>();
+            for (URL url : urls) {
+                if (sample == Sample.simple || sample == Sample.manual) {
+                    if (url.toString().contains("cache-api")) {
+                        continue;
                     }
                 }
-                return list.toArray(new URL[0]);
+                if (config == Config.annotation) {
+                    if (url.toString().contains("spring-init-")) {
+                        continue;
+                    }
+                }
+                list.add(url);
             }
-            return super.filterClassPath(urls);
+            return list.toArray(new URL[0]);
         }
     }
 
@@ -145,7 +178,68 @@ public class CacheBenchmarkIT {
     @EnableSelectedAutoConfiguration({ ConfigurationPropertiesAutoConfiguration.class })
     public static class EmptyApplication extends LauncherApplication {
         public static void main(String[] args) throws Exception {
+            System.setProperty("spring.main.web-application-type", "none");
             LauncherApplication.run(EmptyApplication.class, args);
+        }
+    }
+
+    @EnableCaching
+    @SpringBootConfiguration
+    @ImportAutoConfiguration({ CacheAutoConfiguration.class,
+            ConfigurationPropertiesAutoConfiguration.class })
+    public static class AnnoCacheApplication extends LauncherApplication {
+
+        public static void main(String[] args) throws Exception {
+            LauncherApplication.run(AnnoCacheApplication.class, args);
+        }
+
+        @Override
+        public void run() {
+            super.run();
+            assertThat(getContext().getBean(CacheManager.class)).isNotNull();
+        }
+
+    }
+
+    @EnableCaching
+    @SpringBootConfiguration
+    @ImportAutoConfiguration(ConfigurationPropertiesAutoConfiguration.class)
+    @EnableConfigurationProperties(CacheProperties.class)
+    public static class ManualCacheApplication extends LauncherApplication {
+
+        @Autowired
+        private CacheProperties cacheProperties;
+
+        public static void main(String[] args) throws Exception {
+            System.setProperty("spring.main.web-application-type", "none");
+            LauncherApplication.run(ManualCacheApplication.class, args);
+        }
+
+        @Override
+        public void run() {
+            super.run();
+            assertThat(getContext().getBean(CacheManager.class)).isNotNull();
+        }
+
+        @Bean
+        public ConcurrentMapCacheManager cacheManager() {
+            ConcurrentMapCacheManager cacheManager = new ConcurrentMapCacheManager();
+            List<String> cacheNames = this.cacheProperties.getCacheNames();
+            if (!cacheNames.isEmpty()) {
+                cacheManager.setCacheNames(cacheNames);
+            }
+            return cacheManager;
+        }
+
+    }
+
+    @SpringBootConfiguration
+    @ImportAutoConfiguration(ConfigurationPropertiesAutoConfiguration.class)
+    public static class AnnoEmptyApplication extends LauncherApplication {
+        public static void main(String[] args) throws Exception {
+            System.setProperty("spring.main.web-application-type", "none");
+            System.setProperty("spring.functional.enabled", "false");
+            LauncherApplication.run(AnnoEmptyApplication.class, args);
         }
     }
 }
