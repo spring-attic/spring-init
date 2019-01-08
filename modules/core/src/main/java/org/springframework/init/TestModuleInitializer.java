@@ -46,9 +46,9 @@ public class TestModuleInitializer
 		ImportRegistrars registrars;
 		if (!context.getBeanFactory()
 				.containsBeanDefinition(ConditionService.class.getName())) {
-			registrars = new ModuleInstallerImportRegistrars(context);
+			registrars = new FunctionalInstallerImportRegistrars(context);
 			context.registerBean(ConditionService.class,
-					() -> new ModuleInstallerConditionService(context,
+					() -> new SimpleConditionService(context,
 							context.getBeanFactory(), context.getEnvironment(), context));
 			context.registerBean(ImportRegistrars.class, () -> registrars);
 		}

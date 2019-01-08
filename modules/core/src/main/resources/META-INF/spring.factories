@@ -1,5 +1,5 @@
 org.springframework.context.ApplicationListener=\
-org.springframework.init.ModuleInstallerListener
+org.springframework.init.FunctionalInstallerListener
 
 org.springframework.context.ApplicationContextInitializer=\
 org.springframework.init.TestModuleInitializer

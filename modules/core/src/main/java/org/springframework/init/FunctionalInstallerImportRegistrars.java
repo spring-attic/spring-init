@@ -51,7 +51,7 @@ import org.springframework.util.ClassUtils;
  * @author Dave Syer
  *
  */
-public class ModuleInstallerImportRegistrars
+public class FunctionalInstallerImportRegistrars
 		implements BeanDefinitionRegistryPostProcessor, ImportRegistrars {
 
 	private Set<Imported> registrars = new LinkedHashSet<>();
@@ -66,7 +66,7 @@ public class ModuleInstallerImportRegistrars
 
 	private GenericApplicationContext context;
 
-	public ModuleInstallerImportRegistrars(GenericApplicationContext context) {
+	public FunctionalInstallerImportRegistrars(GenericApplicationContext context) {
 		this.context = context;
 	}
 

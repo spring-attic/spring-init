@@ -41,7 +41,7 @@ import org.springframework.util.ClassUtils;
  * @author Dave Syer
  *
  */
-public class ModuleInstallerConditionService implements ConditionService {
+public class SimpleConditionService implements ConditionService {
 
 	private static final String EXCLUDE_FILTER_BEAN_NAME = "org.springframework.boot.test.autoconfigure.filter.TypeExcludeFilters";
 
@@ -51,7 +51,7 @@ public class ModuleInstallerConditionService implements ConditionService {
 	private ConfigurableListableBeanFactory beanFactory;
 	private MetadataReaderFactory metadataReaderFactory;
 
-	public ModuleInstallerConditionService(BeanDefinitionRegistry registry,
+	public SimpleConditionService(BeanDefinitionRegistry registry,
 			ConfigurableListableBeanFactory beanFactory, Environment environment,
 			ResourceLoader resourceLoader) {
 		this.beanFactory = beanFactory;

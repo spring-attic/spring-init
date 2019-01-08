@@ -72,9 +72,9 @@ import org.springframework.util.ReflectionUtils;
  * @author Dave Syer
  *
  */
-public class ModuleInstallerListener implements SmartApplicationListener {
+public class FunctionalInstallerListener implements SmartApplicationListener {
 
-	private static final Log logger = LogFactory.getLog(ModuleInstallerListener.class);
+	private static final Log logger = LogFactory.getLog(FunctionalInstallerListener.class);
 
 	// TODO: make this class stateless
 	private Collection<ApplicationContextInitializer<GenericApplicationContext>> initializers = new LinkedHashSet<>();
@@ -106,7 +106,7 @@ public class ModuleInstallerListener implements SmartApplicationListener {
 				return;
 			}
 			GenericApplicationContext generic = (GenericApplicationContext) context;
-			ConditionService conditions = new ModuleInstallerConditionService(generic,
+			ConditionService conditions = new SimpleConditionService(generic,
 					generic.getBeanFactory(), context.getEnvironment(), context);
 			initialize(generic, conditions);
 			functional(generic, conditions);
@@ -204,7 +204,7 @@ public class ModuleInstallerListener implements SmartApplicationListener {
 				.containsBeanDefinition(ConditionService.class.getName())) {
 			context.registerBean(ConditionService.class, () -> conditions);
 			context.registerBean(ImportRegistrars.class,
-					() -> new ModuleInstallerImportRegistrars(context));
+					() -> new FunctionalInstallerImportRegistrars(context));
 		}
 		this.autoTypeNames = new HashSet<>(SpringFactoriesLoader.loadFactoryNames(
 				EnableAutoConfiguration.class, context.getClassLoader()));
