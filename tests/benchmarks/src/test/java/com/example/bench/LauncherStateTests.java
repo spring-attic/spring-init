@@ -41,6 +41,7 @@ public class LauncherStateTests {
 	@BeforeEach
 	public void init() throws Exception {
 		state = new LauncherState(PrivateApplication.class);
+		state.addProperties("spring.main.web-application-type=none");
 		state.start();
 	}
 
