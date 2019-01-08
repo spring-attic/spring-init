@@ -19,9 +19,6 @@ import com.example.manual.ManualApplication;
 
 import org.openjdk.jmh.annotations.AuxCounters;
 import org.openjdk.jmh.annotations.AuxCounters.Type;
-
-import org.springframework.init.bench.ProcessLauncherState;
-
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -34,6 +31,8 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Warmup;
+
+import org.springframework.init.bench.ProcessLauncherState;
 
 import jmh.mbr.junit5.Microbenchmark;
 

@@ -16,7 +16,6 @@ import org.springframework.boot.autoconfigure.web.reactive.HttpHandlerAutoConfig
 import org.springframework.boot.autoconfigure.web.reactive.ReactiveWebServerFactoryAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.WebFluxAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.error.ErrorWebFluxAutoConfiguration;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.init.EnableSelectedAutoConfiguration;
@@ -30,11 +29,7 @@ import org.springframework.init.SpringInitApplication;
 public class InitApplication {
 
 	public static void main(String[] args) {
-		new SpringApplication(InitApplication.class) {
-			@Override
-			protected void load(ApplicationContext context, Object[] sources) {
-			};
-		}.run(args);
+		new SpringApplication(InitApplication.class).run(args);
 	}
 }
 
