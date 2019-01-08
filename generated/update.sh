@@ -1,12 +1,5 @@
 #!/bin/bash
 
-cache=`dirname $0`/sources/spring-boot
-if ! [ -e $cache ]; then
-    git clone https://github.com/spring-projects/spring-boot $cache
-fi
-
-(cd $cache; git checkout v2.1.1.RELEASE)
-
 function init() {
 
     module=$1; shift
@@ -26,6 +19,7 @@ function generate() {
     src=$1; shift
     pom=$1; shift
     artifactId=$1; shift;
+    version=$1; shift;
     if ! [ -e $pom ]; then
         cat > $pom <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -35,7 +29,7 @@ function generate() {
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>${artifactId}</artifactId>
-	<version>2.1.1.BUILD-SNAPSHOT</version>
+	<version>${version}</version>
 
 	<parent>
     	<groupId>org.springframework.experimental</groupId>
@@ -93,7 +87,7 @@ EOF
     # Build them back up
     tmpfile=.pom.xml
     sed '/<\/dependencies/,$ d' $pom > $tmpfile
-    sed '1,/<dependencies/ d;/<!-- Test/,$ d' $src >> $tmpfile
+    sed -e '1,/<dependencies/ d;/<\/dependencies/,$ d' -e '/<dependency>/{:a;N;/<\/dependency>/!ba};/<scope>test/d' $src >> $tmpfile
     cat >> $tmpfile <<EOF
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
@@ -131,17 +125,39 @@ EOF
 
 }
 
+cache=`dirname $0`/sources/spring-boot
+if ! [ -e $cache ]; then
+    git clone https://github.com/spring-projects/spring-boot $cache
+fi
+
+(cd $cache; git checkout v2.1.1.RELEASE)
+
 src=$cache/spring-boot-project/spring-boot-autoconfigure
 tgt=`dirname $0`/autoconfigure
 init $tgt $src
-generate $src/pom.xml $tgt/pom.xml spring-boot-autoconfigure
+generate $src/pom.xml $tgt/pom.xml spring-boot-autoconfigure 2.1.1.BUILD-SNAPSHOT
 
 src=$cache/spring-boot-project/spring-boot-actuator-autoconfigure
 tgt=`dirname $0`/actuator
 init $tgt $src
-generate $src/pom.xml $tgt/pom.xml spring-boot-actuator-autoconfigure
+generate $src/pom.xml $tgt/pom.xml spring-boot-actuator-autoconfigure 2.1.1.BUILD-SNAPSHOT
 
 src=$cache/spring-boot-project/spring-boot-test-autoconfigure
 tgt=`dirname $0`/test
 init $tgt $src
-generate $src/pom.xml $tgt/pom.xml spring-boot-test-autoconfigure
+generate $src/pom.xml $tgt/pom.xml spring-boot-test-autoconfigure 2.1.1.BUILD-SNAPSHOT
+
+cache=`dirname $0`/sources/spring-security
+if ! [ -e $cache ]; then
+    git clone https://github.com/spring-projects/spring-security $cache
+fi
+
+(cd $cache; git checkout 5.1.2.RELEASE)
+(cd $cache/config; ../gradlew install -x test)
+
+src=$cache/config
+tgt=`dirname $0`/security
+init $tgt $src
+generate $src/build/poms/pom-default.xml $tgt/pom.xml spring-security-config 5.1.2.BUILD-SNAPSHOT
+
+

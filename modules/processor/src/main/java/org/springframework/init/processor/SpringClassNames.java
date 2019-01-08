@@ -81,6 +81,12 @@ public class SpringClassNames {
 	public static final ClassName APPLICATION_CONTEXT = ClassName
 			.get("org.springframework.context", "ApplicationContext");
 
+	public static final ClassName RESOURCE_LOADER = ClassName
+			.get("org.springframework.core.io", "ResourceLoader");
+
+	public static final ClassName APPLICATION_EVENT_PUBLISHER = ClassName
+			.get("org.springframework.context", "ApplicationEventPublisher");
+
 	public static final ClassName WEB_APPLICATION_CONTEXT = ClassName
 			.get("org.springframework.web.context", "WebApplicationContext");
 

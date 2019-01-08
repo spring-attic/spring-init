@@ -30,6 +30,7 @@
 		<module>autoconfigure</module>
 		<module>actuator</module>
 		<module>test</module>
+		<module>security</module>
 	</modules>
 
 	<properties>

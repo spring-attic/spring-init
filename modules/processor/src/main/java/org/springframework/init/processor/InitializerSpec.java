@@ -485,6 +485,10 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		}
 		else if (utils.implementsInterface(typeElement,
 				SpringClassNames.APPLICATION_CONTEXT)
+				|| utils.implementsInterface(typeElement,
+						SpringClassNames.RESOURCE_LOADER)
+				|| utils.implementsInterface(typeElement,
+						SpringClassNames.APPLICATION_EVENT_PUBLISHER)
 				|| paramTypename.equals(
 						SpringClassNames.CONFIGURABLE_APPLICATION_CONTEXT.toString())) {
 			if (utils.implementsInterface(typeElement,
