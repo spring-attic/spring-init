@@ -51,7 +51,7 @@ public class SlimBenchmarkIT {
 	}
 
 	@Benchmark
-	public void select(SlimState state) throws Exception {
+	public void annos(SlimState state) throws Exception {
 		state.addArgs("-Dspring.functional.enabled=false");
 		state.run();
 	}
