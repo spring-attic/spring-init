@@ -20,9 +20,9 @@
                 <module>tomcat</module>
                 <module>jackson</module>
                 <module>mustache</module>
+                <module>orm</module>
                 <module>mongo</module>
                 <module>jdbc</module>
-                <module>jpa</module>
                 <module>actuator</module>
                 <module>db</module>
                 <module>auto</module>
