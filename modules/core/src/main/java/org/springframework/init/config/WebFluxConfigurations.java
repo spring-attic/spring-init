@@ -20,7 +20,7 @@ import org.springframework.boot.autoconfigure.web.reactive.HttpHandlerAutoConfig
 import org.springframework.boot.autoconfigure.web.reactive.ReactiveWebServerFactoryAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.WebFluxAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.error.ErrorWebFluxAutoConfiguration;
-import org.springframework.init.SelectedAutoConfiguration;
+import org.springframework.init.select.SelectedAutoConfiguration;
 
 /**
  * @author Dave Syer

@@ -14,22 +14,16 @@
  * limitations under the License.
  */
 
-package org.springframework.init;
-
-import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
+package org.springframework.init.func;
 
 /**
  * @author Dave Syer
  *
  */
-public interface ConditionService {
+public interface ImportRegistrars {
 
-	boolean matches(Class<?> type, ConfigurationPhase phase);
+	void add(Class<?> importer, Class<?> imported);
 
-	boolean matches(Class<?> type);
-
-	boolean matches(Class<?> factory, Class<?> type);
-
-	boolean includes(Class<?> type);
+	void add(Class<?> importer, String typeName);
 
 }

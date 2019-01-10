@@ -3,7 +3,7 @@ package org.springframework.cloud.bootstrap;
 import java.lang.Override;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.init.ImportRegistrars;
+import org.springframework.init.func.ImportRegistrars;
 
 public class BootstrapImportSelectorConfigurationInitializer implements ApplicationContextInitializer<GenericApplicationContext> {
   @Override

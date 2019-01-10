@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.init;
+package org.springframework.init.test;
 
 import java.util.Set;
 
@@ -22,6 +22,10 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.init.func.ConditionService;
+import org.springframework.init.func.FunctionalInstallerImportRegistrars;
+import org.springframework.init.func.ImportRegistrars;
+import org.springframework.init.func.SimpleConditionService;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -30,8 +34,6 @@ import org.springframework.util.ClassUtils;
  */
 public class TestModuleInitializer
 		implements ApplicationContextInitializer<GenericApplicationContext> {
-
-	public static volatile boolean enabled = false;
 
 	@Override
 	public void initialize(GenericApplicationContext context) {
@@ -60,7 +62,7 @@ public class TestModuleInitializer
 			BeanDefinition definition = context.getBeanFactory().getBeanDefinition(name);
 			if (definition.getBeanClassName()
 					.contains("ImportsContextCustomizer$ImportsConfiguration")) {
-				enabled = true;
+				SimpleConditionService.EXCLUDES_ENABLED = true;
 				Class<?> testClass = (definition != null)
 						? (Class<?>) definition.getAttribute("testClass")
 						: null;

@@ -3,7 +3,7 @@ package org.springframework.cloud.bootstrap.encrypt;
 import java.lang.Override;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.init.ConditionService;
+import org.springframework.init.func.ConditionService;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 
 public class EncryptionBootstrapConfiguration_VanillaEncryptionConfigurationInitializer implements ApplicationContextInitializer<GenericApplicationContext> {

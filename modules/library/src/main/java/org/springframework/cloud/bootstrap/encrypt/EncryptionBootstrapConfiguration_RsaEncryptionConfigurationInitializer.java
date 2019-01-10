@@ -3,8 +3,8 @@ package org.springframework.cloud.bootstrap.encrypt;
 import java.lang.Override;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.init.ConditionService;
-import org.springframework.init.ImportRegistrars;
+import org.springframework.init.func.ConditionService;
+import org.springframework.init.func.ImportRegistrars;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 
 public class EncryptionBootstrapConfiguration_RsaEncryptionConfigurationInitializer implements ApplicationContextInitializer<GenericApplicationContext> {

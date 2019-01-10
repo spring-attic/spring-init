@@ -18,7 +18,7 @@ package org.springframework.init.config;
 
 import org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.reactive.ReactiveUserDetailsServiceAutoConfiguration;
-import org.springframework.init.SelectedAutoConfiguration;
+import org.springframework.init.select.SelectedAutoConfiguration;
 
 /**
  * @author Dave Syer

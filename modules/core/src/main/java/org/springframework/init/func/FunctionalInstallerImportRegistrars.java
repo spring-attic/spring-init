@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.init;
+package org.springframework.init.func;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -45,6 +45,7 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.type.StandardAnnotationMetadata;
+import org.springframework.init.select.EnableSelectedAutoConfigurationImportSelector;
 import org.springframework.util.ClassUtils;
 
 /**

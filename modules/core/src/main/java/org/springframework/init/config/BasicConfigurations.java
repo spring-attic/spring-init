@@ -18,7 +18,7 @@ package org.springframework.init.config;
 
 import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
-import org.springframework.init.SelectedAutoConfiguration;
+import org.springframework.init.select.SelectedAutoConfiguration;
 
 /**
  * @author Dave Syer

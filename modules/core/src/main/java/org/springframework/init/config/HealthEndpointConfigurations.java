@@ -24,7 +24,7 @@ import org.springframework.boot.actuate.autoconfigure.info.InfoEndpointAutoConfi
 import org.springframework.boot.actuate.autoconfigure.web.reactive.ReactiveManagementContextAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.web.server.ManagementContextAutoConfiguration;
 import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration;
-import org.springframework.init.SelectedAutoConfiguration;
+import org.springframework.init.select.SelectedAutoConfiguration;
 
 /**
  * @author Dave Syer

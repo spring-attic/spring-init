@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.init;
+package org.springframework.init.func;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -43,6 +43,7 @@ import org.springframework.util.ClassUtils;
  */
 public class SimpleConditionService implements ConditionService {
 
+	public static volatile boolean EXCLUDES_ENABLED = false;
 	private static final String EXCLUDE_FILTER_BEAN_NAME = "org.springframework.boot.test.autoconfigure.filter.TypeExcludeFilters";
 
 	private final ConditionEvaluator evaluator;
@@ -103,7 +104,7 @@ public class SimpleConditionService implements ConditionService {
 
 	@Override
 	public boolean includes(Class<?> type) {
-		if (!TestModuleInitializer.enabled) {
+		if (!EXCLUDES_ENABLED) {
 			return true;
 		}
 		// TODO: split this method off into a test component?

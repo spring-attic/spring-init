@@ -66,14 +66,14 @@ public class SpringClassNames {
 	public static final ClassName NULLABLE = ClassName.get("org.springframework.lang",
 			"Nullable");
 
-	public static final ClassName OBJECT_UTILS = ClassName.get("org.springframework.init",
+	public static final ClassName OBJECT_UTILS = ClassName.get("org.springframework.init.func",
 			"ObjectUtils");
 
 	public static final ClassName CONDITION_SERVICE = ClassName
-			.get("org.springframework.init", "ConditionService");
+			.get("org.springframework.init.func", "ConditionService");
 
 	public static final ClassName IMPORT_REGISTRARS = ClassName
-			.get("org.springframework.init", "ImportRegistrars");
+			.get("org.springframework.init.func", "ImportRegistrars");
 
 	public static final ClassName APPLICATION_CONTEXT_INITIALIZER = ClassName
 			.get("org.springframework.context", "ApplicationContextInitializer");

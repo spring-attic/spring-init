@@ -11,9 +11,9 @@ import org.springframework.boot.actuate.autoconfigure.web.server.ManagementConte
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.init.EnableSelectedAutoConfiguration;
 import org.springframework.init.SpringInitApplication;
 import org.springframework.init.config.WebFluxConfigurations;
+import org.springframework.init.select.EnableSelectedAutoConfiguration;
 
 @SpringInitApplication(WebFluxConfigurations.class)
 public class InitApplication {

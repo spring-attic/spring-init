@@ -43,9 +43,9 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
-import org.springframework.init.EnableSelectedAutoConfiguration;
 import org.springframework.init.bench.LauncherApplication;
 import org.springframework.init.bench.LauncherState;
+import org.springframework.init.select.EnableSelectedAutoConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

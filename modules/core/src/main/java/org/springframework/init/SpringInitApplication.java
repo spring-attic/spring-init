@@ -29,6 +29,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.core.annotation.AliasFor;
+import org.springframework.init.select.EnableSelectedAutoConfiguration;
 
 /**
  * @author Dave Syer

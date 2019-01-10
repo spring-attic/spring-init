@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.init;
+package org.springframework.init.func;
 
 import java.lang.reflect.Array;
 import java.util.Map;

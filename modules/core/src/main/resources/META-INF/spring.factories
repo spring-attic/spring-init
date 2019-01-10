@@ -1,8 +1,8 @@
 org.springframework.context.ApplicationListener=\
-org.springframework.init.FunctionalInstallerListener
+org.springframework.init.func.FunctionalInstallerListener
 
 org.springframework.context.ApplicationContextInitializer=\
-org.springframework.init.TestModuleInitializer
+org.springframework.init.test.TestModuleInitializer
 
 org.springframework.test.context.ContextCustomizerFactory=\
-org.springframework.init.TestAutoConfigurationContextCustomizerFactory
+org.springframework.init.test.TestAutoConfigurationContextCustomizerFactory
