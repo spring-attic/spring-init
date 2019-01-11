@@ -67,7 +67,10 @@ public class Components {
 			Set<TypeElement> computed = result.computeIfAbsent(owner,
 					key -> new LinkedHashSet<>());
 			for (String pkg : getBasePackage(owner)) {
-				computed.addAll(packages.get(pkg));
+				Set<TypeElement> added = packages.get(pkg);
+				if (added != null) {
+					computed.addAll(added);
+				}
 			}
 		}
 		return result;
