@@ -32,7 +32,6 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.thymeleaf.ThymeleafAutoConfiguration;
 import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.init.SpringInitApplication;
 import org.springframework.init.config.JpaDataConfigurations;
 import org.springframework.init.config.WebMvcConfigurations;
@@ -44,35 +43,24 @@ import org.springframework.init.config.WebMvcConfigurations;
  *
  */
 @SpringInitApplication({ MessageSourceAutoConfiguration.class,
-		JpaDataConfigurations.class, WebMvcConfigurations.class,
-		ThymeleafAutoConfiguration.class })
+        JpaDataConfigurations.class, TransactionAutoConfiguration.class,
+        WebMvcConfigurations.class, ThymeleafAutoConfiguration.class,
+        CacheAutoConfiguration.class })
 @EntityScan
 public class PetClinicApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(PetClinicApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(PetClinicApplication.class, args);
+    }
 
-}
-
-@Configuration
-@Profile("cache")
-@ImportAutoConfiguration(CacheAutoConfiguration.class)
-class ApplicationCacheConfiguration {
-}
-
-@Configuration
-@Profile("tx")
-@ImportAutoConfiguration(TransactionAutoConfiguration.class)
-class ApplicationTxConfiguration {
 }
 
 @ConditionalOnClass(name = "org.springframework.boot.actuate.endpoint.annotation.Endpoint")
 @Configuration
 @ImportAutoConfiguration({ EndpointAutoConfiguration.class,
-		HealthIndicatorAutoConfiguration.class, HealthEndpointAutoConfiguration.class,
-		InfoEndpointAutoConfiguration.class, WebEndpointAutoConfiguration.class,
-		ServletManagementContextAutoConfiguration.class,
-		ManagementContextAutoConfiguration.class })
+        HealthIndicatorAutoConfiguration.class, HealthEndpointAutoConfiguration.class,
+        InfoEndpointAutoConfiguration.class, WebEndpointAutoConfiguration.class,
+        ServletManagementContextAutoConfiguration.class,
+        ManagementContextAutoConfiguration.class })
 class ApplicationActuatorConfiguration {
 }

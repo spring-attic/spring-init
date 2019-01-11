@@ -31,28 +31,28 @@ import static org.assertj.core.api.Assertions.assertThat;
 @CaptureSystemOutput
 public class ProcessLauncherStateTests {
 
-	@Test
-	public void vanilla(OutputCapture output) throws Exception {
-		// System.setProperty("bench.args", "-verbose:class");
-		MainState state = new MainState();
-		// state.addArgs("-agentlib:jdwp=transport=dt_socket,server=y,address=8000");
-		state.before();
-		state.run();
-		state.after();
-		assertThat(output.toString()).contains("Benchmark app started");
-		assertThat(output.toString()).doesNotContain("/manage");
-	}
+    @Test
+    public void vanilla(OutputCapture output) throws Exception {
+        // System.setProperty("bench.args", "-verbose:class");
+        MainState state = new MainState();
+        // state.addArgs("-agentlib:jdwp=transport=dt_socket,server=y,address=8000");
+        state.before();
+        state.run();
+        state.after();
+        assertThat(output.toString()).contains("Benchmark app started");
+        assertThat(output.toString()).doesNotContain("/manage");
+    }
 
-	@Test
-	public void actr(OutputCapture output) throws Exception {
-		// System.setProperty("bench.args", "-verbose:class");
-		MainState state = new MainState();
-		state.setProfiles("actr");
-		state.before();
-		state.run();
-		state.after();
-		assertThat(output.toString()).contains("Benchmark app started");
-		assertThat(output.toString()).contains("/manage");
-	}
+    @Test
+    public void actr(OutputCapture output) throws Exception {
+        // System.setProperty("bench.args", "-verbose:class");
+        MainState state = new MainState();
+        state.setProfiles("actr");
+        state.before();
+        state.run();
+        state.after();
+        assertThat(output.toString()).contains("Benchmark app started");
+        assertThat(output.toString()).contains("/manage");
+    }
 
 }
