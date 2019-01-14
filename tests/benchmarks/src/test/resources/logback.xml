@@ -11,7 +11,7 @@
 
 	<logger name="com.example" level="info"/>
 
-	<logger name="com.example.config" level="debug"/>
+	<logger name="org.springframework.init.config" level="debug"/>
 
 	<logger name="org.springframework.boot.loader" level="info"/>
 

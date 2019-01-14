@@ -25,20 +25,24 @@ import org.springframework.context.ConfigurableApplicationContext;
 public class LauncherApplication implements Runnable, Closeable {
 
 	private ConfigurableApplicationContext context;
+	private Class<?> main;
+	private String[] args = new String[0];
 
-	public static void main(String[] args) throws Exception {
-		// Copy the main method and replace the class name
-		try (LauncherApplication app = new LauncherApplication()) {
-			app.run();
-		}
+	public LauncherApplication(Class<?> main) {
+		this.main = main;
 	}
-	
+
 	public static void run(Class<?> main, String[] args) throws Exception {
-		try (LauncherApplication app = (LauncherApplication) main.getConstructor().newInstance()) {
+		try (LauncherApplication app = new LauncherApplication(main)) {
+			app.setArgs(args);
 			app.run();
 		}
 	}
-	
+
+	private void setArgs(String[] args) {
+		this.args = args;
+	}
+
 	public ConfigurableApplicationContext getContext() {
 		return this.context;
 	}
@@ -52,7 +56,7 @@ public class LauncherApplication implements Runnable, Closeable {
 
 	@Override
 	public void run() {
-		this.context = SpringApplication.run(getClass());
+		this.context = SpringApplication.run(main, args);
 	}
 
 }

@@ -27,16 +27,12 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 @State(Scope.Benchmark)
 public class LauncherState implements Runnable, Closeable {
-
-	private static final Logger log = LoggerFactory.getLogger(LauncherState.class);
 
 	private Closeable instance;
 
@@ -57,7 +53,7 @@ public class LauncherState implements Runnable, Closeable {
 	public LauncherState(Class<?> mainClass) {
 		this.mainClass = mainClass;
 	}
-	
+
 	public void setMainClass(Class<?> mainClass) {
 		this.mainClass = mainClass;
 	}
@@ -65,7 +61,7 @@ public class LauncherState implements Runnable, Closeable {
 	public void addProperties(String... args) {
 		for (String arg : args) {
 			String[] keys = arg.split("=");
-			this.args.setProperty(keys[0], keys.length>0 ? keys[1] : "");
+			this.args.setProperty(keys[0], keys.length > 0 ? keys[1] : "");
 		}
 	}
 
@@ -82,25 +78,32 @@ public class LauncherState implements Runnable, Closeable {
 	}
 
 	public void shared() throws Exception {
-		if (!Closeable.class.isAssignableFrom(mainClass)) {
-			throw new IllegalStateException(mainClass.getName()
-					+ " is not Closeable and Runnable. Please consider using LauncherApplication as a base class.");
+		if (Closeable.class.isAssignableFrom(this.mainClass)) {
+			Constructor<?> constructor = mainClass.getConstructor();
+			ReflectionUtils.makeAccessible(constructor);
+			instance = (Closeable) constructor.newInstance();
+			((Runnable) instance).run();
 		}
-		Constructor<?> constructor = mainClass.getConstructor();
-		ReflectionUtils.makeAccessible(constructor);
-		instance = (Closeable) constructor.newInstance();
-		run();
+		else {
+			instance = new LauncherApplication(mainClass);
+			run();
+		}
 	}
 
 	public void isolated() throws Exception {
-		if (!Closeable.class.isAssignableFrom(mainClass)) {
-			throw new IllegalStateException(mainClass.getName()
-					+ " is not Closeable and Runnable. Please consider using LauncherApplication as a base class.");
-		}
 		Class<?> mainClass = loadMainClass(this.mainClass);
-		Constructor<?> constructor = mainClass.getConstructor();
-		ReflectionUtils.makeAccessible(constructor);
-		instance = (Closeable) constructor.newInstance();
+		if (Closeable.class.isAssignableFrom(this.mainClass)) {
+			Constructor<?> constructor = mainClass.getConstructor();
+			ReflectionUtils.makeAccessible(constructor);
+			instance = (Closeable) constructor.newInstance();
+		}
+		else {
+			Class<?> appClass = mainClass.getClassLoader()
+					.loadClass(LauncherApplication.class.getName());
+			Constructor<?> constructor = appClass.getConstructor(Class.class);
+			ReflectionUtils.makeAccessible(constructor);
+			instance = (Closeable) constructor.newInstance(mainClass);
+		}
 		this.runThread = new Thread(() -> {
 			try {
 				run();
@@ -138,7 +141,7 @@ public class LauncherState implements Runnable, Closeable {
 				loader = null;
 			}
 			catch (Exception e) {
-				log.error("Failed to close loader", e);
+				System.err.println("Failed to close loader " + e);
 			}
 		}
 		System.gc();
@@ -153,7 +156,8 @@ public class LauncherState implements Runnable, Closeable {
 	}
 
 	private Class<?> loadMainClass(Class<?> type) throws ClassNotFoundException {
-		URL[] urls = filterClassPath(((URLClassLoader) getClass().getClassLoader()).getURLs());
+		URL[] urls = filterClassPath(
+				((URLClassLoader) getClass().getClassLoader()).getURLs());
 		loader = new URLClassLoader(urls, getClass().getClassLoader().getParent());
 		orig = ClassUtils.overrideThreadContextClassLoader(loader);
 		return loader.loadClass(type.getName());

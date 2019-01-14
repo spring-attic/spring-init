@@ -16,7 +16,8 @@
 
 package com.example.bench;
 
-import com.example.init.InitApplication;
+import com.example.bench.FactoriesBenchmarkIT.MainState;
+import com.example.bench.FactoriesBenchmarkIT.MainState.Sample;
 import com.example.manual.ManualApplication;
 
 import org.junit.jupiter.api.Test;
@@ -37,13 +38,12 @@ public class ProcessLauncherStateTests {
 	@Test
 	public void select(OutputCapture output) throws Exception {
 		// System.setProperty("bench.args", "-verbose:class");
-		ProcessLauncherState state = new ProcessLauncherState(InitApplication.class,
-				"target", "--server.port=0");
-		state.addArgs("-Dspring.functional.enabled=false");
-		state.setProfiles("slim");
-		state.before();
+		MainState state = new MainState();
+		state.sample = Sample.demo;
+		// state.addArgs("-agentlib:jdwp=transport=dt_socket,server=y,address=8000");
+		state.start();
 		state.run();
-		state.after();
+		state.stop();
 		assertThat(output.toString()).contains("Benchmark app started");
 		assertThat(output.toString()).doesNotContain("/actuator");
 	}

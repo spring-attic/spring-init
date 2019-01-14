@@ -20,12 +20,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.init.bench.CaptureSystemOutput;
-import org.springframework.init.bench.LauncherApplication;
 import org.springframework.init.bench.CaptureSystemOutput.OutputCapture;
-import org.springframework.init.select.EnableSelectedAutoConfiguration;
 import org.springframework.init.bench.LauncherState;
+import org.springframework.init.select.EnableSelectedAutoConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -67,12 +67,10 @@ public class LauncherStateTests {
 
 	@SpringBootConfiguration
 	@EnableSelectedAutoConfiguration
-	public static class PrivateApplication extends LauncherApplication {
+	public static class PrivateApplication {
 
 		public static void main(String[] args) throws Exception {
-			try (PrivateApplication app = new PrivateApplication()) {
-				app.run();
-			}
+			SpringApplication.run(PrivateApplication.class, args);
 		}
 
 	}
