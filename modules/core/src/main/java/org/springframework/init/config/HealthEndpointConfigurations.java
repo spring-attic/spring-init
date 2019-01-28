@@ -23,7 +23,6 @@ import org.springframework.boot.actuate.autoconfigure.health.HealthIndicatorAuto
 import org.springframework.boot.actuate.autoconfigure.info.InfoEndpointAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.web.reactive.ReactiveManagementContextAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.web.server.ManagementContextAutoConfiguration;
-import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration;
 import org.springframework.init.select.SelectedAutoConfiguration;
 
 /**
@@ -34,7 +33,6 @@ import org.springframework.init.select.SelectedAutoConfiguration;
 		HealthIndicatorAutoConfiguration.class, HealthEndpointAutoConfiguration.class,
 		InfoEndpointAutoConfiguration.class, WebEndpointAutoConfiguration.class,
 		ReactiveManagementContextAutoConfiguration.class,
-		ConfigurationPropertiesAutoConfiguration.class,
 		ManagementContextAutoConfiguration.class }, depends = BasicConfigurations.class)
 public class HealthEndpointConfigurations {
 
