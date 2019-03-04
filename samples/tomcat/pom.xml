@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.1.1.RELEASE</version>
+		<version>2.1.2.RELEASE</version>
 	</parent>
 
 	<dependencies>
@@ -74,7 +74,7 @@
 
 	<properties>
 		<java.version>1.8</java.version>
-		<generated.version>2.1.1.BUILD-SNAPSHOT</generated.version>
+		<generated.version>2.1.2.BUILD-SNAPSHOT</generated.version>
 		<start-class>app.main.SampleApplication</start-class>
 	</properties>
 
