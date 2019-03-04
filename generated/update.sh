@@ -130,22 +130,22 @@ if ! [ -e $cache ]; then
     git clone https://github.com/spring-projects/spring-boot $cache
 fi
 
-(cd $cache; git fetch --tags && git checkout v2.1.2.RELEASE)
+(cd $cache; git fetch --tags && git checkout origin/master)
 
 src=$cache/spring-boot-project/spring-boot-autoconfigure
 tgt=`dirname $0`/autoconfigure
 init $tgt $src
-generate $src/pom.xml $tgt/pom.xml spring-boot-autoconfigure 2.1.2.BUILD-SNAPSHOT
+generate $src/pom.xml $tgt/pom.xml spring-boot-autoconfigure 2.2.0.BUILD-SNAPSHOT
 
 src=$cache/spring-boot-project/spring-boot-actuator-autoconfigure
 tgt=`dirname $0`/actuator
 init $tgt $src
-generate $src/pom.xml $tgt/pom.xml spring-boot-actuator-autoconfigure 2.1.2.BUILD-SNAPSHOT
+generate $src/pom.xml $tgt/pom.xml spring-boot-actuator-autoconfigure 2.2.0.BUILD-SNAPSHOT
 
 src=$cache/spring-boot-project/spring-boot-test-autoconfigure
 tgt=`dirname $0`/test
 init $tgt $src
-generate $src/pom.xml $tgt/pom.xml spring-boot-test-autoconfigure 2.1.2.BUILD-SNAPSHOT
+generate $src/pom.xml $tgt/pom.xml spring-boot-test-autoconfigure 2.2.0.BUILD-SNAPSHOT
 
 cache=`dirname $0`/sources/spring-security
 if ! [ -e $cache ]; then
