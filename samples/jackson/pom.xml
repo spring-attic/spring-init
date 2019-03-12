@@ -112,7 +112,7 @@
 	<repositories>
 		<repository>
 			<id>spring-libs-snapshot</id>
-			<url>http://repo.spring.io/libs-snapshot</url>
+			<url>https://repo.spring.io/libs-snapshot</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
@@ -122,7 +122,7 @@
 		</repository>
 		<repository>
 			<id>spring-libs-milestone</id>
-			<url>http://repo.spring.io/libs-milestone</url>
+			<url>https://repo.spring.io/libs-milestone</url>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
@@ -135,7 +135,7 @@
 	<pluginRepositories>
 		<pluginRepository>
 			<id>spring-libs-snapshot</id>
-			<url>http://repo.spring.io/libs-snapshot</url>
+			<url>https://repo.spring.io/libs-snapshot</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
@@ -145,7 +145,7 @@
 		</pluginRepository>
 		<pluginRepository>
 			<id>spring-libs-milestone</id>
-			<url>http://repo.spring.io/libs-milestone</url>
+			<url>https://repo.spring.io/libs-milestone</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
