@@ -13,15 +13,15 @@
 	<version>0.0.1.BUILD-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Spring Init Modules</name>
-	<url>http://spring.io</url>
+	<url>https://spring.io</url>
 	<organization>
 		<name>Spring</name>
-		<url>http://spring.io</url>
+		<url>https://spring.io</url>
 	</organization>
 	<licenses>
 		<license>
 			<name>Apache 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
 		</license>
 	</licenses>
 
@@ -74,7 +74,7 @@
 	<repositories>
 		<repository>
 			<id>spring-libs-snapshot</id>
-			<url>http://repo.spring.io/libs-snapshot</url>
+			<url>https://repo.spring.io/libs-snapshot</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -87,7 +87,7 @@
 	<pluginRepositories>
 		<pluginRepository>
 			<id>spring-libs-snapshot</id>
-			<url>http://repo.spring.io/libs-snapshot</url>
+			<url>https://repo.spring.io/libs-snapshot</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -143,7 +143,7 @@
 	</profiles>
 
 	<scm>
-		<url>http://github.com/spring-projects-experimental/spring-init</url>
+		<url>https://github.com/spring-projects-experimental/spring-init</url>
 		<connection>scm:git:git://github.com/spring-projects-experimental/spring-init.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/spring-projects-experimental/spring-init.git</developerConnection>
 		<tag>HEAD</tag>
