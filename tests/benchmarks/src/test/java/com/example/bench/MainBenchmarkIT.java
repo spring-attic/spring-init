@@ -19,9 +19,6 @@ import com.example.demo.TestsApplication;
 
 import org.openjdk.jmh.annotations.AuxCounters;
 import org.openjdk.jmh.annotations.AuxCounters.Type;
-
-import org.springframework.init.bench.ProcessLauncherState;
-
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -34,6 +31,8 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Warmup;
+
+import org.springframework.init.bench.ProcessLauncherState;
 
 import jmh.mbr.junit5.Microbenchmark;
 
@@ -49,12 +48,20 @@ public class MainBenchmarkIT {
 		state.run();
 	}
 
+	@Benchmark
+	public void lazy(MainState state) throws Exception {
+		state.addArgs("-Dspring.main.lazy-initialization=true");
+		state.run();
+	}
+
 	@State(Scope.Thread)
 	@AuxCounters(Type.EVENTS)
 	public static class MainState extends ProcessLauncherState {
 
 		public static enum Sample {
+
 			jlog, demo, actr, conf;
+
 		}
 
 		@Param
@@ -86,6 +93,7 @@ public class MainBenchmarkIT {
 			}
 			super.before();
 		}
+
 	}
 
 }
