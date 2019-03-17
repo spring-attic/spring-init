@@ -72,6 +72,16 @@ public class PetClinicBenchmarkIT {
             return super.getBeans();
         }
 
+        @Override
+        public double getMemory() {
+            return super.getMemory();
+        }
+
+        @Override
+        public double getHeap() {
+            return super.getHeap();
+        }
+
         @TearDown(Level.Invocation)
         public void stop() throws Exception {
             super.after();

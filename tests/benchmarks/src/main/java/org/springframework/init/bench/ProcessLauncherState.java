@@ -19,10 +19,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,19 +35,28 @@ import org.springframework.boot.loader.thin.DependencyResolver;
 import org.springframework.boot.loader.thin.PathResolver;
 import org.springframework.init.config.ShutdownApplicationListener;
 import org.springframework.init.config.StartupApplicationListener;
+import org.springframework.util.ReflectionUtils;
 
 public class ProcessLauncherState {
 
 	private static final Logger log = LoggerFactory.getLogger(ProcessLauncherState.class);
 
 	private Process started;
+
 	private List<String> args = new ArrayList<>();
+
 	private List<String> progs = new ArrayList<>();
+
 	private static List<String> DEFAULT_JVM_ARGS = Arrays.asList("-Xmx128m", "-cp", "",
-			"-Djava.security.egd=file:/dev/./urandom", "-noverify");
+			"-Djava.security.egd=file:/dev/./urandom", "-noverify",
+			"-Dspring.main.lazy-initialization=true", "-Dspring.jmx.enabled=false");
+
 	private File home;
+
 	private String mainClass;
+
 	private String name = "thin";
+
 	private String[] profiles = new String[0];
 
 	private BufferedReader buffer;
@@ -72,8 +83,20 @@ public class ProcessLauncherState {
 
 	private int beans;
 
+	private long memory;
+
+	private long heap;
+
 	public int getClasses() {
 		return classes;
+	}
+
+	public double getMemory() {
+		return memory / (1024. * 1024);
+	}
+
+	public double getHeap() {
+		return heap / (1024. * 1024);
 	}
 
 	public int getBeans() {
@@ -135,8 +158,26 @@ public class ProcessLauncherState {
 		return path;
 	}
 
+	public String getPid() {
+		String pid = null;
+		try {
+			if (started != null) {
+				Field field = ReflectionUtils.findField(started.getClass(), "pid");
+				ReflectionUtils.makeAccessible(field);
+				pid = "" + ReflectionUtils.getField(field, started);
+			}
+		}
+		catch (Exception e) {
+		}
+		return pid;
+	}
+
 	public void after() throws Exception {
 		if (started != null && started.isAlive()) {
+			Map<String, Long> metrics = VirtualMachineMetrics.fetch(getPid());
+			this.memory = VirtualMachineMetrics.total(metrics);
+			this.heap = VirtualMachineMetrics.heap(metrics);
+			this.classes = metrics.get("Classes").intValue();
 			System.err.println(
 					"Stopped " + mainClass + ": " + started.destroyForcibly().waitFor());
 		}
@@ -242,4 +283,5 @@ public class ProcessLauncherState {
 	public File getHome() {
 		return home;
 	}
+
 }
