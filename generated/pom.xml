@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -14,10 +14,10 @@
 	<version>0.0.1.BUILD-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Parent Generated</name>
-	<url>http://spring.io</url>
+	<url>https://spring.io</url>
 	<organization>
 		<name>Spring</name>
-		<url>http://spring.io</url>
+		<url>https://spring.io</url>
 	</organization>
 	<licenses>
 		<license>
@@ -68,7 +68,7 @@
 	<repositories>
 		<repository>
 			<id>spring-libs-snapshot</id>
-			<url>http://repo.spring.io/libs-snapshot</url>
+			<url>https://repo.spring.io/libs-snapshot</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -81,7 +81,7 @@
 	<pluginRepositories>
 		<pluginRepository>
 			<id>spring-libs-snapshot</id>
-			<url>http://repo.spring.io/libs-snapshot</url>
+			<url>https://repo.spring.io/libs-snapshot</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -137,7 +137,7 @@
 	</profiles>
 
 	<scm>
-		<url>http://github.com/spring-projects-experimental/spring-init</url>
+		<url>https://github.com/spring-projects-experimental/spring-init</url>
 		<connection>scm:git:git://github.com/spring-projects-experimental/spring-init.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/spring-projects-experimental/spring-init.git</developerConnection>
 		<tag>HEAD</tag>
