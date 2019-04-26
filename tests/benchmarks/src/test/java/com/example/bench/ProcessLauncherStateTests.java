@@ -45,7 +45,7 @@ public class ProcessLauncherStateTests {
 		state.run();
 		state.stop();
 		assertThat(output.toString()).contains("Benchmark app started");
-		assertThat(output.toString()).doesNotContain("/actuator");
+		assertThat(output.toString()).doesNotContain("healthEndpoint");
 	}
 
 	@Test
@@ -58,7 +58,7 @@ public class ProcessLauncherStateTests {
 		state.run();
 		state.after();
 		assertThat(output.toString()).contains("Benchmark app started");
-		assertThat(output.toString()).doesNotContain("/actuator");
+		assertThat(output.toString()).doesNotContain("healthEndpoint");
 	}
 
 	@Test
@@ -71,7 +71,7 @@ public class ProcessLauncherStateTests {
 		state.run();
 		state.after();
 		assertThat(output.toString()).contains("Benchmark app started");
-		assertThat(output.toString()).contains("/actuator");
+		assertThat(output.toString()).contains("healthEndpoint");
 	}
 
 }

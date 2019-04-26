@@ -43,7 +43,7 @@ public class ActrStateTests {
 		state.run();
 		state.stop();
 		assertThat(output.toString()).contains("Benchmark app started");
-		assertThat(output.toString()).doesNotContain("/actuator");
+		assertThat(output.toString()).doesNotContain("healthEndpoint");
 	}
 
 	@Test
@@ -56,7 +56,7 @@ public class ActrStateTests {
 		state.run();
 		state.stop();
 		assertThat(output.toString()).contains("Benchmark app started");
-		assertThat(output.toString()).contains("/actuator");
+		assertThat(output.toString()).contains("healthEndpoint");
 	}
 
 	@Test
@@ -68,7 +68,8 @@ public class ActrStateTests {
 		state.run();
 		state.stop();
 		assertThat(output.toString()).contains("Benchmark app started");
-		assertThat(output.toString()).contains("0 endpoint(s)");
+		assertThat(output.toString()).contains("healthAggregator");
+		assertThat(output.toString()).doesNotContain("healthEndpoint");
 	}
 
 }
