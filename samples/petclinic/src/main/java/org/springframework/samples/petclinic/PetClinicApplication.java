@@ -16,6 +16,8 @@
 
 package org.springframework.samples.petclinic;
 
+import java.util.Map;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.endpoint.EndpointAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointAutoConfiguration;
@@ -29,12 +31,16 @@ import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.context.MessageSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.autoconfigure.orm.jpa.EntityManagerFactoryBuilderCustomizer;
 import org.springframework.boot.autoconfigure.thymeleaf.ThymeleafAutoConfiguration;
 import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.init.SpringInitApplication;
 import org.springframework.init.config.JpaDataConfigurations;
 import org.springframework.init.config.WebMvcConfigurations;
+import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 
 /**
  * PetClinic Spring Boot Application.
@@ -53,6 +59,13 @@ public class PetClinicApplication {
         SpringApplication.run(PetClinicApplication.class, args);
     }
 
+    @Bean
+    public EntityManagerFactoryBuilderCustomizer customEntityManagerFactoryBootstrapExecutorCustomizer(
+            Map<String, AsyncTaskExecutor> taskExecutors) {
+        return (builder) -> {
+            builder.setBootstrapExecutor(new ConcurrentTaskExecutor());
+        };
+    }
 }
 
 @ConditionalOnClass(name = "org.springframework.boot.actuate.endpoint.annotation.Endpoint")

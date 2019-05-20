@@ -3,6 +3,9 @@ package app.main;
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
 
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -19,9 +22,6 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 import static org.springframework.web.reactive.function.server.ServerResponse.ok;
-
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 @SpringInitApplication({ JpaDataConfigurations.class, WebFluxConfigurations.class,
 		JacksonAutoConfiguration.class })
@@ -57,4 +57,5 @@ public class JpaApplication {
 }
 
 interface FooRepository extends CrudRepository<Foo, Long> {
+
 }

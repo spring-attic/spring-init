@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
@@ -36,6 +37,7 @@ import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.annotation.AnnotationBeanNameGenerator;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
 import org.springframework.context.annotation.DeferredImportSelector;
@@ -44,8 +46,10 @@ import org.springframework.context.annotation.ImportSelector;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.io.Resource;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.init.select.EnableSelectedAutoConfigurationImportSelector;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -60,7 +64,9 @@ public class FunctionalInstallerImportRegistrars
 	private Set<Imported> deferred = new LinkedHashSet<>();
 
 	private enum Phase {
+
 		USER, DEFERRED;
+
 	}
 
 	private Phase phase = Phase.USER;
@@ -287,13 +293,27 @@ public class FunctionalInstallerImportRegistrars
 		Object bean = context.getAutowireCapableBeanFactory().createBean(type);
 		ImportBeanDefinitionRegistrar registrar = (ImportBeanDefinitionRegistrar) bean;
 		registrar.registerBeanDefinitions(
-				new StandardAnnotationMetadata(imported.getSource()), registry);
+				AnnotationMetadata.introspect(imported.getSource()), registry,
+				IMPORT_BEAN_NAME_GENERATOR);
 	}
 
+	public static final AnnotationBeanNameGenerator IMPORT_BEAN_NAME_GENERATOR = new AnnotationBeanNameGenerator() {
+		@Override
+		protected String buildDefaultBeanName(BeanDefinition definition) {
+			String beanClassName = definition.getBeanClassName();
+			Assert.state(beanClassName != null, "No bean class name set");
+			return beanClassName;
+		}
+	};
+
 	private static class Imported {
+
 		private Class<?> source;
+
 		private String typeName;
+
 		private Class<?> type;
+
 		private Resource[] resources;
 
 		public Imported(Class<?> source, Class<?> type) {
@@ -399,4 +419,5 @@ public class FunctionalInstallerImportRegistrars
 		}
 
 	}
+
 }
