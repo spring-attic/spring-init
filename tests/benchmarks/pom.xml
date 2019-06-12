@@ -25,7 +25,7 @@
 		<aether.version>1.1.0</aether.version>
 		<jmh.version>1.21</jmh.version>
 		<maven-core.version>3.3.9</maven-core.version>
-		<thin.version>1.0.20.BUILD-SNAPSHOT</thin.version>
+		<thin.version>1.0.22.RELEASE</thin.version>
 		<generated.version>2.2.0.BUILD-SNAPSHOT</generated.version>
 		<slim.version>0.0.1.BUILD-SNAPSHOT</slim.version>
 		<benchmarksEnabled>false</benchmarksEnabled>
