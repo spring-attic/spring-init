@@ -36,6 +36,7 @@ import org.springframework.boot.loader.thin.PathResolver;
 import org.springframework.init.config.ShutdownApplicationListener;
 import org.springframework.init.config.StartupApplicationListener;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 public class ProcessLauncherState {
 
@@ -121,7 +122,17 @@ public class ProcessLauncherState {
 
 	private String getClasspath() {
 		PathResolver resolver = new PathResolver(DependencyResolver.instance());
+		if (System.getProperty("thin.location") != null) {
+			resolver.setLocations(StringUtils.commaDelimitedListToStringArray(
+					System.getProperty("thin.location")));
+		}
 		Archive root = ArchiveUtils.getArchive(getClass());
+		String[] profiles = this.profiles;
+		if (!Arrays.asList(profiles).contains("")) {
+			List<String> list = new ArrayList<>(Arrays.asList(profiles));
+			list.add(0, "");
+			profiles = list.toArray(new String[0]);
+		}
 		List<Archive> resolved = resolver.resolve(root, name, profiles);
 		File app = new File("target/classes");
 		StringBuilder builder = new StringBuilder(app.getAbsolutePath());

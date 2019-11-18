@@ -18,7 +18,6 @@ package com.example.bench;
 
 import com.example.bench.ActrBenchmarkIT.MainState;
 import com.example.bench.ActrBenchmarkIT.MainState.Sample;
-
 import org.junit.jupiter.api.Test;
 
 import org.springframework.init.bench.CaptureSystemOutput;
@@ -68,7 +67,7 @@ public class ActrStateTests {
 		state.run();
 		state.stop();
 		assertThat(output.toString()).contains("Benchmark app started");
-		assertThat(output.toString()).contains("healthAggregator");
+		assertThat(output.toString()).contains("HealthIndicator");
 		assertThat(output.toString()).doesNotContain("healthEndpoint");
 	}
 

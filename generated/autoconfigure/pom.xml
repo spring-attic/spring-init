@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>spring-boot-autoconfigure</artifactId>
-	<version>2.2.0.BUILD-SNAPSHOT</version>
+	<version>2.2.1.BUILD-SNAPSHOT</version>
 
 	<parent>
     	<groupId>org.springframework.experimental</groupId>
@@ -184,7 +184,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.ext</groupId>
-			<artifactId>jersey-spring4</artifactId>
+			<artifactId>jersey-spring5</artifactId>
 			<optional>true</optional>
 			<exclusions>
 				<exclusion>
@@ -432,7 +432,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.infinispan</groupId>
-			<artifactId>infinispan-spring4-embedded</artifactId>
+			<artifactId>infinispan-spring5-embedded</artifactId>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -673,6 +673,16 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-oauth2-resource-server</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-rsocket</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-saml2-service-provider</artifactId>
 			<optional>true</optional>
 		</dependency>
 		<dependency>

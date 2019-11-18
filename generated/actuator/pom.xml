@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>spring-boot-actuator-autoconfigure</artifactId>
-	<version>2.2.0.BUILD-SNAPSHOT</version>
+	<version>2.2.1.BUILD-SNAPSHOT</version>
 
 	<parent>
     	<groupId>org.springframework.experimental</groupId>
@@ -64,11 +64,6 @@
 		<dependency>
 			<groupId>com.sun.mail</groupId>
 			<artifactId>jakarta.mail</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>com.timgroup</groupId>
-			<artifactId>java-statsd-client</artifactId>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -346,7 +341,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.infinispan</groupId>
-			<artifactId>infinispan-spring4-embedded</artifactId>
+			<artifactId>infinispan-spring5-embedded</artifactId>
 			<optional>true</optional>
 		</dependency>
 		<dependency>

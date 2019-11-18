@@ -16,9 +16,9 @@
 
 package org.springframework.init.config;
 
+import org.springframework.boot.actuate.autoconfigure.security.servlet.SecurityRequestMatchersManagementContextConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityRequestMatcherProviderAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.init.select.SelectedAutoConfiguration;
 
@@ -28,7 +28,7 @@ import org.springframework.init.select.SelectedAutoConfiguration;
  */
 @SelectedAutoConfiguration(classes = { SecurityAutoConfiguration.class,
 		UserDetailsServiceAutoConfiguration.class,
-		SecurityRequestMatcherProviderAutoConfiguration.class,
+		SecurityRequestMatchersManagementContextConfiguration.class,
 		SecurityFilterAutoConfiguration.class }, depends = WebMvcConfigurations.class)
 public class ServletSecurityConfigurations {
 

@@ -17,6 +17,7 @@
 package org.springframework.init.config;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
 import org.springframework.init.select.SelectedAutoConfiguration;
 
@@ -25,6 +26,7 @@ import org.springframework.init.select.SelectedAutoConfiguration;
  *
  */
 @SelectedAutoConfiguration(classes = { JdbcTemplateAutoConfiguration.class,
+		DataSourceTransactionManagerAutoConfiguration.class,
 		DataSourceAutoConfiguration.class }, depends = BasicConfigurations.class)
 public class JdbcConfigurations {
 

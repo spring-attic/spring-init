@@ -31,8 +31,8 @@ import org.springframework.context.annotation.ConfigurationCondition.Configurati
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
-import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.ClassUtils;
@@ -48,7 +48,7 @@ public class SimpleConditionService implements ConditionService {
 
 	private final ConditionEvaluator evaluator;
 	private final ClassLoader classLoader;
-	private final Map<Class<?>, StandardAnnotationMetadata> metadata = new ConcurrentHashMap<>();
+	private final Map<Class<?>, AnnotationMetadata> metadata = new ConcurrentHashMap<>();
 	private ConfigurableListableBeanFactory beanFactory;
 	private MetadataReaderFactory metadataReaderFactory;
 
@@ -78,7 +78,7 @@ public class SimpleConditionService implements ConditionService {
 
 	@Override
 	public boolean matches(Class<?> factory, Class<?> type) {
-		StandardAnnotationMetadata metadata = getMetadata(factory);
+		AnnotationMetadata metadata = getMetadata(factory);
 		Set<MethodMetadata> assignable = new HashSet<>();
 		for (MethodMetadata method : metadata.getAnnotatedMethods(Bean.class.getName())) {
 			Class<?> candidate = ClassUtils.resolveClassName(method.getReturnTypeName(),
@@ -124,9 +124,9 @@ public class SimpleConditionService implements ConditionService {
 		return true;
 	}
 
-	public StandardAnnotationMetadata getMetadata(Class<?> factory) {
+	public AnnotationMetadata getMetadata(Class<?> factory) {
 		return metadata.computeIfAbsent(factory,
-				type -> new StandardAnnotationMetadata(type));
+				type -> AnnotationMetadata.introspect(type));
 	}
 
 }

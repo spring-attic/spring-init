@@ -4,8 +4,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.actuate.autoconfigure.endpoint.EndpointAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointAutoConfiguration;
+import org.springframework.boot.actuate.autoconfigure.health.HealthContributorAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.health.HealthEndpointAutoConfiguration;
-import org.springframework.boot.actuate.autoconfigure.health.HealthIndicatorAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.info.InfoEndpointAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.web.reactive.ReactiveManagementContextAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.web.server.ManagementContextAutoConfiguration;
@@ -34,7 +34,7 @@ public class ManualApplication {
 
 @Configuration
 @ConditionalOnClass(Endpoint.class)
-@Import({ EndpointAutoConfiguration.class, HealthIndicatorAutoConfiguration.class,
+@Import({ EndpointAutoConfiguration.class, HealthContributorAutoConfiguration.class,
 		HealthEndpointAutoConfiguration.class, InfoEndpointAutoConfiguration.class,
 		WebEndpointAutoConfiguration.class,
 		ReactiveManagementContextAutoConfiguration.class,

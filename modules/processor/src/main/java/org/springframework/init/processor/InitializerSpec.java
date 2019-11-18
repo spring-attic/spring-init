@@ -415,8 +415,14 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 	private String supplier(TypeElement owner, ExecutableElement beanMethod,
 			String parameterVariables) {
 		boolean exception = utils.throwsCheckedException(beanMethod);
-		String code = "context.getBean($T.class)." + beanMethod.getSimpleName() + "("
-				+ parameterVariables + ")";
+		String code;
+		if (!beanMethod.getModifiers().contains(Modifier.STATIC)) {
+			code = "context.getBean($T.class)." + beanMethod.getSimpleName() + "("
+					+ parameterVariables + ")";
+		}
+		else {
+			code = "$T." + beanMethod.getSimpleName() + "(" + parameterVariables + ")";
+		}
 		if (exception) {
 			return "() -> { try { return " + code
 					+ "; } catch (Exception e) { throw new IllegalStateException(e); } }";

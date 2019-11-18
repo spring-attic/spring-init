@@ -23,7 +23,8 @@ import org.springframework.init.select.SelectedAutoConfiguration;
  * @author Dave Syer
  *
  */
-@SelectedAutoConfiguration(classes = JdbcRepositoriesAutoConfiguration.class, depends = JdbcConfigurations.class)
+@SelectedAutoConfiguration(classes = {
+		JdbcRepositoriesAutoConfiguration.class }, depends = JdbcConfigurations.class)
 public class JdbcDataConfigurations {
 
 }

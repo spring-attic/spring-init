@@ -2,5 +2,5 @@ DROP TABLE foo IF EXISTS;
 
 CREATE TABLE foo (
   id         INTEGER IDENTITY PRIMARY KEY,
-  value VARCHAR(30),
+  value VARCHAR(30)
 );

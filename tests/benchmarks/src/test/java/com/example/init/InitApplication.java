@@ -3,8 +3,8 @@ package com.example.init;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.endpoint.EndpointAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointAutoConfiguration;
+import org.springframework.boot.actuate.autoconfigure.health.HealthContributorAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.health.HealthEndpointAutoConfiguration;
-import org.springframework.boot.actuate.autoconfigure.health.HealthIndicatorAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.info.InfoEndpointAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.web.reactive.ReactiveManagementContextAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.web.server.ManagementContextAutoConfiguration;
@@ -26,7 +26,7 @@ public class InitApplication {
 @Configuration
 @ConditionalOnClass(Endpoint.class)
 @EnableSelectedAutoConfiguration({ EndpointAutoConfiguration.class,
-		HealthIndicatorAutoConfiguration.class, HealthEndpointAutoConfiguration.class,
+		HealthContributorAutoConfiguration.class, HealthEndpointAutoConfiguration.class,
 		InfoEndpointAutoConfiguration.class, WebEndpointAutoConfiguration.class,
 		ReactiveManagementContextAutoConfiguration.class,
 		ManagementContextAutoConfiguration.class })

@@ -47,7 +47,6 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.init.select.EnableSelectedAutoConfigurationImportSelector;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -255,12 +254,12 @@ public class FunctionalInstallerImportRegistrars
 		if (!(registrar instanceof EnableSelectedAutoConfigurationImportSelector)
 				&& registrar instanceof DeferredImportSelector) {
 			return new DeferredConfigurations(Stream
-					.of(registrar.selectImports(new StandardAnnotationMetadata(importer)))
+					.of(registrar.selectImports(AnnotationMetadata.introspect(importer)))
 					.map(name -> ClassUtils.resolveClassName(name,
 							context.getClassLoader()))
 					.collect(Collectors.toList())).list();
 		}
-		return registrar.selectImports(new StandardAnnotationMetadata(importer));
+		return registrar.selectImports(AnnotationMetadata.introspect(importer));
 	}
 
 	static class DeferredConfigurations extends AutoConfigurations {

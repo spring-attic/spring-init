@@ -19,7 +19,6 @@ package com.example.bench;
 import com.example.bench.FactoriesBenchmarkIT.MainState;
 import com.example.bench.FactoriesBenchmarkIT.MainState.Sample;
 import com.example.manual.ManualApplication;
-
 import org.junit.jupiter.api.Test;
 
 import org.springframework.init.bench.CaptureSystemOutput;
@@ -53,7 +52,6 @@ public class ProcessLauncherStateTests {
 		// System.setProperty("bench.args", "-verbose:class");
 		ProcessLauncherState state = new ProcessLauncherState(ManualApplication.class,
 				"target", "--server.port=0");
-		// state.setProfiles("actr");
 		state.before();
 		state.run();
 		state.after();
