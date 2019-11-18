@@ -33,6 +33,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
+import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.ClassUtils;
@@ -126,7 +127,7 @@ public class SimpleConditionService implements ConditionService {
 
 	public AnnotationMetadata getMetadata(Class<?> factory) {
 		return metadata.computeIfAbsent(factory,
-				type -> AnnotationMetadata.introspect(type));
+				type -> new StandardAnnotationMetadata(type, false));
 	}
 
 }

@@ -83,6 +83,7 @@ public class SamplesTests {
 				dependencies);
 		System.out.println(
 				"Timer: compiler run: #" + (System.currentTimeMillis() - stime) + "ms");
+		// result.printGeneratedSources(System.err);
 		dependencies.add(0, result.dumpToTemporaryJar());
 		stime = System.currentTimeMillis();
 		Utils.executeTests(result, dependencies,

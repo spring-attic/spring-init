@@ -32,7 +32,6 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeSpec.Builder;
-
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.graph.Dependency;
@@ -44,6 +43,8 @@ import org.springframework.cloud.function.compiler.java.DependencyResolver;
 import org.springframework.cloud.function.compiler.java.InputFileDescriptor;
 import org.springframework.core.io.FileUrlResource;
 import org.springframework.slim.processor.infra.CompilerRunner;
+import org.springframework.slim.processor.nested.NestedConfiguration;
+import org.springframework.slim.processor.nested.NestedInterface;
 import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -149,6 +150,52 @@ public class SimpleProcessorTests {
 		// bean methods come before imports
 		assertThat(generated).containsSubsequence("Bar.class",
 				"AutoConfigurationImportSelector");
+	}
+
+	@Test
+	public void nestedConfigurationClass() {
+		CompilationResult cr = CompilerRunner
+				.run(new InputFileDescriptor(
+						new File("src/test/java/"
+								+ ClassUtils.classPackageAsResourcePath(
+										NestedConfiguration.class)
+								+ "/NestedConfiguration.java"),
+						"SampleApplication",
+						ClassUtils.getPackageName(NestedConfiguration.class)
+								+ ".NestedConfiguration"),
+						getSpringDependencies());
+		// cr.printGeneratedSources(System.err);
+		assertThat(cr.containsNewFile("NestedConfigurationInitializer.class"));
+		assertThat(cr.containsNewFile(
+				"NestedConfiguration_InsideNestedConfigurationInitializer.class"));
+		assertThat(cr.containsNewFile(
+				"InsideNestedConfiguration_InsideInsideNestedConfigurationInitializer.class"));
+		String generated = cr.getGeneratedFileContents(
+				ClassUtils.classPackageAsResourcePath(NestedConfiguration.class)
+						+ "/NestedConfigurationInitializer.java");
+		assertThat(generated).doesNotContain(
+				"InsideNestedConfiguration_InsideInsideNestedConfigurationInitializer");
+	}
+
+	@Test
+	public void nestedInterface() {
+		CompilationResult cr = CompilerRunner
+				.run(new InputFileDescriptor(
+						new File(
+								"src/test/java/"
+										+ ClassUtils.classPackageAsResourcePath(
+												NestedInterface.class)
+										+ "/NestedInterface.java"),
+						"SampleApplication",
+						ClassUtils.getPackageName(NestedInterface.class)
+								+ ".NestedInterface"),
+						getSpringDependencies());
+		// cr.printGeneratedSources(System.err);
+		assertThat(cr.containsNewFile("NestedInterfaceInitializer.class"));
+		String generated = cr.getGeneratedFileContents(
+				ClassUtils.classPackageAsResourcePath(NestedInterface.class)
+						+ "/NestedInterfaceInitializer.java");
+		assertThat(generated).doesNotContain("Inside");
 	}
 
 	// ---

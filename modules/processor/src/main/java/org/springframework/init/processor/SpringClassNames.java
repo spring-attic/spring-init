@@ -45,6 +45,9 @@ public class SpringClassNames {
 	public static final ClassName QUALIFIER = ClassName
 			.get("org.springframework.beans.factory.annotation", "Qualifier");
 
+	public static final ClassName LAZY = ClassName
+			.get("org.springframework.context.annotation", "Lazy");
+
 	public static final ClassName BEAN_FACTORY_ANNOTATION_UTILS = ClassName.get(
 			"org.springframework.beans.factory.annotation", "BeanFactoryAnnotationUtils");
 
@@ -66,8 +69,8 @@ public class SpringClassNames {
 	public static final ClassName NULLABLE = ClassName.get("org.springframework.lang",
 			"Nullable");
 
-	public static final ClassName OBJECT_UTILS = ClassName.get("org.springframework.init.func",
-			"ObjectUtils");
+	public static final ClassName OBJECT_UTILS = ClassName
+			.get("org.springframework.init.func", "ObjectUtils");
 
 	public static final ClassName CONDITION_SERVICE = ClassName
 			.get("org.springframework.init.func", "ConditionService");

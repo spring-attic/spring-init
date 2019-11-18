@@ -17,11 +17,19 @@
 package org.springframework.init.func;
 
 import java.lang.reflect.Array;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.springframework.aop.TargetSource;
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.ObjectProvider;
 
 /**
@@ -89,4 +97,49 @@ public class ObjectUtils {
 			}
 		};
 	}
+
+	public static <T> T lazy(Class<T> type, Supplier<T> supplier) {
+		TargetSource ts = new TargetSource() {
+			@Override
+			public Class<?> getTargetClass() {
+				return type;
+			}
+
+			@Override
+			public boolean isStatic() {
+				return false;
+			}
+
+			@Override
+			public Object getTarget() {
+				Object target = supplier.get();
+				if (target == null) {
+					Class<?> type = getTargetClass();
+					if (Map.class == type) {
+						return Collections.emptyMap();
+					}
+					else if (List.class == type) {
+						return Collections.emptyList();
+					}
+					else if (Set.class == type || Collection.class == type) {
+						return Collections.emptySet();
+					}
+					throw new NoSuchBeanDefinitionException(type,
+							"Optional dependency not present for lazy injection point");
+				}
+				return target;
+			}
+
+			@Override
+			public void releaseTarget(Object target) {
+			}
+		};
+		ProxyFactory pf = new ProxyFactory();
+		pf.setTargetSource(ts);
+		pf.addInterface(type);
+		@SuppressWarnings("unchecked")
+		T proxy = (T) pf.getProxy();
+		return proxy;
+	}
+
 }

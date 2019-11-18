@@ -599,17 +599,27 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 			}
 		}
 		else {
+			StringBuilder code = new StringBuilder();
 			String qualifier = utils.getQualifier(param);
+			if (utils.isLazy(param)) {
+				code.append("$T.lazy($T.class, () -> ");
+				result.types.add(SpringClassNames.OBJECT_UTILS);
+				result.types.add(TypeName.get(utils.erasure(param)));
+			}
 			if (qualifier != null) {
-				result.format = "$T.qualifiedBeanOfType(context, $T.class, \"" + qualifier
-						+ "\")";
+				code.append("$T.qualifiedBeanOfType(context, $T.class, \"" + qualifier
+						+ "\")");
 				result.types.add(SpringClassNames.BEAN_FACTORY_ANNOTATION_UTILS);
 				result.types.add(TypeName.get(utils.erasure(param)));
 			}
 			else {
-				result.format = "context.getBean($T.class)";
+				code.append("context.getBean($T.class)");
 				result.types.add(TypeName.get(utils.erasure(param)));
 			}
+			if (utils.isLazy(param)) {
+				code.append(")");
+			}
+			result.format = code.toString();
 		}
 		return result;
 	}

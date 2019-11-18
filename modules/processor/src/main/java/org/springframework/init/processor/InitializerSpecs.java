@@ -51,30 +51,31 @@ public class InitializerSpecs {
 	}
 
 	public void addInitializer(TypeElement initializer) {
-		if (initializers.containsKey(initializer) ) {
+		if (initializers.containsKey(initializer)) {
 			return;
 		}
-		initializers.put(initializer, new InitializerSpec(this.utils, initializer, imports, components));
-		Set<TypeElement> types = new HashSet<>();
-		findNestedInitializers(initializer, types);
-		types.remove(initializer);
-		for (TypeElement nested : types) {
-			addInitializer(nested);
-			imports.addNested(initializer, nested);
-		}
+		initializers.put(initializer,
+				new InitializerSpec(this.utils, initializer, imports, components));
+		findNestedInitializers(initializer, new HashSet<>());
 	}
 
 	private void findNestedInitializers(TypeElement type, Set<TypeElement> types) {
-		if (type.getKind() == ElementKind.CLASS
+		if (!types.contains(type) && type.getKind() == ElementKind.CLASS
 				&& !type.getModifiers().contains(Modifier.ABSTRACT)
 				&& utils.hasAnnotation(type, SpringClassNames.CONFIGURATION.toString())) {
-			types.add(type);
+			addInitializer(type);
 			for (Element element : type.getEnclosedElements()) {
 				if (element instanceof TypeElement
 						&& element.getModifiers().contains(Modifier.STATIC)) {
-					findNestedInitializers((TypeElement) element, types);
+					TypeElement nested = (TypeElement) element;
+					if (utils.hasAnnotation(nested,
+							SpringClassNames.CONFIGURATION.toString())) {
+						imports.addNested(type, nested);
+					}
+					findNestedInitializers(nested, types);
 				}
 			}
+			types.add(type);
 		}
 
 	}

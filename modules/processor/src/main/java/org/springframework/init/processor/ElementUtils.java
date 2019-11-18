@@ -743,4 +743,8 @@ public class ElementUtils {
 				SpringClassNames.QUALIFIER.toString(), "value");
 		return qualifier != null && qualifier.length() == 0 ? null : qualifier;
 	}
+
+	public boolean isLazy(VariableElement param) {
+		return hasAnnotation(param, SpringClassNames.LAZY.toString());
+	}
 }
