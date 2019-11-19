@@ -26,7 +26,7 @@ public class FunctionApplicationTests {
 
 	@Test
 	public void test() {
-		client.post().uri("/").syncBody("foo").exchange().expectBody(String.class)
+		client.post().uri("/").bodyValue("foo").exchange().expectBody(String.class)
 				.isEqualTo("FOO");
 	}
 

@@ -21,6 +21,8 @@ import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.function.context.FunctionCatalog;
 import org.springframework.cloud.function.context.catalog.FunctionInspector;
@@ -40,9 +42,6 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 import static org.springframework.web.reactive.function.server.ServerResponse.status;
-
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -64,6 +63,7 @@ public class ReactorAutoConfigurationInitializer
 						context.getBeanFactory()));
 		context.registerBean(RequestProcessor.class,
 				() -> new RequestProcessor(context.getBean(FunctionInspector.class),
+						context.getBean(FunctionCatalog.class),
 						context.getBeanProvider(JsonMapper.class),
 						context.getBean(StringConverter.class),
 						context.getBeanProvider(ServerCodecConfigurer.class)));

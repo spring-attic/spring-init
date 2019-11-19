@@ -21,8 +21,8 @@ import java.util.Map;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.endpoint.EndpointAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointAutoConfiguration;
+import org.springframework.boot.actuate.autoconfigure.health.HealthContributorAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.health.HealthEndpointAutoConfiguration;
-import org.springframework.boot.actuate.autoconfigure.health.HealthIndicatorAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.info.InfoEndpointAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.web.server.ManagementContextAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.web.servlet.ServletManagementContextAutoConfiguration;
@@ -71,7 +71,7 @@ public class PetClinicApplication {
 @ConditionalOnClass(name = "org.springframework.boot.actuate.endpoint.annotation.Endpoint")
 @Configuration
 @ImportAutoConfiguration({ EndpointAutoConfiguration.class,
-        HealthIndicatorAutoConfiguration.class, HealthEndpointAutoConfiguration.class,
+        HealthContributorAutoConfiguration.class, HealthEndpointAutoConfiguration.class,
         InfoEndpointAutoConfiguration.class, WebEndpointAutoConfiguration.class,
         ServletManagementContextAutoConfiguration.class,
         ManagementContextAutoConfiguration.class })

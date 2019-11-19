@@ -94,7 +94,7 @@
 	<properties>
 		<java.version>1.8</java.version>
 		<generated.version>2.2.1.BUILD-SNAPSHOT</generated.version>
-		<generated-security.version>5.1.3.BUILD-SNAPSHOT</generated-security.version>
+		<generated-security.version>5.2.1.BUILD-SNAPSHOT</generated-security.version>
 		<start-class>app.main.SampleApplication</start-class>
 	</properties>
 

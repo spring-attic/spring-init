@@ -127,6 +127,7 @@ public class SimpleConditionService implements ConditionService {
 
 	public AnnotationMetadata getMetadata(Class<?> factory) {
 		return metadata.computeIfAbsent(factory,
+				// TODO: use AnnotationMetadata.introspect()?
 				type -> new StandardAnnotationMetadata(type, false));
 	}
 
