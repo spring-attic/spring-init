@@ -17,7 +17,7 @@ function init() {
 
 function optionals() {
 	project=$1; shift
-	./gradlew spring-boot-project:$project:dependencies --configuration optional | grep '^+---' | sed -e 's/+--- //' -e 's/ ->.*//' | egrep -v '^project' | awk -f <(cat - <<EOF
+	./gradlew spring-boot-project:$project:dependencies --configuration optional | grep '^[^-]---' | sed -e 's/.--- //' -e 's/ ->.*//' | egrep -v '^project' | awk -f <(cat - <<EOF
 BEGIN { FS=":" }
 {
   print "        <dependency>"
@@ -106,7 +106,7 @@ EOF
     # Build them back up
     tmpfile=.pom.xml
     sed '/<\/dependencies/,$ d' $pom > $tmpfile
-    sed -e '1,/<dependencies/ d;/<\/dependencies/,/<dependencies/ d;/<\/dependencies/,$ d' $src >> $tmpfile
+    sed -e '1,/<dependencies/ d;/<\/dependencies/,/<dependencies/ d;/<\/dependencies/,$ d' -e '/<dependency>/{:a;N;/<\/dependency>/!ba};/<scope>test/d'  $src | egrep -v '<scope>' >> $tmpfile
 	if ! [ -z ${opts} ] && [ -f ${opts} ]; then cat $opts >> $tmpfile; fi
     cat >> $tmpfile <<EOF
 		<dependency>
@@ -156,20 +156,20 @@ fi
 src=$cache/spring-boot-project/spring-boot-autoconfigure
 tgt=`dirname $0`/autoconfigure
 init $tgt $src
-(cd $cache; mkdir -p build && optionals spring-boot-autoconfigure > build/opts)
-generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml spring-boot-autoconfigure 2.3.0.BUILD-SNAPSHOT $cache/build/opts
+(cd $cache; mkdir -p build && optionals spring-boot-autoconfigure > build/opts-autoconfigure)
+generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml spring-boot-autoconfigure 2.3.0.BUILD-SNAPSHOT $cache/build/opts-autoconfigure
 
 src=$cache/spring-boot-project/spring-boot-actuator-autoconfigure
 tgt=`dirname $0`/actuator
 init $tgt $src
-(cd $cache; mkdir -p build && optionals spring-boot-actuator-autoconfigure > build/opts)
-generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml spring-boot-actuator-autoconfigure 2.3.0.BUILD-SNAPSHOT $cache/build/opts
+(cd $cache; mkdir -p build && optionals spring-boot-actuator-autoconfigure > build/opts-actuator-autoconfigure)
+generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml spring-boot-actuator-autoconfigure 2.3.0.BUILD-SNAPSHOT $cache/build/opts-actuator-autoconfigure
 
 src=$cache/spring-boot-project/spring-boot-test-autoconfigure
 tgt=`dirname $0`/test
 init $tgt $src
-(cd $cache; mkdir -p build && optionals spring-boot-test-autoconfigure > build/opts)
-generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml spring-boot-test-autoconfigure 2.3.0.BUILD-SNAPSHOT $cache/build/opts
+(cd $cache; mkdir -p build && optionals spring-boot-test-autoconfigure > build/opts-test-autoconfigure)
+generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml spring-boot-test-autoconfigure 2.3.0.BUILD-SNAPSHOT $cache/build/opts-test-autoconfigure
 
 cache=`dirname $0`/sources/spring-security
 if ! [ -e $cache ]; then
