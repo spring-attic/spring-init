@@ -14,7 +14,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.2.1.RELEASE</version>
+		<version>2.3.0.RELEASE</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 
@@ -26,7 +26,7 @@
 		<jmh.version>1.21</jmh.version>
 		<maven-core.version>3.3.9</maven-core.version>
 		<thin.version>1.0.23.RELEASE</thin.version>
-		<generated.version>2.2.1.BUILD-SNAPSHOT</generated.version>
+		<generated.version>2.3.0.BUILD-SNAPSHOT</generated.version>
 		<slim.version>0.0.1.BUILD-SNAPSHOT</slim.version>
 		<benchmarksEnabled>false</benchmarksEnabled>
 	</properties>
@@ -58,7 +58,12 @@
 		<dependency>
 			<groupId>com.github.mp911de.microbenchmark-runner</groupId>
 			<artifactId>microbenchmark-runner-junit5</artifactId>
-			<version>0.1.0.RELEASE</version>
+			<version>0.2.0.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.mp911de.microbenchmark-runner</groupId>
+			<artifactId>microbenchmark-runner-extras</artifactId>
+			<version>0.2.0.RELEASE</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot.experimental</groupId>

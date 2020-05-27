@@ -16,15 +16,13 @@
 
 package app.main;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.DispatcherServlet;
 
@@ -37,7 +35,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Dave Syer
  *
  */
-@RunWith(SpringRunner.class)
 @WebMvcTest(controllers = SampleController.class, properties = "spring.functional.enabled=false")
 public class MockSampleApplicationTests {
 
@@ -67,8 +64,7 @@ public class MockSampleApplicationTests {
 	@Test
 	public void test() throws Exception {
 		Mockito.when(foo.getValue()).thenReturn("Test");
-		mockMvc.perform(get("/")).andExpect(status().isOk())
-				.andExpect(content().string("Test"));
+		mockMvc.perform(get("/")).andExpect(status().isOk()).andExpect(content().string("Test"));
 	}
 
 }

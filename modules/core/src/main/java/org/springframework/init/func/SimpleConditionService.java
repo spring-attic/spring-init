@@ -33,7 +33,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
-import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.ClassUtils;
@@ -45,17 +44,21 @@ import org.springframework.util.ClassUtils;
 public class SimpleConditionService implements ConditionService {
 
 	public static volatile boolean EXCLUDES_ENABLED = false;
+
 	private static final String EXCLUDE_FILTER_BEAN_NAME = "org.springframework.boot.test.autoconfigure.filter.TypeExcludeFilters";
 
 	private final ConditionEvaluator evaluator;
+
 	private final ClassLoader classLoader;
+
 	private final Map<Class<?>, AnnotationMetadata> metadata = new ConcurrentHashMap<>();
+
 	private ConfigurableListableBeanFactory beanFactory;
+
 	private MetadataReaderFactory metadataReaderFactory;
 
-	public SimpleConditionService(BeanDefinitionRegistry registry,
-			ConfigurableListableBeanFactory beanFactory, Environment environment,
-			ResourceLoader resourceLoader) {
+	public SimpleConditionService(BeanDefinitionRegistry registry, ConfigurableListableBeanFactory beanFactory,
+			Environment environment, ResourceLoader resourceLoader) {
 		this.beanFactory = beanFactory;
 		this.evaluator = new ConditionEvaluator(registry, environment, resourceLoader);
 		this.classLoader = resourceLoader.getClassLoader();
@@ -82,8 +85,7 @@ public class SimpleConditionService implements ConditionService {
 		AnnotationMetadata metadata = getMetadata(factory);
 		Set<MethodMetadata> assignable = new HashSet<>();
 		for (MethodMetadata method : metadata.getAnnotatedMethods(Bean.class.getName())) {
-			Class<?> candidate = ClassUtils.resolveClassName(method.getReturnTypeName(),
-					this.classLoader);
+			Class<?> candidate = ClassUtils.resolveClassName(method.getReturnTypeName(), this.classLoader);
 			// Look for exact match first
 			if (type.equals(candidate)) {
 				return !this.evaluator.shouldSkip(method);
@@ -110,11 +112,9 @@ public class SimpleConditionService implements ConditionService {
 		}
 		// TODO: split this method off into a test component?
 		if (beanFactory.containsSingleton(EXCLUDE_FILTER_BEAN_NAME)) {
-			TypeExcludeFilter filter = (TypeExcludeFilter) beanFactory
-					.getSingleton(EXCLUDE_FILTER_BEAN_NAME);
+			TypeExcludeFilter filter = (TypeExcludeFilter) beanFactory.getSingleton(EXCLUDE_FILTER_BEAN_NAME);
 			try {
-				if (filter.match(metadataReaderFactory.getMetadataReader(type.getName()),
-						metadataReaderFactory)) {
+				if (filter.match(metadataReaderFactory.getMetadataReader(type.getName()), metadataReaderFactory)) {
 					return false;
 				}
 			}
@@ -126,9 +126,14 @@ public class SimpleConditionService implements ConditionService {
 	}
 
 	public AnnotationMetadata getMetadata(Class<?> factory) {
-		return metadata.computeIfAbsent(factory,
-				// TODO: use AnnotationMetadata.introspect()?
-				type -> new StandardAnnotationMetadata(type, false));
+		return metadata.computeIfAbsent(factory, type -> {
+			try {
+				return metadataReaderFactory.getMetadataReader(type.getName()).getAnnotationMetadata();
+			}
+			catch (IOException e) {
+				throw new IllegalStateException(e);
+			}
+		});
 	}
 
 }

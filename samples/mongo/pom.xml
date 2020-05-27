@@ -11,8 +11,8 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.2.1.RELEASE</version>
-		<relativePath/>
+		<version>2.3.0.RELEASE</version>
+		<relativePath />
 	</parent>
 
 	<dependencies>
@@ -41,6 +41,10 @@
 			<groupId>de.flapdoodle.embed</groupId>
 			<artifactId>de.flapdoodle.embed.mongo</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-cache</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -88,7 +92,7 @@
 
 	<properties>
 		<java.version>1.8</java.version>
-		<generated.version>2.2.1.BUILD-SNAPSHOT</generated.version>
+		<generated.version>2.3.0.BUILD-SNAPSHOT</generated.version>
 		<start-class>app.main.SampleApplication</start-class>
 	</properties>
 
