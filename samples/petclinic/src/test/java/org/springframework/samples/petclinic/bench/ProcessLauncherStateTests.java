@@ -40,7 +40,7 @@ public class ProcessLauncherStateTests {
         state.run();
         state.after();
         assertThat(output.toString()).contains("Benchmark app started");
-        assertThat(output.toString()).doesNotContain("/manage");
+        assertThat(output.toString()).doesNotContain("/actuator");
     }
 
     @Test
@@ -52,7 +52,7 @@ public class ProcessLauncherStateTests {
         state.run();
         state.after();
         assertThat(output.toString()).contains("Benchmark app started");
-        assertThat(output.toString()).contains("/manage");
+        assertThat(output.toString()).contains("/actuator");
     }
 
 }
