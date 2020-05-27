@@ -106,7 +106,7 @@ EOF
     # Build them back up
     tmpfile=.pom.xml
     sed '/<\/dependencies/,$ d' $pom > $tmpfile
-    sed -e '1,/<dependencies/ d;/<\/dependencies/,$ d' -e '/<dependency>/{:a;N;/<\/dependency>/!ba};/<scope>test/d' $src >> $tmpfile
+    sed -e '1,/<dependencies/ d;/<\/dependencies/,/<dependencies/ d;/<\/dependencies/,$ d' $src >> $tmpfile
 	if ! [ -z ${opts} ] && [ -f ${opts} ]; then cat $opts >> $tmpfile; fi
     cat >> $tmpfile <<EOF
 		<dependency>
