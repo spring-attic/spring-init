@@ -27,19 +27,13 @@ import org.springframework.boot.actuate.autoconfigure.info.InfoEndpointAutoConfi
 import org.springframework.boot.actuate.autoconfigure.web.server.ManagementContextAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.web.servlet.ServletManagementContextAutoConfiguration;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.context.MessageSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.orm.jpa.EntityManagerFactoryBuilderCustomizer;
-import org.springframework.boot.autoconfigure.thymeleaf.ThymeleafAutoConfiguration;
-import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.init.SpringInitApplication;
-import org.springframework.init.config.JpaDataConfigurations;
-import org.springframework.init.config.WebMvcConfigurations;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 
 /**
@@ -48,10 +42,7 @@ import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
  * @author Dave Syer
  *
  */
-@SpringInitApplication({ MessageSourceAutoConfiguration.class,
-        JpaDataConfigurations.class, TransactionAutoConfiguration.class,
-        WebMvcConfigurations.class, ThymeleafAutoConfiguration.class,
-        CacheAutoConfiguration.class })
+@SpringBootApplication(proxyBeanMethods = false)
 @EntityScan
 public class PetClinicApplication {
 
