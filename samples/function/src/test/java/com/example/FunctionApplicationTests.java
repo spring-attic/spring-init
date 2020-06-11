@@ -1,7 +1,6 @@
 package com.example;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +9,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.server.WebHandler;
 
 @SpringBootTest("spring.functional.enabled=false")
-@Disabled
+// @Disabled
 public class FunctionApplicationTests {
 
 	@Autowired
@@ -25,7 +24,7 @@ public class FunctionApplicationTests {
 
 	@Test
 	public void test() {
-		client.post().uri("/").bodyValue("foo").exchange().expectBody(String.class).isEqualTo("FOO");
+		client.post().uri("/uppercase").bodyValue("foo").exchange().expectBody(String.class).isEqualTo("FOO");
 	}
 
 }
