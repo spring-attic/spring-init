@@ -18,7 +18,7 @@ package com.example.bench;
 import com.example.demo.TestsApplication;
 import com.example.init.InitApplication;
 import com.example.manual.ManualApplication;
-
+import jmh.mbr.junit5.Microbenchmark;
 import org.openjdk.jmh.annotations.AuxCounters;
 import org.openjdk.jmh.annotations.AuxCounters.Type;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -35,8 +35,6 @@ import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Warmup;
 
 import org.springframework.init.bench.ProcessLauncherState;
-
-import jmh.mbr.junit5.Microbenchmark;
 
 @Measurement(iterations = 5, time = 1)
 @Warmup(iterations = 1, time = 1)
@@ -73,7 +71,9 @@ public class SlimBenchmarkIT {
 	public static class SlimState extends ProcessLauncherState {
 
 		public static enum Sample {
+
 			jlog, demo, actr, conf;
+
 		}
 
 		@Param
@@ -93,6 +93,16 @@ public class SlimBenchmarkIT {
 			return super.getBeans();
 		}
 
+		@Override
+		public double getMemory() {
+			return super.getMemory();
+		}
+
+		@Override
+		public double getHeap() {
+			return super.getHeap();
+		}
+
 		@TearDown(Level.Invocation)
 		public void stop() throws Exception {
 			super.after();
@@ -108,6 +118,7 @@ public class SlimBenchmarkIT {
 			}
 			super.before();
 		}
+
 	}
 
 }
