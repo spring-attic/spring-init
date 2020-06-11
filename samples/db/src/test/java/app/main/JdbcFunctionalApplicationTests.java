@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Dave Syer
  *
  */
-@JdbcTest // (properties = "spring.functional.enabled=false")
+@JdbcTest
 @DirtiesContext
 @Import(JdbcFooRepository.class)
 public class JdbcFunctionalApplicationTests {

@@ -76,8 +76,9 @@ public class EnableSelectedAutoConfigurationImportSelector
 	}
 
 	private List<String> computeImports(AnnotationMetadata metadata) {
-		String[] values = (String[]) metadata.getAnnotationAttributes(
-				EnableSelectedAutoConfiguration.class.getName(), true).get("value");
+		Map<String, Object> annotationAttributes = metadata.getAnnotationAttributes(
+				EnableSelectedAutoConfiguration.class.getName(), true);
+		String[] values = annotationAttributes == null ? new String[0] : (String[]) annotationAttributes.get("value");
 		Set<String> result = new LinkedHashSet<>();
 		for (String value : values) {
 			StopWatch stop = new StopWatch("selected");
