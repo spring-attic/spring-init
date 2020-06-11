@@ -6,13 +6,10 @@ import java.util.Arrays;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
-import org.springframework.init.SpringInitApplication;
-import org.springframework.init.config.JacksonConfigurations;
-import org.springframework.init.config.ReactiveMongoDataConfigurations;
-import org.springframework.init.config.WebFluxConfigurations;
 import org.springframework.web.reactive.function.server.RouterFunction;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
@@ -26,8 +23,7 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
  * @author Dave Syer
  *
  */
-@SpringInitApplication({ ReactiveMongoDataConfigurations.class,
-		JacksonConfigurations.class, WebFluxConfigurations.class })
+@SpringBootApplication(proxyBeanMethods = false)
 @EntityScan
 public class SampleApplication {
 
@@ -41,11 +37,9 @@ public class SampleApplication {
 	public CommandLineRunner runner(ConfigurableListableBeanFactory beans) {
 		return args -> {
 			foos.findAll().switchIfEmpty(foos.save(new Foo("Hello"))).blockFirst();
-			System.err.println("Class count: " + ManagementFactory.getClassLoadingMXBean()
-					.getTotalLoadedClassCount());
+			System.err.println("Class count: " + ManagementFactory.getClassLoadingMXBean().getTotalLoadedClassCount());
 			System.err.println("Bean count: " + beans.getBeanDefinitionNames().length);
-			System.err.println(
-					"Bean names: " + Arrays.asList(beans.getBeanDefinitionNames()));
+			System.err.println("Bean names: " + Arrays.asList(beans.getBeanDefinitionNames()));
 		};
 	}
 
@@ -61,4 +55,5 @@ public class SampleApplication {
 }
 
 interface CustomerRepository extends ReactiveCrudRepository<Foo, String> {
+
 }

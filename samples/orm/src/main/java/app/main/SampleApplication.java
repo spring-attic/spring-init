@@ -4,25 +4,21 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.init.SpringInitApplication;
-import org.springframework.init.config.HibernateConfigurations;
-import org.springframework.init.config.WebFluxConfigurations;
 import org.springframework.web.reactive.function.server.RouterFunction;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 import static org.springframework.web.reactive.function.server.ServerResponse.ok;
 
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
-
-@SpringInitApplication({ HibernateConfigurations.class, WebFluxConfigurations.class,
-	JacksonAutoConfiguration.class })
+@SpringBootApplication(proxyBeanMethods = false)
 @EntityScan
 public class SampleApplication {
 
@@ -49,9 +45,7 @@ public class SampleApplication {
 	@Bean
 	public RouterFunction<?> userEndpoints() {
 		return route(GET("/"),
-				request -> ok().body(Mono
-						.fromCallable(
-								() -> entities.createEntityManager().find(Foo.class, 1L))
+				request -> ok().body(Mono.fromCallable(() -> entities.createEntityManager().find(Foo.class, 1L))
 						.subscribeOn(Schedulers.elastic()), Foo.class));
 	}
 

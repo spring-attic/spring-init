@@ -21,13 +21,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.server.WebHandler;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Dave Syer
@@ -40,9 +37,6 @@ public class SampleApplicationTests {
 	@Autowired
 	private WebHandler webHandler;
 
-	@Autowired(required = false)
-	private TaskExecutionAutoConfiguration tasks;
-
 	private WebTestClient client;
 
 	@Before
@@ -53,11 +47,6 @@ public class SampleApplicationTests {
 	@Test
 	public void test() {
 		client.get().uri("/").exchange().expectBody(String.class).isEqualTo("Hello");
-	}
-
-	@Test
-	public void tasks() {
-		assertThat(tasks).isNull();
 	}
 
 }

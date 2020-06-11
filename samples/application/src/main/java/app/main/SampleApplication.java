@@ -1,10 +1,9 @@
 package app.main;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.init.SpringInitApplication;
-import org.springframework.init.config.BasicConfigurations;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringInitApplication(BasicConfigurations.class)
+@SpringBootApplication(proxyBeanMethods = false)
 public class SampleApplication {
 
 	public static void main(String[] args) {

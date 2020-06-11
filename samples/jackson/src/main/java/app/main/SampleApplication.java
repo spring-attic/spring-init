@@ -1,19 +1,17 @@
 package app.main;
 
+import reactor.core.publisher.Mono;
+
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.init.SpringInitApplication;
-import org.springframework.init.config.JacksonConfigurations;
-import org.springframework.init.config.WebFluxConfigurations;
 import org.springframework.web.reactive.function.server.RouterFunction;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 import static org.springframework.web.reactive.function.server.ServerResponse.ok;
 
-import reactor.core.publisher.Mono;
-
-@SpringInitApplication({ JacksonConfigurations.class, WebFluxConfigurations.class })
+@SpringBootApplication(proxyBeanMethods = false)
 public class SampleApplication {
 
 	@Bean
