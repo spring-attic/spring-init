@@ -16,7 +16,7 @@ LazyInitBeanFactoryPostProcessor.java * Copyright 2016-2017 the original author 
 package com.example.bench;
 
 import com.example.demo.TestsApplication;
-
+import jmh.mbr.junit5.Microbenchmark;
 import org.openjdk.jmh.annotations.AuxCounters;
 import org.openjdk.jmh.annotations.AuxCounters.Type;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -33,8 +33,6 @@ import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Warmup;
 
 import org.springframework.init.bench.ProcessLauncherState;
-
-import jmh.mbr.junit5.Microbenchmark;
 
 @Measurement(iterations = 5, time = 1)
 @Warmup(iterations = 1, time = 1)
@@ -64,7 +62,7 @@ public class MainBenchmarkIT {
 
 		}
 
-		@Param("jlog")
+		@Param // ("jlog")
 		private Sample sample = Sample.demo;
 
 		public MainState() {
