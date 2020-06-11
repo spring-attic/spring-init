@@ -47,7 +47,6 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.init.select.EnableSelectedAutoConfigurationImportSelector;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -55,8 +54,7 @@ import org.springframework.util.ClassUtils;
  * @author Dave Syer
  *
  */
-public class FunctionalInstallerImportRegistrars
-		implements BeanDefinitionRegistryPostProcessor, ImportRegistrars {
+public class FunctionalInstallerImportRegistrars implements BeanDefinitionRegistryPostProcessor, ImportRegistrars {
 
 	private Set<Imported> registrars = new LinkedHashSet<>();
 
@@ -77,8 +75,7 @@ public class FunctionalInstallerImportRegistrars
 	}
 
 	@Override
-	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
-			throws BeansException {
+	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 	}
 
 	@Override
@@ -93,12 +90,10 @@ public class FunctionalInstallerImportRegistrars
 		}
 		else {
 			if (isAutoConfiguration(importer, typeName) && !context.getEnvironment()
-					.getProperty(EnableAutoConfiguration.ENABLED_OVERRIDE_PROPERTY,
-							Boolean.class, true)) {
+					.getProperty(EnableAutoConfiguration.ENABLED_OVERRIDE_PROPERTY, Boolean.class, true)) {
 				return;
 			}
-			this.registrars
-					.add(new Imported(importer, typeName, context.getClassLoader()));
+			this.registrars.add(new Imported(importer, typeName, context.getClassLoader()));
 		}
 	}
 
@@ -108,16 +103,14 @@ public class FunctionalInstallerImportRegistrars
 	}
 
 	@Override
-	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry)
-			throws BeansException {
+	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
 		Set<Imported> seen = new LinkedHashSet<>();
 		Set<Imported> added = findAdded(seen, registry);
 		while (!added.isEmpty()) {
 			for (Imported imported : added) {
 				if (!registrars.contains(imported)) {
 					Class<?> type = imported.getType();
-					if (type != null && ImportBeanDefinitionRegistrar.class
-							.isAssignableFrom(type)) {
+					if (type != null && ImportBeanDefinitionRegistrar.class.isAssignableFrom(type)) {
 						importRegistrar(registry, imported);
 					}
 				}
@@ -132,8 +125,7 @@ public class FunctionalInstallerImportRegistrars
 				for (Imported imported : added) {
 					if (!registrars.contains(imported)) {
 						Class<?> type = imported.getType();
-						if (type != null && ImportBeanDefinitionRegistrar.class
-								.isAssignableFrom(type)) {
+						if (type != null && ImportBeanDefinitionRegistrar.class.isAssignableFrom(type)) {
 							importRegistrar(registry, imported);
 						}
 					}
@@ -163,32 +155,26 @@ public class FunctionalInstallerImportRegistrars
 					}
 				}
 				if (ImportSelector.class.isAssignableFrom(type)) {
-					ImportSelector registrar = (ImportSelector) context
-							.getAutowireCapableBeanFactory().createBean(type);
+					ImportSelector registrar = (ImportSelector) context.getAutowireCapableBeanFactory()
+							.createBean(type);
 					String[] selected = selected(registrar, imported.getSource());
 					for (String select : selected) {
 						if (ClassUtils.isPresent(select, context.getClassLoader())) {
-							Class<?> clazz = ClassUtils.resolveClassName(select,
-									context.getClassLoader());
-							if (conditions.matches(clazz,
-									ConfigurationPhase.PARSE_CONFIGURATION)) {
-								if (AnnotatedElementUtils.isAnnotated(clazz,
-										Configuration.class)) {
+							Class<?> clazz = ClassUtils.resolveClassName(select, context.getClassLoader());
+							if (conditions.matches(clazz, ConfigurationPhase.PARSE_CONFIGURATION)) {
+								if (AnnotatedElementUtils.isAnnotated(clazz, Configuration.class)) {
 									// recurse?
-									if (ClassUtils.isPresent(select + "Initializer",
-											context.getClassLoader())) {
+									if (ClassUtils.isPresent(select + "Initializer", context.getClassLoader())) {
 										@SuppressWarnings("unchecked")
 										ApplicationContextInitializer<GenericApplicationContext> initializer = BeanUtils
 												.instantiateClass(
-														ClassUtils.resolveClassName(
-																select + "Initializer",
+														ClassUtils.resolveClassName(select + "Initializer",
 																context.getClassLoader()),
 														ApplicationContextInitializer.class);
 										configs.put(clazz, initializer);
 									}
 								}
-								else if (ImportBeanDefinitionRegistrar.class
-										.isAssignableFrom(clazz)) {
+								else if (ImportBeanDefinitionRegistrar.class.isAssignableFrom(clazz)) {
 									added.add(new Imported(imported.getSource(), clazz));
 								}
 								else {
@@ -205,15 +191,11 @@ public class FunctionalInstallerImportRegistrars
 					try {
 						if (type.getAnnotation(Configuration.class) != null) {
 							// recurse?
-							if (ClassUtils.isPresent(type.getName() + "Initializer",
-									context.getClassLoader())) {
+							if (ClassUtils.isPresent(type.getName() + "Initializer", context.getClassLoader())) {
 								@SuppressWarnings("unchecked")
 								ApplicationContextInitializer<GenericApplicationContext> initializer = BeanUtils
-										.instantiateClass(
-												ClassUtils.resolveClassName(
-														type.getName() + "Initializer",
-														context.getClassLoader()),
-												ApplicationContextInitializer.class);
+										.instantiateClass(ClassUtils.resolveClassName(type.getName() + "Initializer",
+												context.getClassLoader()), ApplicationContextInitializer.class);
 								configs.put(type, initializer);
 							}
 						}
@@ -234,8 +216,8 @@ public class FunctionalInstallerImportRegistrars
 			initializers.addAll(configs.values());
 		}
 		else {
-			for (Class<?> config : AutoConfigurations.getClasses(
-					AutoConfigurations.of(configs.keySet().toArray(new Class<?>[0])))) {
+			for (Class<?> config : AutoConfigurations
+					.getClasses(AutoConfigurations.of(configs.keySet().toArray(new Class<?>[0])))) {
 				initializers.add(configs.get(config));
 			}
 		}
@@ -251,13 +233,11 @@ public class FunctionalInstallerImportRegistrars
 	}
 
 	private String[] selected(ImportSelector registrar, Class<?> importer) {
-		if (!(registrar instanceof EnableSelectedAutoConfigurationImportSelector)
-				&& registrar instanceof DeferredImportSelector) {
-			return new DeferredConfigurations(Stream
-					.of(registrar.selectImports(AnnotationMetadata.introspect(importer)))
-					.map(name -> ClassUtils.resolveClassName(name,
-							context.getClassLoader()))
-					.collect(Collectors.toList())).list();
+		if (registrar instanceof DeferredImportSelector) {
+			return new DeferredConfigurations(
+					Stream.of(registrar.selectImports(AnnotationMetadata.introspect(importer)))
+							.map(name -> ClassUtils.resolveClassName(name, context.getClassLoader()))
+							.collect(Collectors.toList())).list();
 		}
 		return registrar.selectImports(AnnotationMetadata.introspect(importer));
 	}
@@ -269,8 +249,7 @@ public class FunctionalInstallerImportRegistrars
 		}
 
 		public String[] list() {
-			return getClasses().stream().map(cls -> cls.getName())
-					.collect(Collectors.toList()).toArray(new String[0]);
+			return getClasses().stream().map(cls -> cls.getName()).collect(Collectors.toList()).toArray(new String[0]);
 		}
 
 	}
@@ -278,8 +257,8 @@ public class FunctionalInstallerImportRegistrars
 	private Set<Imported> prioritize(Set<Imported> registrars) {
 		Set<Imported> result = new LinkedHashSet<>();
 		for (Imported imported : registrars) {
-			if (imported.getType() != null && imported.getType().getName()
-					.startsWith(AutoConfigurationPackages.class.getName())) {
+			if (imported.getType() != null
+					&& imported.getType().getName().startsWith(AutoConfigurationPackages.class.getName())) {
 				result.add(imported);
 			}
 		}
@@ -291,8 +270,7 @@ public class FunctionalInstallerImportRegistrars
 		Class<?> type = imported.getType();
 		Object bean = context.getAutowireCapableBeanFactory().createBean(type);
 		ImportBeanDefinitionRegistrar registrar = (ImportBeanDefinitionRegistrar) bean;
-		registrar.registerBeanDefinitions(
-				AnnotationMetadata.introspect(imported.getSource()), registry,
+		registrar.registerBeanDefinitions(AnnotationMetadata.introspect(imported.getSource()), registry,
 				IMPORT_BEAN_NAME_GENERATOR);
 	}
 
@@ -360,10 +338,8 @@ public class FunctionalInstallerImportRegistrars
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
-			result = prime * result
-					+ ((this.source == null) ? 0 : this.source.getName().hashCode());
-			result = prime * result
-					+ ((this.typeName == null) ? 0 : this.typeName.hashCode());
+			result = prime * result + ((this.source == null) ? 0 : this.source.getName().hashCode());
+			result = prime * result + ((this.typeName == null) ? 0 : this.typeName.hashCode());
 			return result;
 		}
 
@@ -400,8 +376,7 @@ public class FunctionalInstallerImportRegistrars
 
 	}
 
-	static class XmlInitializer
-			implements ApplicationContextInitializer<GenericApplicationContext> {
+	static class XmlInitializer implements ApplicationContextInitializer<GenericApplicationContext> {
 
 		private final Resource[] resources;
 

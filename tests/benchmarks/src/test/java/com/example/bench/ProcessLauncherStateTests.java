@@ -16,8 +16,6 @@
 
 package com.example.bench;
 
-import com.example.bench.FactoriesBenchmarkIT.MainState;
-import com.example.bench.FactoriesBenchmarkIT.MainState.Sample;
 import com.example.manual.ManualApplication;
 import org.junit.jupiter.api.Test;
 
@@ -35,23 +33,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ProcessLauncherStateTests {
 
 	@Test
-	public void select(OutputCapture output) throws Exception {
-		// System.setProperty("bench.args", "-verbose:class");
-		MainState state = new MainState();
-		state.sample = Sample.demo;
-		// state.addArgs("-agentlib:jdwp=transport=dt_socket,server=y,address=8000");
-		state.start();
-		state.run();
-		state.stop();
-		assertThat(output.toString()).contains("Benchmark app started");
-		assertThat(output.toString()).doesNotContain("healthEndpoint");
-	}
-
-	@Test
 	public void vanilla(OutputCapture output) throws Exception {
 		// System.setProperty("bench.args", "-verbose:class");
-		ProcessLauncherState state = new ProcessLauncherState(ManualApplication.class,
-				"target", "--server.port=0");
+		ProcessLauncherState state = new ProcessLauncherState(ManualApplication.class, "target", "--server.port=0");
 		state.before();
 		state.run();
 		state.after();
@@ -62,8 +46,7 @@ public class ProcessLauncherStateTests {
 	@Test
 	public void actr(OutputCapture output) throws Exception {
 		// System.setProperty("bench.args", "-verbose:class");
-		ProcessLauncherState state = new ProcessLauncherState(ManualApplication.class,
-				"target", "--server.port=0");
+		ProcessLauncherState state = new ProcessLauncherState(ManualApplication.class, "target", "--server.port=0");
 		state.setProfiles("actr");
 		state.before();
 		state.run();

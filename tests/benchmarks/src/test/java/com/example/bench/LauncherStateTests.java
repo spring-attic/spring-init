@@ -22,10 +22,10 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.init.bench.CaptureSystemOutput;
 import org.springframework.init.bench.CaptureSystemOutput.OutputCapture;
 import org.springframework.init.bench.LauncherState;
-import org.springframework.init.select.EnableSelectedAutoConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -66,7 +66,7 @@ public class LauncherStateTests {
 	}
 
 	@SpringBootConfiguration
-	@EnableSelectedAutoConfiguration
+	@ImportAutoConfiguration
 	public static class PrivateApplication {
 
 		public static void main(String[] args) throws Exception {
@@ -74,4 +74,5 @@ public class LauncherStateTests {
 		}
 
 	}
+
 }

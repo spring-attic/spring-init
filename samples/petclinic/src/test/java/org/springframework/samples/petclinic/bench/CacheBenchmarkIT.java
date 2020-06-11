@@ -19,6 +19,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import jmh.mbr.junit5.Microbenchmark;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -47,11 +48,8 @@ import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.init.bench.LauncherState;
-import org.springframework.init.select.EnableSelectedAutoConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import jmh.mbr.junit5.Microbenchmark;
 
 @Measurement(iterations = 5, time = 1)
 @Warmup(iterations = 1, time = 1)
@@ -60,191 +58,192 @@ import jmh.mbr.junit5.Microbenchmark;
 @Microbenchmark
 public class CacheBenchmarkIT {
 
-	@Benchmark
-	public void bench(MainState state) throws Exception {
-		state.isolated();
-	}
+    @Benchmark
+    public void bench(MainState state) throws Exception {
+        state.isolated();
+    }
 
-	@State(Scope.Thread)
-	public static class MainState extends LauncherState {
+    @State(Scope.Thread)
+    public static class MainState extends LauncherState {
 
-		public static enum Sample {
-			empty(EmptyApplication.class), simple(CacheApplication.class), cache(
-					CacheApplication.class), jcache(
-							CacheApplication.class), manual(ManualCacheApplication.class);
-			private Class<?> config;
+        public static enum Sample {
+            empty(EmptyApplication.class), simple(CacheApplication.class), cache(
+                    CacheApplication.class), jcache(
+                            CacheApplication.class), manual(ManualCacheApplication.class);
 
-			private Sample(Class<?> config) {
-				this.config = config;
-			}
-		}
+            private Class<?> config;
 
-		public static enum Config {
-			functional, annotation;
-		}
+            private Sample(Class<?> config) {
+                this.config = config;
+            }
+        }
 
-		@Param
-		private Sample sample = Sample.simple;
+        public static enum Config {
+            functional, annotation;
+        }
 
-		@Param
-		private Config config = Config.functional;
+        @Param
+        private Sample sample = Sample.simple;
 
-		public MainState() {
-			super(CacheApplication.class);
-			addProperties("spring.main.web-application-type=none");
-		}
+        @Param
+        private Config config = Config.functional;
 
-		@TearDown(Level.Invocation)
-		public void stop() throws Exception {
-			super.close();
-		}
+        public MainState() {
+            super(CacheApplication.class);
+            addProperties("spring.main.web-application-type=none");
+        }
 
-		@Override
-		@Setup(Level.Invocation)
-		public void start() throws Exception {
-			setMainClass(sample.config);
-			switch (sample) {
-			case simple:
-			case manual:
-			case cache:
-				addProperties("spring.cache.cache-names=app");
-				addProperties("spring.cache.type=simple");
-				break;
+        @TearDown(Level.Invocation)
+        public void stop() throws Exception {
+            super.close();
+        }
 
-			case jcache:
-				addProperties("spring.cache.cache-names=app");
-				break;
+        @Override
+        @Setup(Level.Invocation)
+        public void start() throws Exception {
+            setMainClass(sample.config);
+            switch (sample) {
+            case simple:
+            case manual:
+            case cache:
+                addProperties("spring.cache.cache-names=app");
+                addProperties("spring.cache.type=simple");
+                break;
 
-			default:
-				break;
-			}
-			if (config == Config.annotation) {
-				addProperties("spring.functional.enabled=false");
-				if (sample.config == CacheApplication.class) {
-					setMainClass(AnnoCacheApplication.class);
-				}
-				else if (sample.config == EmptyApplication.class) {
-					setMainClass(AnnoEmptyApplication.class);
-				}
-			}
-			super.start();
-		}
+            case jcache:
+                addProperties("spring.cache.cache-names=app");
+                break;
 
-		public void setSample(Sample sample) {
-			this.sample = sample;
-		}
+            default:
+                break;
+            }
+            if (config == Config.annotation) {
+                addProperties("spring.functional.enabled=false");
+                if (sample.config == CacheApplication.class) {
+                    setMainClass(AnnoCacheApplication.class);
+                }
+                else if (sample.config == EmptyApplication.class) {
+                    setMainClass(AnnoEmptyApplication.class);
+                }
+            }
+            super.start();
+        }
 
-		public void setConfig(Config config) {
-			this.config = config;
-		}
+        public void setSample(Sample sample) {
+            this.sample = sample;
+        }
 
-		@Override
-		protected URL[] filterClassPath(URL[] urls) {
-			List<URL> list = new ArrayList<>();
-			for (URL url : urls) {
-				if (sample == Sample.simple || sample == Sample.manual) {
-					if (url.toString().contains("cache-api")) {
-						continue;
-					}
-				}
-				if (config == Config.annotation) {
-					if (url.toString().contains("spring-init-")) {
-						continue;
-					}
-				}
-				list.add(url);
-			}
-			return list.toArray(new URL[0]);
-		}
-	}
+        public void setConfig(Config config) {
+            this.config = config;
+        }
 
-	@EnableCaching
-	@SpringBootConfiguration
-	@EnableSelectedAutoConfiguration({ CacheAutoConfiguration.class,
-			ConfigurationPropertiesAutoConfiguration.class })
-	public static class CacheApplication {
+        @Override
+        protected URL[] filterClassPath(URL[] urls) {
+            List<URL> list = new ArrayList<>();
+            for (URL url : urls) {
+                if (sample == Sample.simple || sample == Sample.manual) {
+                    if (url.toString().contains("cache-api")) {
+                        continue;
+                    }
+                }
+                if (config == Config.annotation) {
+                    if (url.toString().contains("spring-init-")) {
+                        continue;
+                    }
+                }
+                list.add(url);
+            }
+            return list.toArray(new URL[0]);
+        }
+    }
 
-		public static void main(String[] args) throws Exception {
-			SpringApplication.run(CacheApplication.class, args);
-		}
+    @EnableCaching
+    @SpringBootConfiguration
+    @ImportAutoConfiguration({ CacheAutoConfiguration.class,
+            ConfigurationPropertiesAutoConfiguration.class })
+    public static class CacheApplication {
 
-		@Bean
-		public CommandLineRunner runner(ApplicationContext context) {
-			return args -> {
-				assertThat(context.getBean(CacheManager.class)).isNotNull();
-			};
-		}
+        public static void main(String[] args) throws Exception {
+            SpringApplication.run(CacheApplication.class, args);
+        }
 
-	}
+        @Bean
+        public CommandLineRunner runner(ApplicationContext context) {
+            return args -> {
+                assertThat(context.getBean(CacheManager.class)).isNotNull();
+            };
+        }
 
-	@SpringBootConfiguration
-	@EnableSelectedAutoConfiguration({ ConfigurationPropertiesAutoConfiguration.class })
-	public static class EmptyApplication {
-		public static void main(String[] args) throws Exception {
-			System.setProperty("spring.main.web-application-type", "none");
-			SpringApplication.run(EmptyApplication.class, args);
-		}
-	}
+    }
 
-	@EnableCaching
-	@SpringBootConfiguration
-	@ImportAutoConfiguration({ CacheAutoConfiguration.class,
-			ConfigurationPropertiesAutoConfiguration.class })
-	public static class AnnoCacheApplication {
+    @SpringBootConfiguration
+    @ImportAutoConfiguration({ ConfigurationPropertiesAutoConfiguration.class })
+    public static class EmptyApplication {
+        public static void main(String[] args) throws Exception {
+            System.setProperty("spring.main.web-application-type", "none");
+            SpringApplication.run(EmptyApplication.class, args);
+        }
+    }
 
-		public static void main(String[] args) throws Exception {
-			SpringApplication.run(AnnoCacheApplication.class, args);
-		}
+    @EnableCaching
+    @SpringBootConfiguration
+    @ImportAutoConfiguration({ CacheAutoConfiguration.class,
+            ConfigurationPropertiesAutoConfiguration.class })
+    public static class AnnoCacheApplication {
 
-		@Bean
-		public CommandLineRunner runner(ApplicationContext context) {
-			return args -> {
-				assertThat(context.getBean(CacheManager.class)).isNotNull();
-			};
-		}
+        public static void main(String[] args) throws Exception {
+            SpringApplication.run(AnnoCacheApplication.class, args);
+        }
 
-	}
+        @Bean
+        public CommandLineRunner runner(ApplicationContext context) {
+            return args -> {
+                assertThat(context.getBean(CacheManager.class)).isNotNull();
+            };
+        }
 
-	@EnableCaching
-	@SpringBootConfiguration
-	@ImportAutoConfiguration(ConfigurationPropertiesAutoConfiguration.class)
-	@EnableConfigurationProperties(CacheProperties.class)
-	public static class ManualCacheApplication {
+    }
 
-		@Autowired
-		private CacheProperties cacheProperties;
+    @EnableCaching
+    @SpringBootConfiguration
+    @ImportAutoConfiguration(ConfigurationPropertiesAutoConfiguration.class)
+    @EnableConfigurationProperties(CacheProperties.class)
+    public static class ManualCacheApplication {
 
-		public static void main(String[] args) throws Exception {
-			System.setProperty("spring.main.web-application-type", "none");
-			SpringApplication.run(ManualCacheApplication.class, args);
-		}
+        @Autowired
+        private CacheProperties cacheProperties;
 
-		@Bean
-		public CommandLineRunner runner(ApplicationContext context) {
-			return args -> {
-				assertThat(context.getBean(CacheManager.class)).isNotNull();
-			};
-		}
+        public static void main(String[] args) throws Exception {
+            System.setProperty("spring.main.web-application-type", "none");
+            SpringApplication.run(ManualCacheApplication.class, args);
+        }
 
-		@Bean
-		public ConcurrentMapCacheManager cacheManager() {
-			ConcurrentMapCacheManager cacheManager = new ConcurrentMapCacheManager();
-			List<String> cacheNames = this.cacheProperties.getCacheNames();
-			if (!cacheNames.isEmpty()) {
-				cacheManager.setCacheNames(cacheNames);
-			}
-			return cacheManager;
-		}
+        @Bean
+        public CommandLineRunner runner(ApplicationContext context) {
+            return args -> {
+                assertThat(context.getBean(CacheManager.class)).isNotNull();
+            };
+        }
 
-	}
+        @Bean
+        public ConcurrentMapCacheManager cacheManager() {
+            ConcurrentMapCacheManager cacheManager = new ConcurrentMapCacheManager();
+            List<String> cacheNames = this.cacheProperties.getCacheNames();
+            if (!cacheNames.isEmpty()) {
+                cacheManager.setCacheNames(cacheNames);
+            }
+            return cacheManager;
+        }
 
-	@SpringBootConfiguration
-	@ImportAutoConfiguration(ConfigurationPropertiesAutoConfiguration.class)
-	public static class AnnoEmptyApplication {
-		public static void main(String[] args) throws Exception {
-			System.setProperty("spring.main.web-application-type", "none");
-			System.setProperty("spring.functional.enabled", "false");
-			SpringApplication.run(AnnoEmptyApplication.class, args);
-		}
-	}
+    }
+
+    @SpringBootConfiguration
+    @ImportAutoConfiguration(ConfigurationPropertiesAutoConfiguration.class)
+    public static class AnnoEmptyApplication {
+        public static void main(String[] args) throws Exception {
+            System.setProperty("spring.main.web-application-type", "none");
+            System.setProperty("spring.functional.enabled", "false");
+            SpringApplication.run(AnnoEmptyApplication.class, args);
+        }
+    }
 }

@@ -3,6 +3,3 @@ org.springframework.init.func.FunctionalInstallerListener
 
 org.springframework.context.ApplicationContextInitializer=\
 org.springframework.init.test.TestModuleInitializer
-
-org.springframework.test.context.ContextCustomizerFactory=\
-org.springframework.init.test.TestAutoConfigurationContextCustomizerFactory
