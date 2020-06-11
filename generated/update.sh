@@ -47,7 +47,7 @@ function generate() {
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>${artifactId}</artifactId>
+	<artifactId>${artifactId}-func</artifactId>
 	<version>${version}</version>
 
 	<parent>
@@ -69,7 +69,6 @@ function generate() {
 			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>
 				<configuration>
-					<classifier>func</classifier>
 					<includes>
 						<include>**/*Initializer.class</include>
 					</includes>
@@ -78,7 +77,6 @@ function generate() {
 			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
 				<configuration>
-					<classifier>func-sources</classifier>
 					<includes>
 						<include>**/*Initializer.java</include>
 					</includes>
@@ -182,6 +180,6 @@ fi
 src=$cache/config
 tgt=`dirname $0`/security
 init $tgt $src
-generate $src/build/poms/pom-default.xml $tgt/pom.xml spring-security-config 5.3.2.BUILD-SNAPSHOT
+generate $src/build/poms/pom-default.xml $tgt/pom.xml spring-security-config 5.3.3.BUILD-SNAPSHOT
 
 

@@ -18,15 +18,13 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.experimental</groupId>
-			<artifactId>spring-boot-autoconfigure</artifactId>
+			<artifactId>spring-boot-autoconfigure-func</artifactId>
 			<version>${generated.version}</version>
-			<classifier>func</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.experimental</groupId>
-			<artifactId>spring-boot-test-autoconfigure</artifactId>
+			<artifactId>spring-boot-test-autoconfigure-func</artifactId>
 			<version>${generated.version}</version>
-			<classifier>func</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.experimental</groupId>

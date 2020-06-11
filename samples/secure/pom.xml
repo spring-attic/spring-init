@@ -17,21 +17,18 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.experimental</groupId>
-			<artifactId>spring-boot-autoconfigure</artifactId>
+			<artifactId>spring-boot-autoconfigure-func</artifactId>
 			<version>${generated.version}</version>
-			<classifier>func</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.experimental</groupId>
-			<artifactId>spring-security-config</artifactId>
+			<artifactId>spring-security-config-func</artifactId>
 			<version>${generated-security.version}</version>
-			<classifier>func</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.experimental</groupId>
-			<artifactId>spring-boot-test-autoconfigure</artifactId>
+			<artifactId>spring-boot-test-autoconfigure-func</artifactId>
 			<version>${generated.version}</version>
-			<classifier>func</classifier>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -94,7 +91,7 @@
 	<properties>
 		<java.version>1.8</java.version>
 		<generated.version>2.3.0.BUILD-SNAPSHOT</generated.version>
-		<generated-security.version>5.2.1.BUILD-SNAPSHOT</generated-security.version>
+		<generated-security.version>5.3.3.BUILD-SNAPSHOT</generated-security.version>
 		<spring-security.version>5.3.3.RELEASE</spring-security.version>
 		<start-class>app.main.SampleApplication</start-class>
 	</properties>

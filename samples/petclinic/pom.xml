@@ -38,13 +38,11 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.experimental</groupId>
-			<artifactId>spring-boot-autoconfigure</artifactId>
-			<classifier>func</classifier>
+			<artifactId>spring-boot-autoconfigure-func</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.experimental</groupId>
-			<artifactId>spring-boot-test-autoconfigure</artifactId>
-			<classifier>func</classifier>
+			<artifactId>spring-boot-test-autoconfigure-func</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -157,21 +155,18 @@
 		<dependencies>
 			<dependency>
 				<groupId>org.springframework.experimental</groupId>
-				<artifactId>spring-boot-autoconfigure</artifactId>
+				<artifactId>spring-boot-autoconfigure-func</artifactId>
 				<version>${generated.version}</version>
-				<classifier>func</classifier>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.experimental</groupId>
-				<artifactId>spring-boot-actuator-autoconfigure</artifactId>
+				<artifactId>spring-boot-actuator-autoconfigure-func</artifactId>
 				<version>${generated.version}</version>
-				<classifier>func</classifier>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.experimental</groupId>
-				<artifactId>spring-boot-test-autoconfigure</artifactId>
+				<artifactId>spring-boot-test-autoconfigure-func</artifactId>
 				<version>${generated.version}</version>
-				<classifier>func</classifier>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.experimental</groupId>

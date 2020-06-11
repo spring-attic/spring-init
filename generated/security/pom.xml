@@ -4,8 +4,8 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>spring-security-config</artifactId>
-	<version>5.2.1.BUILD-SNAPSHOT</version>
+	<artifactId>spring-security-config-func</artifactId>
+	<version>5.3.3.BUILD-SNAPSHOT</version>
 
 	<parent>
     	<groupId>org.springframework.experimental</groupId>
@@ -205,7 +205,6 @@
 			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>
 				<configuration>
-					<classifier>func</classifier>
 					<includes>
 						<include>**/*Initializer.class</include>
 					</includes>
@@ -214,7 +213,6 @@
 			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
 				<configuration>
-					<classifier>func-sources</classifier>
 					<includes>
 						<include>**/*Initializer.java</include>
 					</includes>
