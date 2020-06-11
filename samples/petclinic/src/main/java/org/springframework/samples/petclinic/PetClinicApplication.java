@@ -19,20 +19,10 @@ package org.springframework.samples.petclinic;
 import java.util.Map;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.actuate.autoconfigure.endpoint.EndpointAutoConfiguration;
-import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointAutoConfiguration;
-import org.springframework.boot.actuate.autoconfigure.health.HealthContributorAutoConfiguration;
-import org.springframework.boot.actuate.autoconfigure.health.HealthEndpointAutoConfiguration;
-import org.springframework.boot.actuate.autoconfigure.info.InfoEndpointAutoConfiguration;
-import org.springframework.boot.actuate.autoconfigure.web.server.ManagementContextAutoConfiguration;
-import org.springframework.boot.actuate.autoconfigure.web.servlet.ServletManagementContextAutoConfiguration;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.orm.jpa.EntityManagerFactoryBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 
@@ -57,14 +47,4 @@ public class PetClinicApplication {
             builder.setBootstrapExecutor(new ConcurrentTaskExecutor());
         };
     }
-}
-
-@ConditionalOnClass(name = "org.springframework.boot.actuate.endpoint.annotation.Endpoint")
-@Configuration
-@ImportAutoConfiguration({ EndpointAutoConfiguration.class,
-        HealthContributorAutoConfiguration.class, HealthEndpointAutoConfiguration.class,
-        InfoEndpointAutoConfiguration.class, WebEndpointAutoConfiguration.class,
-        ServletManagementContextAutoConfiguration.class,
-        ManagementContextAutoConfiguration.class })
-class ApplicationActuatorConfiguration {
 }

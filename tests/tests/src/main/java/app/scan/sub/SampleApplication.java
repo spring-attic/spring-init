@@ -1,12 +1,9 @@
 package app.scan.sub;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration;
-import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
-import org.springframework.init.SpringInitApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringInitApplication({ PropertyPlaceholderAutoConfiguration.class,
-		ConfigurationPropertiesAutoConfiguration.class })
+@SpringBootApplication(proxyBeanMethods = false)
 public class SampleApplication {
 
 	public static void main(String[] args) {

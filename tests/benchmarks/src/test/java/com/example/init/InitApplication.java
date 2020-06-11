@@ -1,35 +1,13 @@
 package com.example.init;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.actuate.autoconfigure.endpoint.EndpointAutoConfiguration;
-import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointAutoConfiguration;
-import org.springframework.boot.actuate.autoconfigure.health.HealthContributorAutoConfiguration;
-import org.springframework.boot.actuate.autoconfigure.health.HealthEndpointAutoConfiguration;
-import org.springframework.boot.actuate.autoconfigure.info.InfoEndpointAutoConfiguration;
-import org.springframework.boot.actuate.autoconfigure.web.reactive.ReactiveManagementContextAutoConfiguration;
-import org.springframework.boot.actuate.autoconfigure.web.server.ManagementContextAutoConfiguration;
-import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.init.SpringInitApplication;
-import org.springframework.init.config.WebFluxConfigurations;
-import org.springframework.init.select.EnableSelectedAutoConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringInitApplication(WebFluxConfigurations.class)
+@SpringBootApplication(proxyBeanMethods = false)
 public class InitApplication {
 
 	public static void main(String[] args) {
 		new SpringApplication(InitApplication.class).run(args);
 	}
-}
-
-@Configuration
-@ConditionalOnClass(Endpoint.class)
-@EnableSelectedAutoConfiguration({ EndpointAutoConfiguration.class,
-		HealthContributorAutoConfiguration.class, HealthEndpointAutoConfiguration.class,
-		InfoEndpointAutoConfiguration.class, WebEndpointAutoConfiguration.class,
-		ReactiveManagementContextAutoConfiguration.class,
-		ManagementContextAutoConfiguration.class })
-class ActuatorConfiguration {
 
 }
