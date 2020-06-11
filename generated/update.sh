@@ -176,7 +176,7 @@ if ! [ -e $cache ]; then
     git clone https://github.com/spring-projects/spring-security $cache
 fi
 
-(cd $cache; git fetch --tags && git checkout 5.3.2.RELEASE)
+(cd $cache; git fetch --tags && git checkout 5.3.3.RELEASE)
 (cd $cache/config; ../gradlew install -x test)
 
 src=$cache/config
