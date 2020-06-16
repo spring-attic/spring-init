@@ -1,4 +1,4 @@
-Demo of an APT plugin that converts `@Configuration` to functional bean registrations, which are known to be faster and also more amenable to AOT compilation (native image building).
+This project implements an APT plugin that converts `@Configuration` to functional bean registrations, which are known to be faster and also more amenable to AOT compilation (native image building).
 
 Takes this:
 

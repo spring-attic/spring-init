@@ -70,10 +70,6 @@ public class StartupApplicationListener
 				return true;
 			}
 		}
-		if (sources.contains(Object.class)) {
-			// TODO: find a better marker class for a @SpringInitApplication
-			return true;
-		}
 		return false;
 	}
 

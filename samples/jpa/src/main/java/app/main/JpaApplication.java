@@ -1,31 +1,25 @@
 package app.main;
 
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
+import static org.springframework.web.reactive.function.server.RouterFunctions.route;
+import static org.springframework.web.reactive.function.server.ServerResponse.ok;
+
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
-
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.init.SpringInitApplication;
-import org.springframework.init.config.JpaDataConfigurations;
-import org.springframework.init.config.WebFluxConfigurations;
 import org.springframework.web.reactive.function.server.RouterFunction;
 
-import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
-import static org.springframework.web.reactive.function.server.RouterFunctions.route;
-import static org.springframework.web.reactive.function.server.ServerResponse.ok;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
-@SpringInitApplication({ JpaDataConfigurations.class, WebFluxConfigurations.class,
-		JacksonAutoConfiguration.class })
-@EntityScan
+@SpringBootApplication(proxyBeanMethods = false)
 public class JpaApplication {
 
 	@Autowired
