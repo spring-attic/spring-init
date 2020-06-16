@@ -62,7 +62,7 @@ public class MainBenchmarkIT {
 
 		}
 
-		@Param // ("jlog")
+		@Param // ("actr")
 		private Sample sample = Sample.demo;
 
 		public MainState() {
