@@ -1,27 +1,25 @@
 package app.main;
 
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
+import static org.springframework.web.reactive.function.server.RouterFunctions.route;
+import static org.springframework.web.reactive.function.server.ServerResponse.ok;
+
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
 import java.util.Optional;
-
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.web.reactive.function.server.RouterFunction;
 
-import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
-import static org.springframework.web.reactive.function.server.RouterFunctions.route;
-import static org.springframework.web.reactive.function.server.ServerResponse.ok;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @SpringBootApplication(proxyBeanMethods = false)
-@EntityScan
 public class SampleApplication {
 
 	private CustomerRepository foos;
