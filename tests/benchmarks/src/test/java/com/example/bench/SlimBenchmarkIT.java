@@ -42,7 +42,7 @@ import org.springframework.init.bench.ProcessLauncherState;
 @Microbenchmark
 public class SlimBenchmarkIT {
 
-	// @Benchmark
+	@Benchmark
 	public void slim(SlimState state) throws Exception {
 		state.run();
 	}
@@ -69,7 +69,7 @@ public class SlimBenchmarkIT {
 
 		}
 
-		@Param("demo")
+		@Param("conf")
 		protected Sample sample = Sample.demo;
 
 		public SlimState() {
