@@ -16,7 +16,6 @@
 package com.example.bench;
 
 import com.example.demo.TestsApplication;
-import com.example.init.InitApplication;
 import com.example.manual.ManualApplication;
 import jmh.mbr.junit5.Microbenchmark;
 import org.openjdk.jmh.annotations.AuxCounters;
@@ -43,7 +42,7 @@ import org.springframework.init.bench.ProcessLauncherState;
 @Microbenchmark
 public class SlimBenchmarkIT {
 
-	@Benchmark
+	// @Benchmark
 	public void slim(SlimState state) throws Exception {
 		state.run();
 	}
@@ -60,12 +59,6 @@ public class SlimBenchmarkIT {
 		state.run();
 	}
 
-	@Benchmark
-	public void auto(SlimState state) throws Exception {
-		state.setMainClass(TestsApplication.class.getName());
-		state.run();
-	}
-
 	@State(Scope.Thread)
 	@AuxCounters(Type.EVENTS)
 	public static class SlimState extends ProcessLauncherState {
@@ -76,11 +69,11 @@ public class SlimBenchmarkIT {
 
 		}
 
-		@Param
+		@Param("demo")
 		protected Sample sample = Sample.demo;
 
 		public SlimState() {
-			super(InitApplication.class, "target", "--server.port=0");
+			super(TestsApplication.class, "target", "--server.port=0");
 		}
 
 		@Override
