@@ -18,7 +18,7 @@ package com.example.bench;
 
 import com.example.bench.SlimBenchmarkIT.SlimState;
 import com.example.bench.SlimBenchmarkIT.SlimState.Sample;
-
+import com.example.manual.ManualApplication;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.init.bench.CaptureSystemOutput;
@@ -49,6 +49,20 @@ public class SlimStateTests {
 		// System.setProperty("bench.args", "-verbose:class");
 		SlimState state = new SlimState();
 		state.sample = Sample.jlog;
+		state.start();
+		state.run();
+		state.stop();
+		assertThat(output.toString()).contains("Benchmark app started");
+		assertThat(output.toString()).doesNotContain("/actuator");
+	}
+
+	@Test
+	public void manual(OutputCapture output) throws Exception {
+		// System.setProperty("bench.args", "-verbose:class");
+		// System.setProperty("debug", "true");
+		SlimState state = new SlimState(ManualApplication.class);
+		// state.addArgs("-agentlib:jdwp=transport=dt_socket,server=y,address=5005");
+		state.sample = Sample.conf;
 		state.start();
 		state.run();
 		state.stop();

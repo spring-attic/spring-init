@@ -1,0 +1,13 @@
+{
+    "settings": {
+        "java.configuration.updateBuildConfiguration": "interactive"
+    },
+    "folders": [
+		{
+			"path": "../samples"
+		},
+		{
+			"path": "../modules"
+		}
+	]
+}

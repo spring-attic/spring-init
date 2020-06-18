@@ -149,3 +149,5 @@ com.example.bench.SlimBenchmarkIT  slim    conf    117.000  5290.000  9.215  52.
 ```
 
 It's not obvious that Spring Init is any faster or uses less memory than the straight annotation-based version with Spring Boot 2.3. It might be a better story in native images, but that remains to be seen.
+
+N.B. the "conf" sample is probably not doing what it says on the can, so none of those measurements is reliable at present. The bean counts in the non-annos versions of that benchmark, for instance, suggest that this is not the whole set of functionality that is running with the annotations.

@@ -69,6 +69,9 @@ public class StartupApplicationListener implements ApplicationListener<Applicati
 			if (AnnotatedElementUtils.isAnnotated(source, SpringBootConfiguration.class)) {
 				return true;
 			}
+			if (source.getName().endsWith("BootstrapMarkerConfiguration")) {
+				return true; // sigh, Spring Cloud
+			}
 		}
 		if (sources.contains(Object.class)) {
 			// TODO: find a better marker class for a Spring Init application

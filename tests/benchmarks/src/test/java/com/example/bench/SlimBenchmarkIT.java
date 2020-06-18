@@ -55,6 +55,7 @@ public class SlimBenchmarkIT {
 
 	@Benchmark
 	public void manual(SlimState state) throws Exception {
+		// System.setProperty("debug", "true");
 		state.setMainClass(ManualApplication.class.getName());
 		state.run();
 	}
@@ -73,7 +74,11 @@ public class SlimBenchmarkIT {
 		protected Sample sample = Sample.demo;
 
 		public SlimState() {
-			super(TestsApplication.class, "target", "--server.port=0");
+			this(TestsApplication.class);
+		}
+
+		public SlimState(Class<?> mainClass) {
+			super(mainClass, "target", "--server.port=0");
 		}
 
 		@Override
