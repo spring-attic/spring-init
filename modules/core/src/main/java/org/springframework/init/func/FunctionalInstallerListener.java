@@ -99,15 +99,14 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 			ApplicationContextInitializedEvent initialized = (ApplicationContextInitializedEvent) event;
 			ConfigurableApplicationContext context = initialized.getApplicationContext();
 			if (!(context instanceof GenericApplicationContext)) {
-				throw new IllegalStateException(
-						"ApplicationContext must be a GenericApplicationContext");
+				throw new IllegalStateException("ApplicationContext must be a GenericApplicationContext");
 			}
 			if (!isEnabled(context.getEnvironment())) {
 				return;
 			}
 			GenericApplicationContext generic = (GenericApplicationContext) context;
-			ConditionService conditions = new SimpleConditionService(generic,
-					generic.getBeanFactory(), context.getEnvironment(), context);
+			ConditionService conditions = new SimpleConditionService(generic, generic.getBeanFactory(),
+					context.getEnvironment(), context);
 			initialize(generic, conditions);
 			functional(generic, conditions);
 			apply(generic, initialized.getSpringApplication(), conditions);
@@ -117,27 +116,24 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 			if (!isEnabled(prepared.getEnvironment())) {
 				return;
 			}
+			logger.info("Preparing application context");
 			SpringApplication application = prepared.getSpringApplication();
 			findInitializers(application);
 			WebApplicationType type = application.getWebApplicationType();
 			Class<?> contextType = getApplicationContextType(application);
 			if (type == WebApplicationType.NONE) {
-				if (contextType == AnnotationConfigApplicationContext.class
-						|| contextType == null) {
-					application
-							.setApplicationContextClass(GenericApplicationContext.class);
+				if (contextType == AnnotationConfigApplicationContext.class || contextType == null) {
+					application.setApplicationContextClass(GenericApplicationContext.class);
 				}
 			}
 			else if (type == WebApplicationType.REACTIVE) {
 				if (contextType == AnnotationConfigReactiveWebApplicationContext.class) {
-					application.setApplicationContextClass(
-							ReactiveWebServerApplicationContext.class);
+					application.setApplicationContextClass(ReactiveWebServerApplicationContext.class);
 				}
 			}
 			else if (type == WebApplicationType.SERVLET) {
 				if (contextType == AnnotationConfigServletWebServerApplicationContext.class) {
-					application.setApplicationContextClass(
-							ServletWebServerApplicationContext.class);
+					application.setApplicationContextClass(ServletWebServerApplicationContext.class);
 				}
 			}
 		}
@@ -164,8 +160,7 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 	}
 
 	private void remove(SpringApplication application, Object source) {
-		Field field = ReflectionUtils.findField(SpringApplication.class,
-				"primarySources");
+		Field field = ReflectionUtils.findField(SpringApplication.class, "primarySources");
 		ReflectionUtils.makeAccessible(field);
 		@SuppressWarnings("unchecked")
 		Set<Object> sources = (Set<Object>) ReflectionUtils.getField(field, application);
@@ -174,8 +169,7 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 	}
 
 	private Class<?> getApplicationContextType(SpringApplication application) {
-		Field field = ReflectionUtils.findField(SpringApplication.class,
-				"applicationContextClass");
+		Field field = ReflectionUtils.findField(SpringApplication.class, "applicationContextClass");
 		ReflectionUtils.makeAccessible(field);
 		try {
 			return (Class<?>) ReflectionUtils.getField(field, application);
@@ -189,25 +183,19 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 		return environment.getProperty("spring.functional.enabled", Boolean.class, true);
 	}
 
-	private void functional(GenericApplicationContext context,
-			ConditionService conditions) {
-		context.registerBean(
-				AnnotationConfigUtils.CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME,
-				SlimConfigurationClassPostProcessor.class,
-				() -> new SlimConfigurationClassPostProcessor());
+	private void functional(GenericApplicationContext context, ConditionService conditions) {
+		context.registerBean(AnnotationConfigUtils.CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME,
+				SlimConfigurationClassPostProcessor.class, () -> new SlimConfigurationClassPostProcessor());
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 	}
 
-	private void initialize(GenericApplicationContext context,
-			ConditionService conditions) {
-		if (!context.getBeanFactory()
-				.containsBeanDefinition(ConditionService.class.getName())) {
+	private void initialize(GenericApplicationContext context, ConditionService conditions) {
+		if (!context.getBeanFactory().containsBeanDefinition(ConditionService.class.getName())) {
 			context.registerBean(ConditionService.class, () -> conditions);
-			context.registerBean(ImportRegistrars.class,
-					() -> new FunctionalInstallerImportRegistrars(context));
+			context.registerBean(ImportRegistrars.class, () -> new FunctionalInstallerImportRegistrars(context));
 		}
-		this.autoTypeNames = new HashSet<>(SpringFactoriesLoader.loadFactoryNames(
-				EnableAutoConfiguration.class, context.getClassLoader()));
+		this.autoTypeNames = new HashSet<>(
+				SpringFactoriesLoader.loadFactoryNames(EnableAutoConfiguration.class, context.getClassLoader()));
 		for (String autoName : autoTypeNames) {
 			String typeName = autoName + "Initializer";
 			if (ClassUtils.isPresent(autoName, context.getClassLoader())
@@ -216,14 +204,11 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 				Class<? extends ApplicationContextInitializer<?>> module = (Class<? extends ApplicationContextInitializer<?>>) ClassUtils
 						.resolveClassName(typeName, context.getClassLoader());
 				try {
-					this.autoTypes.put(ClassUtils.resolveClassName(autoName,
-							context.getClassLoader()), module);
+					this.autoTypes.put(ClassUtils.resolveClassName(autoName, context.getClassLoader()), module);
 				}
 				catch (Throwable t) {
 					throw new IllegalStateException(
-							"Problem processing @Import/configurations() on "
-									+ module.getName(),
-							t);
+							"Problem processing @Import/configurations() on " + module.getName(), t);
 				}
 			}
 		}
@@ -255,8 +240,7 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 		}
 	}
 
-	private void apply(GenericApplicationContext context, SpringApplication application,
-			ConditionService conditions) {
+	private void apply(GenericApplicationContext context, SpringApplication application, ConditionService conditions) {
 		apply(context);
 	}
 
@@ -270,23 +254,20 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 		}
 		this.added.add(type);
 		if (this.autoTypeNames.contains(type.getName())) {
-			this.autos.add(BeanUtils.instantiateClass(type,
-					ApplicationContextInitializer.class));
+			this.autos.add(BeanUtils.instantiateClass(type, ApplicationContextInitializer.class));
 		}
 		else {
-			initializers.add(BeanUtils.instantiateClass(type,
-					ApplicationContextInitializer.class));
+			initializers.add(BeanUtils.instantiateClass(type, ApplicationContextInitializer.class));
 		}
 	}
 
-	public static void invokeAwareMethods(Object target, Environment environment,
-			ResourceLoader resourceLoader, BeanDefinitionRegistry registry) {
+	public static void invokeAwareMethods(Object target, Environment environment, ResourceLoader resourceLoader,
+			BeanDefinitionRegistry registry) {
 
 		if (target instanceof Aware) {
 			if (target instanceof BeanClassLoaderAware) {
 				ClassLoader classLoader = (registry instanceof ConfigurableBeanFactory
-						? ((ConfigurableBeanFactory) registry).getBeanClassLoader()
-						: resourceLoader.getClassLoader());
+						? ((ConfigurableBeanFactory) registry).getBeanClassLoader() : resourceLoader.getClassLoader());
 				if (classLoader != null) {
 					((BeanClassLoaderAware) target).setBeanClassLoader(classLoader);
 				}
@@ -305,8 +286,8 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 
 }
 
-class SlimConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor,
-		BeanClassLoaderAware, PriorityOrdered {
+class SlimConfigurationClassPostProcessor
+		implements BeanDefinitionRegistryPostProcessor, BeanClassLoaderAware, PriorityOrdered {
 
 	@Override
 	public int getOrder() {
@@ -321,13 +302,11 @@ class SlimConfigurationClassPostProcessor implements BeanDefinitionRegistryPostP
 	}
 
 	@Override
-	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
-			throws BeansException {
+	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 	}
 
 	@Override
-	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry)
-			throws BeansException {
+	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
 	}
 
 }
