@@ -130,7 +130,7 @@ You can debug the APT processor by running on the command line and attaching a d
 
 ## Benchmarks
 
-Benchmark with annotations, with Spring Init (slim), and with manual configuration:
+Benchmark startup time (seconds) with annotations, with Spring Init (slim), and with manual configuration:
 
 ```
 class                              method  sample  beans    classes   heap   memory  median  mean   range
