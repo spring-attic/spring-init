@@ -128,7 +128,7 @@ You can debug the APT processor by running on the command line and attaching a d
 (cd modules/tests-lib/; MAVEN_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000" mvn clean compile)
 ```
 
-== Benchmarks
+## Benchmarks
 
 Benchmark with annotations, with Spring Init (slim), and with manual configuration:
 
