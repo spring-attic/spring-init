@@ -12,7 +12,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.3.0.RELEASE</version>
-		<relativePath/>
+		<relativePath />
 	</parent>
 
 	<dependencies>
@@ -29,6 +29,11 @@
 		<dependency>
 			<groupId>org.springframework.experimental</groupId>
 			<artifactId>spring-init-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.experimental</groupId>
+			<artifactId>spring-init-processor</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -93,6 +98,7 @@
 		<java.version>1.8</java.version>
 		<start-class>app.main.SampleApplication</start-class>
 		<generated.version>2.3.0.BUILD-SNAPSHOT</generated.version>
+		<generated.sources>${project.build.directory}/generated-sources/java</generated.sources>
 	</properties>
 
 	<build>
@@ -112,14 +118,45 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<annotationProcessorPaths>
-						<path>
-							<groupId>org.springframework.experimental</groupId>
-							<artifactId>spring-init-processor</artifactId>
-							<version>${project.version}</version>
-						</path>
-					</annotationProcessorPaths>
+					<compilerArgument>-proc:none</compilerArgument>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.mysema.maven</groupId>
+				<artifactId>apt-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>process</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${generated.sources}</outputDirectory>
+							<processors>
+								<processor>org.springframework.init.processor.SlimConfigurationProcessor</processor>
+							</processors>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<!-- Need to ensure the generated source folder is added to the project 
+							classpath, in jdt.ls -->
+						<id>add-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${generated.sources}</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

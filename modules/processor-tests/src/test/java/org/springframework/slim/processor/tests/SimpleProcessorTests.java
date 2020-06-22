@@ -74,22 +74,17 @@ public class SimpleProcessorTests {
 	 */
 	@Test
 	public void springConfigurationClass() {
-		CompilationResult cr = CompilerRunner.run(createType("ConfigClass", true),
-				getSpringDependencies());
-		List<CompilationMessage> otherMessages = cr.getCompilationMessages().stream()
-				.filter(cm -> cm.isOther()).collect(Collectors.toList());
-		assertThat(otherMessages.get(1).getMessage())
-				.isEqualTo("Found @Configuration in ConfigClass");
-		assertThat(otherMessages.get(2).getMessage())
-				.isEqualTo("Writing Initializer ConfigClassInitializer");
+		CompilationResult cr = CompilerRunner.run(createType("ConfigClass", true), getSpringDependencies());
+		List<CompilationMessage> otherMessages = cr.getCompilationMessages().stream().filter(cm -> cm.isOther())
+				.collect(Collectors.toList());
+		assertThat(otherMessages.get(1).getMessage()).isEqualTo("Found @Configuration in ConfigClass");
+		assertThat(otherMessages.get(2).getMessage()).isEqualTo("Writing Initializer ConfigClassInitializer");
 		assertThat(cr.containsNewFile("ConfigClassInitializer.class"));
-		assertThat(
-				cr.containsNewFile("META-INF/slim-configuration-processor.properties"));
+		assertThat(cr.containsNewFile("META-INF/slim-configuration-processor.properties"));
 		cr.printGeneratedSources(System.out);
 		// TODO store these in getExpectedDataDirectory() for checking ?
 		// assertThat(cr.getNewFileContents("ConfigClassInitializer.java")).isEqualTo("");
-		System.out.println(">>>>\n" + cr.getGeneratedFileContents(
-				"META-INF/slim-configuration-processor.properties"));
+		System.out.println(">>>>\n" + cr.getGeneratedFileContents("META-INF/slim-configuration-processor.properties"));
 	}
 
 	@Test
@@ -97,15 +92,14 @@ public class SimpleProcessorTests {
 		Collection<InputFileDescriptor> inputs = new ArrayList<>();
 		inputs.add(createType("ConfigClass2", true));
 		inputs.add(createType("ConfigClass", true, "ConfigClass2"));
-		CompilationResult cr = CompilerRunner.run(inputs, Collections.emptyList(),
-				getSpringDependencies());
+		CompilationResult cr = CompilerRunner.run(inputs, Collections.emptyList(), getSpringDependencies());
 		assertContainsMessage(cr, "Found @Configuration in ConfigClass");
 		assertContainsMessage(cr, "Found @Configuration in ConfigClass2");
 		assertContainsMessage(cr, "Writing Initializer ConfigClassInitializer");
 		assertContainsMessage(cr, "Writing Initializer ConfigClass2Initializer");
 		Properties p = new Properties();
-		String processorStateProperties = cr.getGeneratedFileContents(
-				"META-INF/slim-configuration-processor.properties");
+		String processorStateProperties = cr
+				.getGeneratedFileContents("META-INF/slim-configuration-processor.properties");
 		p.load(new ByteArrayInputStream(processorStateProperties.getBytes()));
 		assertThat(p.get("import.ConfigClass")).isEqualTo("ConfigClass2");
 		cr.printGeneratedSources(System.out);
@@ -116,16 +110,13 @@ public class SimpleProcessorTests {
 
 	@Test
 	public void sampleConfigurationClass() {
-		CompilationResult cr = CompilerRunner.run(
-				new InputFileDescriptor(
-						new File("src/test/java/"
-								+ ClassUtils.classPackageAsResourcePath(getClass())
-								+ "/SampleConfiguration.java"),
-						"SampleConfiguration",
-						ClassUtils.getPackageName(getClass()) + ".SampleConfiguration"),
+		CompilationResult cr = CompilerRunner.run(new InputFileDescriptor(
+				new File("src/test/java/" + ClassUtils.classPackageAsResourcePath(getClass())
+						+ "/SampleConfiguration.java"),
+				"SampleConfiguration", ClassUtils.getPackageName(getClass()) + ".SampleConfiguration"),
 				getSpringDependencies());
-		List<CompilationMessage> otherMessages = cr.getCompilationMessages().stream()
-				.filter(cm -> cm.isOther()).collect(Collectors.toList());
+		List<CompilationMessage> otherMessages = cr.getCompilationMessages().stream().filter(cm -> cm.isOther())
+				.collect(Collectors.toList());
 		assertThat(otherMessages.get(1).getMessage()).contains("Found @Configuration");
 		assertThat(cr.containsNewFile("SampleConfigurationInitializer.class"));
 		cr.printGeneratedSources(System.out);
@@ -133,79 +124,65 @@ public class SimpleProcessorTests {
 
 	@Test
 	public void sampleApplicationClass() {
-		CompilationResult cr = CompilerRunner.run(
-				new InputFileDescriptor(
-						new File("src/test/java/"
-								+ ClassUtils.classPackageAsResourcePath(getClass())
-								+ "/SampleApplication.java"),
-						"SampleApplication",
-						ClassUtils.getPackageName(getClass()) + ".SampleApplication"),
+		CompilationResult cr = CompilerRunner.run(new InputFileDescriptor(
+				new File("src/test/java/" + ClassUtils.classPackageAsResourcePath(getClass())
+						+ "/SampleApplication.java"),
+				"SampleApplication", ClassUtils.getPackageName(getClass()) + ".SampleApplication"),
 				getSpringDependencies());
 		assertThat(cr.containsNewFile("SampleApplicationInitializer.class"));
 		String generated = cr.getGeneratedFileContents(
-				ClassUtils.classPackageAsResourcePath(getClass())
-						+ "/SampleApplicationInitializer.java");
+				ClassUtils.classPackageAsResourcePath(getClass()) + "/SampleApplicationInitializer.java");
 		assertThat(generated).contains("AutoConfigurationPackages.Registrar");
 		assertThat(generated).contains("AutoConfigurationImportSelector");
 		// bean methods come before imports
-		assertThat(generated).containsSubsequence("Bar.class",
-				"AutoConfigurationImportSelector");
+		assertThat(generated).containsSubsequence("Bar.class", "AutoConfigurationImportSelector");
 	}
 
 	@Test
 	public void nestedConfigurationClass() {
-		CompilationResult cr = CompilerRunner
-				.run(new InputFileDescriptor(
-						new File("src/test/java/"
-								+ ClassUtils.classPackageAsResourcePath(
-										NestedConfiguration.class)
+		CompilationResult cr = CompilerRunner.run(
+				new InputFileDescriptor(
+						new File("src/test/java/" + ClassUtils.classPackageAsResourcePath(NestedConfiguration.class)
 								+ "/NestedConfiguration.java"),
 						"SampleApplication",
-						ClassUtils.getPackageName(NestedConfiguration.class)
-								+ ".NestedConfiguration"),
-						getSpringDependencies());
+						ClassUtils.getPackageName(NestedConfiguration.class) + ".NestedConfiguration"),
+				getSpringDependencies());
 		// cr.printGeneratedSources(System.err);
 		assertThat(cr.containsNewFile("NestedConfigurationInitializer.class"));
-		assertThat(cr.containsNewFile(
-				"NestedConfiguration_InsideNestedConfigurationInitializer.class"));
-		assertThat(cr.containsNewFile(
-				"InsideNestedConfiguration_InsideInsideNestedConfigurationInitializer.class"));
-		String generated = cr.getGeneratedFileContents(
-				ClassUtils.classPackageAsResourcePath(NestedConfiguration.class)
-						+ "/NestedConfigurationInitializer.java");
-		assertThat(generated).doesNotContain(
-				"InsideNestedConfiguration_InsideInsideNestedConfigurationInitializer");
+		assertThat(cr.containsNewFile("NestedConfiguration_InsideNestedConfigurationInitializer.class"));
+		assertThat(cr.containsNewFile("InsideNestedConfiguration_InsideInsideNestedConfigurationInitializer.class"));
+		String generated = cr.getGeneratedFileContents(ClassUtils.classPackageAsResourcePath(NestedConfiguration.class)
+				+ "/NestedConfigurationInitializer.java");
+		assertThat(generated).doesNotContain("InsideNestedConfiguration_InsideInsideNestedConfigurationInitializer");
+		generated = cr.getGeneratedFileContents(ClassUtils.classPackageAsResourcePath(NestedConfiguration.class)
+				+ "/NestedConfiguration_InsideNestedConfigurationInitializer.java");
+		// System.err.println(generated);
+		assertThat(generated).contains("private static final boolean enabled;");
+		assertThat(generated).contains("enabled =");
 	}
 
 	@Test
 	public void nestedInterface() {
-		CompilationResult cr = CompilerRunner
-				.run(new InputFileDescriptor(
-						new File(
-								"src/test/java/"
-										+ ClassUtils.classPackageAsResourcePath(
-												NestedInterface.class)
-										+ "/NestedInterface.java"),
-						"SampleApplication",
-						ClassUtils.getPackageName(NestedInterface.class)
-								+ ".NestedInterface"),
-						getSpringDependencies());
+		CompilationResult cr = CompilerRunner.run(
+				new InputFileDescriptor(
+						new File("src/test/java/" + ClassUtils.classPackageAsResourcePath(NestedInterface.class)
+								+ "/NestedInterface.java"),
+						"SampleApplication", ClassUtils.getPackageName(NestedInterface.class) + ".NestedInterface"),
+				getSpringDependencies());
 		// cr.printGeneratedSources(System.err);
 		assertThat(cr.containsNewFile("NestedInterfaceInitializer.class"));
 		String generated = cr.getGeneratedFileContents(
-				ClassUtils.classPackageAsResourcePath(NestedInterface.class)
-						+ "/NestedInterfaceInitializer.java");
+				ClassUtils.classPackageAsResourcePath(NestedInterface.class) + "/NestedInterfaceInitializer.java");
 		assertThat(generated).doesNotContain("Inside");
 	}
 
 	// ---
 
 	private void assertContainsMessage(CompilationResult cr, String expectedMessage) {
-		boolean contains = cr.getCompilationMessages().stream()
-				.anyMatch(cm -> cm.getMessage().equals(expectedMessage));
+		boolean contains = cr.getCompilationMessages().stream().anyMatch(cm -> cm.getMessage().equals(expectedMessage));
 		if (!contains) {
-			fail("Unable to find expected message '" + expectedMessage
-					+ "' in compilation result: \n" + cr.getCompilationMessages());
+			fail("Unable to find expected message '" + expectedMessage + "' in compilation result: \n"
+					+ cr.getCompilationMessages());
 		}
 	}
 
@@ -216,10 +193,8 @@ public class SimpleProcessorTests {
 			if (stack[i].getClassName().equals(classname)) {
 				// First entry of our class in the stack
 				int lastdot = classname.lastIndexOf(".");
-				String simpleclassname = lastdot == -1 ? classname
-						: classname.substring(lastdot + 1);
-				return new File("./expected_data/" + simpleclassname + "/"
-						+ stack[i].getMethodName());
+				String simpleclassname = lastdot == -1 ? classname : classname.substring(lastdot + 1);
+				return new File("./expected_data/" + simpleclassname + "/" + stack[i].getMethodName());
 			}
 		}
 		return null;
@@ -229,8 +204,7 @@ public class SimpleProcessorTests {
 		DependencyResolver engine = DependencyResolver.instance();
 		Artifact junitLauncherArtifact = new DefaultArtifact(
 				"org.junit.platform:junit-platform-console-standalone:1.3.1");
-		Dependency junitLauncherDependency = new Dependency(junitLauncherArtifact,
-				"test");
+		Dependency junitLauncherDependency = new Dependency(junitLauncherArtifact, "test");
 		File file = engine.resolve(junitLauncherDependency);
 		return file;
 	}
@@ -239,10 +213,9 @@ public class SimpleProcessorTests {
 		try {
 			File f = new File("pom.xml");
 			DependencyResolver engine = DependencyResolver.instance();
-			List<Dependency> dependencies = engine
-					.dependencies(new FileUrlResource(f.toURI().toURL()));
-			List<File> resolvedDependencies = dependencies.stream()
-					.map(d -> engine.resolve(d)).collect(Collectors.toList());
+			List<Dependency> dependencies = engine.dependencies(new FileUrlResource(f.toURI().toURL()));
+			List<File> resolvedDependencies = dependencies.stream().map(d -> engine.resolve(d))
+					.collect(Collectors.toList());
 			return resolvedDependencies;
 		}
 		catch (Exception e) {
@@ -250,20 +223,18 @@ public class SimpleProcessorTests {
 		}
 	}
 
-	public static final ClassName IMPORT = ClassName
-			.get("org.springframework.context.annotation", "Import");
-	public static final ClassName CONFIGURATION = ClassName
-			.get("org.springframework.context.annotation", "Configuration");
+	public static final ClassName IMPORT = ClassName.get("org.springframework.context.annotation", "Import");
 
-	private static TypeSpec.Builder importAnnotation(TypeSpec.Builder type,
-			String... fullyQualifiedImports) {
+	public static final ClassName CONFIGURATION = ClassName.get("org.springframework.context.annotation",
+			"Configuration");
+
+	private static TypeSpec.Builder importAnnotation(TypeSpec.Builder type, String... fullyQualifiedImports) {
 		ClassName[] array = new ClassName[fullyQualifiedImports.length];
 		for (int i = 0; i < fullyQualifiedImports.length; i++) {
 			array[i] = ClassName.bestGuess(fullyQualifiedImports[i]);
 		}
 		AnnotationSpec.Builder builder = AnnotationSpec.builder(IMPORT);
-		builder.addMember("value",
-				array.length > 1 ? ("{" + typeParams(array.length) + "}") : "$T.class",
+		builder.addMember("value", array.length > 1 ? ("{" + typeParams(array.length) + "}") : "$T.class",
 				(Object[]) array);
 		return type.addAnnotation(builder.build());
 	}
@@ -279,8 +250,7 @@ public class SimpleProcessorTests {
 		return builder.toString();
 	}
 
-	private static InputFileDescriptor createType(String classname,
-			boolean markAtConfiguration, String... imports) {
+	private static InputFileDescriptor createType(String classname, boolean markAtConfiguration, String... imports) {
 		Builder builder = TypeSpec.classBuilder(classname);
 		if (markAtConfiguration) {
 			builder.addAnnotation(CONFIGURATION);
@@ -298,9 +268,9 @@ public class SimpleProcessorTests {
 			file.writeTo(sb);
 		}
 		catch (IOException e) {
-			throw new IllegalStateException(
-					"Unable to write out source file: " + classname, e);
+			throw new IllegalStateException("Unable to write out source file: " + classname, e);
 		}
 		return new InputFileDescriptor(classname, sb.toString());
 	}
+
 }

@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -42,6 +44,7 @@ import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic.Kind;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
@@ -54,32 +57,37 @@ import com.squareup.javapoet.TypeSpec.Builder;
 public class InitializerSpec implements Comparable<InitializerSpec> {
 
 	private TypeSpec initializer;
+
 	private String pkg;
+
 	private TypeElement configurationType;
+
 	private ElementUtils utils;
+
 	private ClassName className;
+
 	private Imports imports;
+
 	private Resources resources = new Resources();
+
 	private Components components;
 
-	public InitializerSpec(ElementUtils utils, TypeElement type, Imports imports,
-			Components components) {
+	private boolean hasEnabled = false;
+
+	public InitializerSpec(ElementUtils utils, TypeElement type, Imports imports, Components components) {
 		this.utils = utils;
 		this.components = components;
 		this.className = toInitializerNameFromConfigurationName(type);
 		this.pkg = ClassName.get(type).packageName();
-		type = imports.getImports().containsKey(type)
-				&& type.getKind() == ElementKind.ANNOTATION_TYPE
-						? imports.getImports().get(type).iterator().next()
-						: type;
+		type = imports.getImports().containsKey(type) && type.getKind() == ElementKind.ANNOTATION_TYPE
+				? imports.getImports().get(type).iterator().next() : type;
 		this.configurationType = type;
 		this.imports = imports;
-		for (TypeElement imported : utils.getTypesFromAnnotation(type,
-				SpringClassNames.IMPORT.toString(), "value")) {
+		for (TypeElement imported : utils.getTypesFromAnnotation(type, SpringClassNames.IMPORT.toString(), "value")) {
 			imports.addImport(type, imported);
 		}
-		for (String imported : utils.getStringsFromAnnotation(type,
-				SpringClassNames.IMPORT_RESOURCE.toString(), "value")) {
+		for (String imported : utils.getStringsFromAnnotation(type, SpringClassNames.IMPORT_RESOURCE.toString(),
+				"value")) {
 			resources.addResource(type, imported);
 		}
 	}
@@ -115,8 +123,50 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		Builder builder = TypeSpec.classBuilder(getClassName());
 		builder.addSuperinterface(SpringClassNames.INITIALIZER_TYPE);
 		builder.addModifiers(Modifier.PUBLIC);
+		this.hasEnabled = maybeAddEnabled(builder);
 		builder.addMethod(createInitializer());
 		return builder.build();
+	}
+
+	private boolean maybeAddEnabled(Builder builder) {
+		boolean conditional = utils.hasAnnotation(this.configurationType,
+				SpringClassNames.CONDITIONAL_ON_CLASS.toString());
+		if (!conditional) {
+			return false;
+		}
+		AnnotationMirror anno = utils.getAnnotation(this.configurationType,
+				SpringClassNames.CONDITIONAL_ON_CLASS.toString());
+		Map<? extends ExecutableElement, ? extends AnnotationValue> values = anno.getElementValues();
+		List<TypeMirror> types = new ArrayList<>();
+		for (Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : values.entrySet()) {
+			if (entry.getKey().toString().equals("value()")) {
+				@SuppressWarnings("unchecked")
+				List<AnnotationValue> value = (List<AnnotationValue>) entry.getValue().getValue();
+				for (AnnotationValue type : value) {
+					TypeMirror mirror = (TypeMirror) type.getValue();
+					types.add(mirror);
+				}
+			}
+			// TODO: enumerate class names as well
+		}
+		if (types.isEmpty()) {
+			return false;
+		}
+		builder.addField(TypeName.BOOLEAN, "enabled", Modifier.STATIC, Modifier.PRIVATE, Modifier.FINAL);
+		com.squareup.javapoet.CodeBlock.Builder code = CodeBlock.builder();
+		code.add("enabled =\n");
+		for (int i = 0; i < types.size(); i++) {
+			TypeMirror type = types.get(i);
+			code.add("$T.isPresent(\"$L\", null)", SpringClassNames.CLASS_UTILS, utils.asElement(type));
+			if (i < types.size() - 1) {
+				code.add(" &&\n");
+			}
+			else {
+				code.add(";\n");
+			}
+		}
+		builder.addStaticBlock(code.build());
+		return true;
 	}
 
 	public static ClassName toInitializerNameFromConfigurationName(TypeElement type) {
@@ -142,8 +192,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 
 	private void addRegistrarInvokers(MethodSpec.Builder builder) {
 		addImportInvokers(builder, configurationType);
-		List<? extends AnnotationMirror> annotationMirrors = configurationType
-				.getAnnotationMirrors();
+		List<? extends AnnotationMirror> annotationMirrors = configurationType.getAnnotationMirrors();
 		for (AnnotationMirror am : annotationMirrors) {
 			// Looking up something like @EnableBar
 			TypeElement element = (TypeElement) am.getAnnotationType().asElement();
@@ -156,49 +205,44 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		if (registrarInitializers != null) {
 			for (TypeElement imported : registrarInitializers) {
 				if (utils.isImporter(imported)) {
-					builder.addStatement(
-							"context.getBeanFactory().getBean($T.class).add($T.class, \"$L\")",
-							SpringClassNames.IMPORT_REGISTRARS, configurationType,
-							imported.getQualifiedName());
+					builder.addStatement("context.getBeanFactory().getBean($T.class).add($T.class, \"$L\")",
+							SpringClassNames.IMPORT_REGISTRARS, configurationType, imported.getQualifiedName());
 				}
-				else if (utils.getPackage(imported).equals(pkg)
-						|| components.getAll().contains(imported)) {
-					builder.addStatement("new $T().initialize(context)", InitializerSpec
-							.toInitializerNameFromConfigurationName(imported));
+				else if (utils.getPackage(imported).equals(pkg) || components.getAll().contains(imported)) {
+					builder.addStatement("new $T().initialize(context)",
+							InitializerSpec.toInitializerNameFromConfigurationName(imported));
 				}
 				else {
-					builder.addStatement(
-							"context.getBeanFactory().getBean($T.class).add($T.class, \"$L\")",
-							SpringClassNames.IMPORT_REGISTRARS, configurationType,
-							imported.getQualifiedName());
+					builder.addStatement("context.getBeanFactory().getBean($T.class).add($T.class, \"$L\")",
+							SpringClassNames.IMPORT_REGISTRARS, configurationType, imported.getQualifiedName());
 				}
 			}
 		}
 	}
 
 	private void addBeanMethods(MethodSpec.Builder builder, TypeElement type) {
-		boolean conditional = utils.hasAnnotation(type,
-				SpringClassNames.CONDITIONAL.toString());
+		boolean conditional = utils.hasAnnotation(type, SpringClassNames.CONDITIONAL.toString());
+		if (this.hasEnabled) {
+			builder.beginControlFlow("if ($T.enabled)", this.className);
+		}
 		if (conditional) {
-			builder.addStatement(
-					"$T conditions = context.getBeanFactory().getBean($T.class)",
-					SpringClassNames.CONDITION_SERVICE,
-					SpringClassNames.CONDITION_SERVICE);
+			builder.addStatement("$T conditions = context.getBeanFactory().getBean($T.class)",
+					SpringClassNames.CONDITION_SERVICE, SpringClassNames.CONDITION_SERVICE);
 			builder.beginControlFlow("if (conditions.matches($T.class))", type);
 		}
-		builder.beginControlFlow(
-				"if (context.getBeanFactory().getBeanNamesForType($T.class).length==0)",
-				type);
+		builder.beginControlFlow("if (context.getBeanFactory().getBeanNamesForType($T.class).length==0)", type);
 		boolean conditionsAvailable = addScannedComponents(builder, conditional);
 		addNewBeanForConfig(builder, type);
 		for (ExecutableElement method : getBeanMethods(type)) {
-			conditionsAvailable |= createBeanMethod(builder, method, type,
-					conditionsAvailable);
+			conditionsAvailable |= createBeanMethod(builder, method, type, conditionsAvailable);
 		}
 		addResources(builder);
 		addRegistrarInvokers(builder);
 		builder.endControlFlow();
 		if (conditional) {
+			builder.endControlFlow();
+		}
+		if (this.hasEnabled) {
 			builder.endControlFlow();
 		}
 	}
@@ -207,21 +251,17 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		Set<String> locations = resources.getResources().get(configurationType);
 		if (locations != null) {
 			for (String location : locations) {
-				builder.addStatement(
-						"context.getBeanFactory().getBean($T.class).add($T.class, \"$L\")",
+				builder.addStatement("context.getBeanFactory().getBean($T.class).add($T.class, \"$L\")",
 						SpringClassNames.IMPORT_REGISTRARS, configurationType, location);
 			}
 		}
 	}
 
-	private boolean addScannedComponents(MethodSpec.Builder builder,
-			boolean conditional) {
+	private boolean addScannedComponents(MethodSpec.Builder builder, boolean conditional) {
 		Set<TypeElement> set = components.getComponents().get(configurationType);
 		boolean filtered = false;
-		if (!utils
-				.getAnnotationsFromAnnotation(configurationType,
-						SpringClassNames.COMPONENT_SCAN.toString(), "excludeFilters")
-				.isEmpty()) {
+		if (!utils.getAnnotationsFromAnnotation(configurationType, SpringClassNames.COMPONENT_SCAN.toString(),
+				"excludeFilters").isEmpty()) {
 			filtered = true;
 		}
 		if (set != null) {
@@ -229,34 +269,27 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 				if (!imported.equals(configurationType)) {
 					if (filtered) {
 						if (!conditional) {
-							builder.addStatement(
-									"$T conditions = context.getBeanFactory().getBean($T.class)",
-									SpringClassNames.CONDITION_SERVICE,
-									SpringClassNames.CONDITION_SERVICE);
+							builder.addStatement("$T conditions = context.getBeanFactory().getBean($T.class)",
+									SpringClassNames.CONDITION_SERVICE, SpringClassNames.CONDITION_SERVICE);
 							conditional = true;
 						}
 						includes(builder, imported);
 					}
-					if (utils.hasAnnotation(imported,
-							SpringClassNames.CONFIGURATION.toString())) {
+					if (utils.hasAnnotation(imported, SpringClassNames.CONFIGURATION.toString())) {
 						builder.addStatement("new $T().initialize(context)",
-								InitializerSpec.toInitializerNameFromConfigurationName(
-										imported));
+								InitializerSpec.toInitializerNameFromConfigurationName(imported));
 					}
 					else {
 						if (imported.getModifiers().contains(Modifier.PUBLIC)) {
 							ExecutableElement constructor = getConstructor(imported);
 							Parameters params = autowireParamsForMethod(constructor);
-							builder.addStatement(
-									"context.registerBean($T.class, () -> new $T("
-											+ params.format + "))",
+							builder.addStatement("context.registerBean($T.class, () -> new $T(" + params.format + "))",
 									ArrayUtils.merge(imported, imported, params.args));
 						}
 						else {
 							builder.addStatement(
 									"context.registerBean($T.resolveClassName(\"$L\", context.getClassLoader()))",
-									SpringClassNames.CLASS_UTILS,
-									imported.getQualifiedName());
+									SpringClassNames.CLASS_UTILS, imported.getQualifiedName());
 
 						}
 					}
@@ -269,14 +302,12 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		return conditional;
 	}
 
-	private void includes(com.squareup.javapoet.MethodSpec.Builder builder,
-			TypeElement imported) {
+	private void includes(com.squareup.javapoet.MethodSpec.Builder builder, TypeElement imported) {
 		if (imported.getModifiers().contains(Modifier.PUBLIC)) {
 			builder.beginControlFlow("if (conditions.includes($T.class))", imported);
 		}
 		else {
-			builder.beginControlFlow(
-					"if (conditions.includes($T.resolveClassName(\"$L\", context.getClassLoader())))",
+			builder.beginControlFlow("if (conditions.includes($T.resolveClassName(\"$L\", context.getClassLoader())))",
 					SpringClassNames.CLASS_UTILS, imported.getQualifiedName());
 		}
 	}
@@ -284,26 +315,22 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 	private void addNewBeanForConfig(MethodSpec.Builder builder, TypeElement type) {
 		ExecutableElement constructor = getConstructor(type);
 		Parameters params = autowireParamsForMethod(constructor);
-		builder.addStatement(
-				"context.registerBean($T.class, () -> new $T(" + params.format + "))",
+		builder.addStatement("context.registerBean($T.class, () -> new $T(" + params.format + "))",
 				ArrayUtils.merge(type, type, params.args));
 	}
 
-	private boolean createBeanMethod(MethodSpec.Builder builder,
-			ExecutableElement beanMethod, TypeElement type, boolean conditionsAvailable) {
+	private boolean createBeanMethod(MethodSpec.Builder builder, ExecutableElement beanMethod, TypeElement type,
+			boolean conditionsAvailable) {
 		// TODO will need to handle bean methods in private configs
 		try {
 			TypeMirror returnType = utils.getReturnType(beanMethod);
 
 			Element returnTypeElement = utils.asElement(returnType);
-			boolean conditional = utils.hasAnnotation(beanMethod,
-					SpringClassNames.CONDITIONAL.toString());
+			boolean conditional = utils.hasAnnotation(beanMethod, SpringClassNames.CONDITIONAL.toString());
 			if (conditional) {
 				if (!conditionsAvailable) {
-					builder.addStatement(
-							"$T conditions = context.getBeanFactory().getBean($T.class)",
-							SpringClassNames.CONDITION_SERVICE,
-							SpringClassNames.CONDITION_SERVICE);
+					builder.addStatement("$T conditions = context.getBeanFactory().getBean($T.class)",
+							SpringClassNames.CONDITION_SERVICE, SpringClassNames.CONDITION_SERVICE);
 				}
 			}
 
@@ -312,32 +339,24 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 				if (conditional) {
 					builder.beginControlFlow(
 							"if (conditions.matches($T.class, $T.resolveClassName(\"$L\", context.getClassLoader())))",
-							type, SpringClassNames.CLASS_UTILS,
-							utils.erasure(returnType));
+							type, SpringClassNames.CLASS_UTILS, utils.erasure(returnType));
 				}
-				utils.printMessage(Kind.WARNING,
-						"Generating source for bean method, type involved is private: "
-								+ beanMethod.getEnclosingElement() + "." + beanMethod);
-				builder.addStatement(
-						"context.registerBean($T.resolveClassName(\"$L\", context.getClassLoader()))",
-						SpringClassNames.CLASS_UTILS,
-						((TypeElement) returnTypeElement).getQualifiedName());
+				utils.printMessage(Kind.WARNING, "Generating source for bean method, type involved is private: "
+						+ beanMethod.getEnclosingElement() + "." + beanMethod);
+				builder.addStatement("context.registerBean($T.resolveClassName(\"$L\", context.getClassLoader()))",
+						SpringClassNames.CLASS_UTILS, ((TypeElement) returnTypeElement).getQualifiedName());
 
 			}
 			else {
 
 				if (conditional) {
-					builder.beginControlFlow(
-							"if (conditions.matches($T.class, $T.class))", type,
+					builder.beginControlFlow("if (conditions.matches($T.class, $T.class))", type,
 							utils.erasure(returnType));
 				}
 				Parameters params = autowireParamsForMethod(beanMethod);
 
-				builder.addStatement(
-						"context.registerBean(" + "\"" + beanMethod.getSimpleName()
-								+ "\", $T.class, "
-								+ supplier(type, beanMethod, params.format)
-								+ customizer(type, beanMethod, params) + ")",
+				builder.addStatement("context.registerBean(" + "\"" + beanMethod.getSimpleName() + "\", $T.class, "
+						+ supplier(type, beanMethod, params.format) + customizer(type, beanMethod, params) + ")",
 						ArrayUtils.merge(utils.erasure(returnType), type, params.args));
 			}
 
@@ -348,24 +367,23 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 			return conditional;
 		}
 		catch (Throwable t) {
-			throw new RuntimeException("Problem performing createBeanMethod for method "
-					+ type.toString() + "." + beanMethod.toString(), t);
+			throw new RuntimeException(
+					"Problem performing createBeanMethod for method " + type.toString() + "." + beanMethod.toString(),
+					t);
 		}
 	}
 
-	private String customizer(TypeElement type, ExecutableElement beanMethod,
-			Parameters params) {
+	private String customizer(TypeElement type, ExecutableElement beanMethod, Parameters params) {
 		StringBuilder builder = new StringBuilder(", ");
 		boolean hasInit = false;
 		StringBuilder body = new StringBuilder();
 		if (utils.hasAnnotation(beanMethod, SpringClassNames.BEAN.toString())) {
-			String methodName = utils.getStringFromAnnotation(beanMethod,
-					SpringClassNames.BEAN.toString(), "initMethod");
+			String methodName = utils.getStringFromAnnotation(beanMethod, SpringClassNames.BEAN.toString(),
+					"initMethod");
 			if (methodName != null && methodName.length() > 0) {
 				body.append("def.setInitMethodName(\"" + methodName + "\")");
 			}
-			methodName = utils.getStringFromAnnotation(beanMethod,
-					SpringClassNames.BEAN.toString(), "destroyMethod");
+			methodName = utils.getStringFromAnnotation(beanMethod, SpringClassNames.BEAN.toString(), "destroyMethod");
 			if (methodName != null && methodName.length() > 0) {
 				hasInit = body.length() > 0;
 				if (hasInit && body.indexOf("{") != 0) {
@@ -375,10 +393,8 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 				body.append("def.setDestroyMethodName(\"" + methodName + "\")");
 			}
 		}
-		if (utils.hasAnnotation(beanMethod,
-				SpringClassNames.CONFIGURATION_PROPERTIES.toString())
-				|| utils.implementsInterface(
-						(TypeElement) utils.asElement(beanMethod.getReturnType()),
+		if (utils.hasAnnotation(beanMethod, SpringClassNames.CONFIGURATION_PROPERTIES.toString())
+				|| utils.implementsInterface((TypeElement) utils.asElement(beanMethod.getReturnType()),
 						SpringClassNames.FACTORY_BEAN)) {
 			String methodName = beanMethod.getSimpleName().toString();
 			// The bean name for the @Configuration class is the class name
@@ -398,13 +414,11 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 	}
 
 	private Parameters autowireParamsForMethod(ExecutableElement method) {
-		List<Parameter> parameterTypes = getParameters(method, this::parameterAccessor)
-				.collect(Collectors.toList());
+		List<Parameter> parameterTypes = getParameters(method, this::parameterAccessor).collect(Collectors.toList());
 
-		String format = parameterTypes.stream().map(param -> param.format)
-				.collect(Collectors.joining(","));
-		Object[] args = parameterTypes.stream().flatMap(param -> param.types.stream())
-				.collect(Collectors.toList()).toArray();
+		String format = parameterTypes.stream().map(param -> param.format).collect(Collectors.joining(","));
+		Object[] args = parameterTypes.stream().flatMap(param -> param.types.stream()).collect(Collectors.toList())
+				.toArray();
 
 		Parameters params = new Parameters();
 		params.format = format;
@@ -412,20 +426,17 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		return params;
 	}
 
-	private String supplier(TypeElement owner, ExecutableElement beanMethod,
-			String parameterVariables) {
+	private String supplier(TypeElement owner, ExecutableElement beanMethod, String parameterVariables) {
 		boolean exception = utils.throwsCheckedException(beanMethod);
 		String code;
 		if (!beanMethod.getModifiers().contains(Modifier.STATIC)) {
-			code = "context.getBean($T.class)." + beanMethod.getSimpleName() + "("
-					+ parameterVariables + ")";
+			code = "context.getBean($T.class)." + beanMethod.getSimpleName() + "(" + parameterVariables + ")";
 		}
 		else {
 			code = "$T." + beanMethod.getSimpleName() + "(" + parameterVariables + ")";
 		}
 		if (exception) {
-			return "() -> { try { return " + code
-					+ "; } catch (Exception e) { throw new IllegalStateException(e); } }";
+			return "() -> { try { return " + code + "; } catch (Exception e) { throw new IllegalStateException(e); } }";
 		}
 		return "() -> " + code;
 	}
@@ -445,18 +456,15 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 					if (value.toString().equals(Map.class.getName())) {
 						result.format = "$T.map(context, $T.class)";
 						result.types.add(SpringClassNames.OBJECT_UTILS);
-						Iterator<? extends TypeMirror> iterator = ((DeclaredType) type)
-								.getTypeArguments().iterator();
+						Iterator<? extends TypeMirror> iterator = ((DeclaredType) type).getTypeArguments().iterator();
 						iterator.next();
 						type = iterator.next();
 						value = TypeName.get(utils.erasure(type));
 						result.types.add(value);
 					}
-					else if (type instanceof DeclaredType
-							&& !((DeclaredType) type).getTypeArguments().isEmpty()) {
+					else if (type instanceof DeclaredType && !((DeclaredType) type).getTypeArguments().isEmpty()) {
 						result.format = "context.getBeanProvider($T.forClassWithGenerics($T.class, "
-								+ ((DeclaredType) type).getTypeArguments().stream()
-										.map(thing -> "$T.class")
+								+ ((DeclaredType) type).getTypeArguments().stream().map(thing -> "$T.class")
 										.collect(Collectors.joining(", "))
 								+ "))";
 						result.types.add(SpringClassNames.RESOLVABLE_TYPE);
@@ -489,16 +497,11 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 				}
 			}
 		}
-		else if (utils.implementsInterface(typeElement,
-				SpringClassNames.APPLICATION_CONTEXT)
-				|| utils.implementsInterface(typeElement,
-						SpringClassNames.RESOURCE_LOADER)
-				|| utils.implementsInterface(typeElement,
-						SpringClassNames.APPLICATION_EVENT_PUBLISHER)
-				|| paramTypename.equals(
-						SpringClassNames.CONFIGURABLE_APPLICATION_CONTEXT.toString())) {
-			if (utils.implementsInterface(typeElement,
-					SpringClassNames.WEB_APPLICATION_CONTEXT)) {
+		else if (utils.implementsInterface(typeElement, SpringClassNames.APPLICATION_CONTEXT)
+				|| utils.implementsInterface(typeElement, SpringClassNames.RESOURCE_LOADER)
+				|| utils.implementsInterface(typeElement, SpringClassNames.APPLICATION_EVENT_PUBLISHER)
+				|| paramTypename.equals(SpringClassNames.CONFIGURABLE_APPLICATION_CONTEXT.toString())) {
+			if (utils.implementsInterface(typeElement, SpringClassNames.WEB_APPLICATION_CONTEXT)) {
 				result.format = "($T)context";
 				result.types.add(ClassName.get(typeElement));
 			}
@@ -517,8 +520,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 				if (!args.isEmpty()) {
 					TypeMirror type = args.iterator().next();
 					TypeName value = TypeName.get(utils.erasure(type));
-					if (type instanceof DeclaredType
-							&& !((DeclaredType) type).getTypeArguments().isEmpty()) {
+					if (type instanceof DeclaredType && !((DeclaredType) type).getTypeArguments().isEmpty()) {
 						// The target type itself is generic. So far we only support one
 						// level of generic parameters. Further levels could be supported
 						// by adding calls to ResolvableType
@@ -550,10 +552,8 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 			result.types.add(TypeName.get(utils.erasure(arrayType.getComponentType())));
 
 		}
-		else if (paramType instanceof DeclaredType
-				&& (utils.implementsInterface(typeElement, ClassName.get(List.class))
-						|| utils.implementsInterface(typeElement,
-								ClassName.get(Collection.class)))) {
+		else if (paramType instanceof DeclaredType && (utils.implementsInterface(typeElement, ClassName.get(List.class))
+				|| utils.implementsInterface(typeElement, ClassName.get(Collection.class)))) {
 			DeclaredType declaredType = (DeclaredType) paramType;
 			List<? extends TypeMirror> args = declaredType.getTypeArguments();
 			// TODO: make this work with more general collection elements types
@@ -561,8 +561,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 				TypeMirror type = args.iterator().next();
 				TypeName value = TypeName.get(utils.erasure(type));
 				result.format = "context.getBeanProvider($T.class).stream().collect($T.toList())";
-				if (type instanceof DeclaredType
-						&& !((DeclaredType) type).getTypeArguments().isEmpty()) {
+				if (type instanceof DeclaredType && !((DeclaredType) type).getTypeArguments().isEmpty()) {
 					result.format = "$T.generic(context.getBeanProvider($T.forClassWithGenerics($T.class, $T.class)).stream().collect($T.toList()))";
 					result.types.add(SpringClassNames.OBJECT_UTILS);
 					result.types.add(SpringClassNames.RESOLVABLE_TYPE);
@@ -607,8 +606,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 				result.types.add(TypeName.get(utils.erasure(param)));
 			}
 			if (qualifier != null) {
-				code.append("$T.qualifiedBeanOfType(context, $T.class, \"" + qualifier
-						+ "\")");
+				code.append("$T.qualifiedBeanOfType(context, $T.class, \"" + qualifier + "\")");
 				result.types.add(SpringClassNames.BEAN_FACTORY_ANNOTATION_UTILS);
 				result.types.add(TypeName.get(utils.erasure(param)));
 			}
@@ -624,8 +622,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		return result;
 	}
 
-	private <T> Stream<T> getParameters(ExecutableElement method,
-			Function<VariableElement, T> mapper) {
+	private <T> Stream<T> getParameters(ExecutableElement method, Function<VariableElement, T> mapper) {
 		return method.getParameters().stream().map(mapper);
 	}
 
@@ -633,8 +630,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		Set<Name> seen = new HashSet<>();
 		List<ExecutableElement> beanMethods = new ArrayList<>();
 		while (type != null) {
-			for (ExecutableElement candidate : ElementFilter
-					.methodsIn(type.getEnclosedElements())) {
+			for (ExecutableElement candidate : ElementFilter.methodsIn(type.getEnclosedElements())) {
 				if (isBeanMethod(candidate) && seen.add(candidate.getSimpleName())) {
 					beanMethods.add(candidate);
 				}
@@ -647,8 +643,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 	private ExecutableElement getConstructor(TypeElement type) {
 		Set<Name> seen = new HashSet<>();
 		List<ExecutableElement> methods = new ArrayList<>();
-		for (ExecutableElement candidate : ElementFilter
-				.constructorsIn(type.getEnclosedElements())) {
+		for (ExecutableElement candidate : ElementFilter.constructorsIn(type.getEnclosedElements())) {
 			if (seen.add(candidate.getSimpleName())) {
 				methods.add(candidate);
 			}
@@ -681,12 +676,17 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 	}
 
 	static class Parameter {
+
 		private String format;
+
 		private List<TypeName> types = new ArrayList<>();
+
 	}
 
 	static class Parameters {
+
 		private String format;
+
 		private Object[] args;
 
 		public void addArg(Object arg) {
@@ -695,6 +695,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 			args[args.length - 1] = arg;
 			this.args = args;
 		}
+
 	}
 
 	@Override

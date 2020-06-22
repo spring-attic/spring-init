@@ -67,10 +67,12 @@ public class SlimBenchmarkIT {
 		public static enum Sample {
 
 			jlog, demo, actr, conf;
+			// N.B. "conf" is unreliable, not sure it really works with the initializer
+			// approach
 
 		}
 
-		@Param("conf")
+		@Param({ "demo", "actr" }) // ("conf")
 		protected Sample sample = Sample.demo;
 
 		public SlimState() {
