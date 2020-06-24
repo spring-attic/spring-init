@@ -70,9 +70,8 @@ To use functional versions of Spring Boot autoconfiguration you need to include 
 ```
 		<dependency>
 			<groupId>org.springframework.experimental</groupId>
-			<artifactId>spring-boot-autoconfigure</artifactId>
+			<artifactId>spring-boot-autoconfigure-func</artifactId>
 			<version>${generated.version}</version>
-            <classifier>func</classifier>
 		</dependency>
 ```
 

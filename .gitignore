@@ -1,3 +1,4 @@
+slim-configuration-processor.properties
 target/
 !.mvn/wrapper/maven-wrapper.jar
 \#*

@@ -148,26 +148,26 @@ if ! [ -e $cache ]; then
     git clone https://github.com/spring-projects/spring-boot $cache
 fi
 
-(cd $cache; git fetch --tags && git checkout v2.3.0.RELEASE)
+(cd $cache; git fetch --tags && git checkout v2.3.1.RELEASE)
 (cd $cache; ./gradlew publishMavenPublicationToMavenLocal -x test)
 
 src=$cache/spring-boot-project/spring-boot-autoconfigure
 tgt=`dirname $0`/autoconfigure
 init $tgt $src
 (cd $cache; mkdir -p build && optionals spring-boot-autoconfigure > build/opts-autoconfigure)
-generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml spring-boot-autoconfigure 2.3.0.BUILD-SNAPSHOT $cache/build/opts-autoconfigure
+generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml spring-boot-autoconfigure 2.3.1.BUILD-SNAPSHOT $cache/build/opts-autoconfigure
 
 src=$cache/spring-boot-project/spring-boot-actuator-autoconfigure
 tgt=`dirname $0`/actuator
 init $tgt $src
 (cd $cache; mkdir -p build && optionals spring-boot-actuator-autoconfigure > build/opts-actuator-autoconfigure)
-generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml spring-boot-actuator-autoconfigure 2.3.0.BUILD-SNAPSHOT $cache/build/opts-actuator-autoconfigure
+generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml spring-boot-actuator-autoconfigure 2.3.1.BUILD-SNAPSHOT $cache/build/opts-actuator-autoconfigure
 
 src=$cache/spring-boot-project/spring-boot-test-autoconfigure
 tgt=`dirname $0`/test
 init $tgt $src
 (cd $cache; mkdir -p build && optionals spring-boot-test-autoconfigure > build/opts-test-autoconfigure)
-generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml spring-boot-test-autoconfigure 2.3.0.BUILD-SNAPSHOT $cache/build/opts-test-autoconfigure
+generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml spring-boot-test-autoconfigure 2.3.1.BUILD-SNAPSHOT $cache/build/opts-test-autoconfigure
 
 cache=`dirname $0`/sources/spring-security
 if ! [ -e $cache ]; then
