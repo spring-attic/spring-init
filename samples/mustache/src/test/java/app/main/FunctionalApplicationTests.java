@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.web.server.WebHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,13 +33,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class FunctionalApplicationTests {
 
 	@Autowired
-	private WebHandler webHandler;
+	private SampleController webHandler;
 
 	private WebTestClient client;
 
 	@BeforeEach
 	public void init() {
-		client = WebTestClient.bindToWebHandler(webHandler).build();
+		client = WebTestClient.bindToController(webHandler).build();
 	}
 
 	@Test
