@@ -119,7 +119,7 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 			logger.info("Preparing application context");
 			SpringApplication application = prepared.getSpringApplication();
 			findInitializers(application);
-			WebApplicationType type = application.getWebApplicationType();
+			WebApplicationType type = getWebApplicationType(application, prepared.getEnvironment());
 			Class<?> contextType = getApplicationContextType(application);
 			if (type == WebApplicationType.NONE) {
 				if (contextType == AnnotationConfigApplicationContext.class || contextType == null) {
@@ -137,6 +137,17 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 				}
 			}
 		}
+	}
+
+	private WebApplicationType getWebApplicationType(SpringApplication application,
+			ConfigurableEnvironment environment) {
+		if (environment.getProperty("spring.main.web-application-type") != null) {
+			// Environment hasn't been bound to SpringApplication yet so if this is set we
+			// won't know it
+			return WebApplicationType
+					.valueOf(environment.getProperty("spring.main.web-application-type").toUpperCase());
+		}
+		return application.getWebApplicationType();
 	}
 
 	private void findInitializers(SpringApplication application) {
