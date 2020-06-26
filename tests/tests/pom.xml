@@ -6,13 +6,13 @@
 
 	<groupId>org.springframework.experimental</groupId>
 	<artifactId>spring-init-tests</artifactId>
-	<version>0.0.1.BUILD-SNAPSHOT</version>
+	<version>0.0.1-SNAPSHOT</version>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.3.1.RELEASE</version>
-		<relativePath/>
+		<version>2.4.0-SNAPSHOT</version>
+		<relativePath />
 	</parent>
 
 	<dependencies>
@@ -45,12 +45,23 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<!-- TODO: get rid of this -->
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.hamcrest</groupId>
+					<artifactId>hamcrest-core</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 	</dependencies>
 
 	<properties>
 		<java.version>1.8</java.version>
 		<start-class>app.main.SampleApplication</start-class>
-		<generated.version>2.3.1.BUILD-SNAPSHOT</generated.version>
+		<generated.version>2.4.0-SNAPSHOT</generated.version>
 	</properties>
 
 	<build>

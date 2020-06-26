@@ -53,7 +53,7 @@ function generate() {
 	<parent>
     	<groupId>org.springframework.experimental</groupId>
 		<artifactId>spring-init-generated</artifactId>
-		<version>0.0.1.BUILD-SNAPSHOT</version>
+		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
@@ -61,7 +61,7 @@ function generate() {
 
 	<properties>
 		<java.version>1.8</java.version>
-		<slim.version>0.0.1.BUILD-SNAPSHOT</slim.version>
+		<slim.version>0.0.1-SNAPSHOT</slim.version>
 	</properties>
 
 	<build>
@@ -148,38 +148,38 @@ if ! [ -e $cache ]; then
     git clone https://github.com/spring-projects/spring-boot $cache
 fi
 
-(cd $cache; git fetch --tags && git checkout v2.3.1.RELEASE)
+(cd $cache; git fetch --tags && git checkout master)
 (cd $cache; ./gradlew publishMavenPublicationToMavenLocal -x test)
 
 src=$cache/spring-boot-project/spring-boot-autoconfigure
 tgt=`dirname $0`/autoconfigure
 init $tgt $src
 (cd $cache; mkdir -p build && optionals spring-boot-autoconfigure > build/opts-autoconfigure)
-generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml spring-boot-autoconfigure 2.3.1.BUILD-SNAPSHOT $cache/build/opts-autoconfigure
+generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml spring-boot-autoconfigure 2.4.0-SNAPSHOT $cache/build/opts-autoconfigure
 
 src=$cache/spring-boot-project/spring-boot-actuator-autoconfigure
 tgt=`dirname $0`/actuator
 init $tgt $src
 (cd $cache; mkdir -p build && optionals spring-boot-actuator-autoconfigure > build/opts-actuator-autoconfigure)
-generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml spring-boot-actuator-autoconfigure 2.3.1.BUILD-SNAPSHOT $cache/build/opts-actuator-autoconfigure
+generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml spring-boot-actuator-autoconfigure 2.4.0-SNAPSHOT $cache/build/opts-actuator-autoconfigure
 
 src=$cache/spring-boot-project/spring-boot-test-autoconfigure
 tgt=`dirname $0`/test
 init $tgt $src
 (cd $cache; mkdir -p build && optionals spring-boot-test-autoconfigure > build/opts-test-autoconfigure)
-generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml spring-boot-test-autoconfigure 2.3.1.BUILD-SNAPSHOT $cache/build/opts-test-autoconfigure
+generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml spring-boot-test-autoconfigure 2.4.0-SNAPSHOT $cache/build/opts-test-autoconfigure
 
 cache=`dirname $0`/sources/spring-security
 if ! [ -e $cache ]; then
     git clone https://github.com/spring-projects/spring-security $cache
 fi
 
-(cd $cache; git fetch --tags && git checkout 5.3.3.RELEASE)
+(cd $cache; git fetch --tags && git checkout master)
 (cd $cache/config; ../gradlew install -x test)
 
 src=$cache/config
 tgt=`dirname $0`/security
 init $tgt $src
-generate $src/build/poms/pom-default.xml $tgt/pom.xml spring-security-config 5.3.3.BUILD-SNAPSHOT
+generate $src/build/poms/pom-default.xml $tgt/pom.xml spring-security-config 5.4.0-SNAPSHOT
 
 

@@ -48,7 +48,7 @@ import org.springframework.slim.processor.nested.NestedInterface;
 import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Simple tests around processor invocation.

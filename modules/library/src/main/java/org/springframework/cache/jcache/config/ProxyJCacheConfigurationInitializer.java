@@ -22,19 +22,19 @@ import org.springframework.cache.jcache.interceptor.JCacheOperationSource;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.support.GenericApplicationContext;
 
-public class ProxyJCacheConfigurationInitializer
-		implements ApplicationContextInitializer<GenericApplicationContext> {
+//Only a couple of @Configuration beans in Spring Framework. This is one that Boot doesn't extend or block.
+public class ProxyJCacheConfigurationInitializer implements ApplicationContextInitializer<GenericApplicationContext> {
 
 	@Override
 	public void initialize(GenericApplicationContext context) {
-		context.registerBean(ProxyJCacheConfiguration.class,
-				() -> new ProxyJCacheConfiguration());
+		context.registerBean(ProxyJCacheConfiguration.class, () -> new ProxyJCacheConfiguration());
 		context.registerBean(BeanFactoryJCacheOperationSourceAdvisor.class,
-				() -> context.getBean(ProxyJCacheConfiguration.class).cacheAdvisor());
-		context.registerBean(JCacheInterceptor.class,
-				() -> context.getBean(ProxyJCacheConfiguration.class).cacheInterceptor());
-		context.registerBean(JCacheOperationSource.class, () -> context
-				.getBean(ProxyJCacheConfiguration.class).cacheOperationSource());
+				() -> context.getBean(ProxyJCacheConfiguration.class).cacheAdvisor(
+						context.getBean(JCacheOperationSource.class), context.getBean(JCacheInterceptor.class)));
+		context.registerBean(JCacheInterceptor.class, () -> context.getBean(ProxyJCacheConfiguration.class)
+				.cacheInterceptor(context.getBean(JCacheOperationSource.class)));
+		context.registerBean(JCacheOperationSource.class,
+				() -> context.getBean(ProxyJCacheConfiguration.class).cacheOperationSource());
 	}
 
 }
