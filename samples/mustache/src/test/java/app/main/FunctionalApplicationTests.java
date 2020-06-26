@@ -16,12 +16,11 @@
 
 package app.main;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,22 +28,15 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Dave Syer
  *
  */
-@SpringBootTest("debug=true")
+@SpringBootTest(properties = "debug=true", webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class FunctionalApplicationTests {
 
 	@Autowired
-	private SampleController webHandler;
-
-	private WebTestClient client;
-
-	@BeforeEach
-	public void init() {
-		client = WebTestClient.bindToController(webHandler).build();
-	}
+	private TestRestTemplate client;
 
 	@Test
 	public void test() {
-		client.get().uri("/").exchange().expectBody(String.class).value(value -> assertThat(value).contains("Hello"));
+		assertThat(client.getForObject("/", String.class)).contains("Hello");
 	}
 
 }
