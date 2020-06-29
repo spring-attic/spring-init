@@ -148,7 +148,8 @@ if ! [ -e $cache ]; then
     git clone https://github.com/spring-projects/spring-boot $cache
 fi
 
-(cd $cache; git fetch --tags && git checkout master)
+# If ref is a branch not a tag, remember to reset to origin, not just checkout
+(cd $cache; git fetch --tags && git checkout master && git reset --hard origin/master)
 (cd $cache; ./gradlew publishMavenPublicationToMavenLocal -x test)
 
 src=$cache/spring-boot-project/spring-boot-autoconfigure
@@ -174,7 +175,7 @@ if ! [ -e $cache ]; then
     git clone https://github.com/spring-projects/spring-security $cache
 fi
 
-(cd $cache; git fetch --tags && git checkout master)
+(cd $cache; git fetch --tags && git checkout master && git reset --hard origin/master)
 (cd $cache/config; ../gradlew install -x test)
 
 src=$cache/config
