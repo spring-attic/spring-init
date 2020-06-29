@@ -22,6 +22,8 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.init.func.ConditionService;
 import org.springframework.init.func.FunctionalInstallerImportRegistrars;
 import org.springframework.init.func.ImportRegistrars;
@@ -32,43 +34,38 @@ import org.springframework.util.ClassUtils;
  * @author Dave Syer
  *
  */
-public class TestModuleInitializer
-		implements ApplicationContextInitializer<GenericApplicationContext> {
+public class TestModuleInitializer implements ApplicationContextInitializer<GenericApplicationContext> {
 
 	@Override
 	public void initialize(GenericApplicationContext context) {
-		if (!ClassUtils.isPresent(
-				"org.springframework.boot.test.context.ImportsContextCustomizer",
+		if (!ClassUtils.isPresent("org.springframework.boot.test.context.ImportsContextCustomizer",
 				context.getClassLoader())
-				|| !context.getEnvironment().getProperty("spring.functional.enabled",
-						Boolean.class, true)) {
+				|| !context.getEnvironment().getProperty("spring.functional.enabled", Boolean.class, true)) {
 			// Only used in tests - could move to separate jar
 			return;
 		}
 		ImportRegistrars registrars;
-		if (!context.getBeanFactory()
-				.containsBeanDefinition(ConditionService.class.getName())) {
+		// TODO: extract this logic and share with FunctionalInstallerListener?
+		if (!context.getBeanFactory().containsSingleton(ConditionService.class.getName())) {
+			if (!context.getBeanFactory().containsSingleton(MetadataReaderFactory.class.getName())) {
+				context.getBeanFactory().registerSingleton(MetadataReaderFactory.class.getName(),
+						new CachingMetadataReaderFactory(context.getClassLoader()));
+			}
+			context.getBeanFactory().registerSingleton(ConditionService.class.getName(),
+					new SimpleConditionService(context, context.getBeanFactory(), context.getEnvironment(), context));
 			registrars = new FunctionalInstallerImportRegistrars(context);
-			context.registerBean(ConditionService.class,
-					() -> new SimpleConditionService(context,
-							context.getBeanFactory(), context.getEnvironment(), context));
 			context.registerBean(ImportRegistrars.class, () -> registrars);
 		}
 		else {
-			registrars = context.getBean(ImportRegistrars.class.getName(),
-					ImportRegistrars.class);
+			registrars = context.getBean(ImportRegistrars.class.getName(), ImportRegistrars.class);
 		}
 		for (String name : context.getBeanFactory().getBeanDefinitionNames()) {
 			BeanDefinition definition = context.getBeanFactory().getBeanDefinition(name);
-			if (definition.getBeanClassName()
-					.contains("ImportsContextCustomizer$ImportsConfiguration")) {
+			if (definition.getBeanClassName().contains("ImportsContextCustomizer$ImportsConfiguration")) {
 				SimpleConditionService.EXCLUDES_ENABLED = true;
-				Class<?> testClass = (definition != null)
-						? (Class<?>) definition.getAttribute("testClass")
-						: null;
+				Class<?> testClass = (definition != null) ? (Class<?>) definition.getAttribute("testClass") : null;
 				if (testClass != null) {
-					Set<Import> merged = AnnotatedElementUtils
-							.findAllMergedAnnotations(testClass, Import.class);
+					Set<Import> merged = AnnotatedElementUtils.findAllMergedAnnotations(testClass, Import.class);
 					for (Import ann : merged) {
 						for (Class<?> imported : ann.value()) {
 							registrars.add(testClass, imported);

@@ -19,11 +19,8 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -41,7 +38,6 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.event.ApplicationContextInitializedEvent;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.boot.web.reactive.context.AnnotationConfigReactiveWebApplicationContext;
@@ -63,7 +59,6 @@ import org.springframework.core.PriorityOrdered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.ClassUtils;
@@ -80,13 +75,7 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 	// TODO: make this class stateless
 	private Collection<ApplicationContextInitializer<GenericApplicationContext>> initializers = new LinkedHashSet<>();
 
-	private Collection<ApplicationContextInitializer<GenericApplicationContext>> autos = new LinkedHashSet<>();
-
 	private Set<Class<? extends ApplicationContextInitializer<?>>> added = new LinkedHashSet<>();
-
-	private Set<String> autoTypeNames = new LinkedHashSet<>();
-
-	private Map<Class<?>, Class<? extends ApplicationContextInitializer<?>>> autoTypes = new HashMap<>();
 
 	@Override
 	public boolean supportsEventType(Class<? extends ApplicationEvent> eventType) {
@@ -210,25 +199,6 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 					new SimpleConditionService(context, context.getBeanFactory(), context.getEnvironment(), context));
 			context.registerBean(ImportRegistrars.class, () -> new FunctionalInstallerImportRegistrars(context));
 		}
-		// TODO: do we really need these now?
-		this.autoTypeNames = new HashSet<>(
-				SpringFactoriesLoader.loadFactoryNames(EnableAutoConfiguration.class, context.getClassLoader()));
-		for (String autoName : autoTypeNames) {
-			String typeName = autoName + "Initializer";
-			if (ClassUtils.isPresent(autoName, context.getClassLoader())
-					&& ClassUtils.isPresent(typeName, context.getClassLoader())) {
-				@SuppressWarnings("unchecked")
-				Class<? extends ApplicationContextInitializer<?>> module = (Class<? extends ApplicationContextInitializer<?>>) ClassUtils
-						.resolveClassName(typeName, context.getClassLoader());
-				try {
-					this.autoTypes.put(ClassUtils.resolveClassName(autoName, context.getClassLoader()), module);
-				}
-				catch (Throwable t) {
-					throw new IllegalStateException(
-							"Problem processing @Import/configurations() on " + module.getName(), t);
-				}
-			}
-		}
 		return (ConditionService) context.getBeanFactory().getSingleton(ConditionService.class.getName());
 	}
 
@@ -241,18 +211,6 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Applying initializers: " + initializers);
 		}
-		for (ApplicationContextInitializer<GenericApplicationContext> initializer : initializers) {
-			initializer.initialize(context);
-		}
-		initializers = new ArrayList<>();
-		for (ApplicationContextInitializer<GenericApplicationContext> result : this.autos) {
-			initializers.add(result);
-		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Applying autoconfig " + initializers);
-		}
-		// TODO: sort into autoconfiguration order as well
-		OrderComparator.sort(initializers);
 		for (ApplicationContextInitializer<GenericApplicationContext> initializer : initializers) {
 			initializer.initialize(context);
 		}
@@ -271,12 +229,7 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 			logger.debug("Adding initializer: " + type);
 		}
 		this.added.add(type);
-		if (this.autoTypeNames.contains(type.getName())) {
-			this.autos.add(BeanUtils.instantiateClass(type, ApplicationContextInitializer.class));
-		}
-		else {
-			initializers.add(BeanUtils.instantiateClass(type, ApplicationContextInitializer.class));
-		}
+		initializers.add(BeanUtils.instantiateClass(type, ApplicationContextInitializer.class));
 	}
 
 	public static void invokeAwareMethods(Object target, Environment environment, ResourceLoader resourceLoader,
