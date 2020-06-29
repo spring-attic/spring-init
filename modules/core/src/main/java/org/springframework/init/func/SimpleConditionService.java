@@ -18,9 +18,7 @@ package org.springframework.init.func;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -51,8 +49,6 @@ public class SimpleConditionService implements ConditionService {
 
 	private final ClassLoader classLoader;
 
-	private final Map<Class<?>, AnnotationMetadata> metadata = new ConcurrentHashMap<>();
-
 	private ConfigurableListableBeanFactory beanFactory;
 
 	private MetadataReaderFactory metadataReaderFactory;
@@ -62,7 +58,10 @@ public class SimpleConditionService implements ConditionService {
 		this.beanFactory = beanFactory;
 		this.evaluator = new ConditionEvaluator(registry, environment, resourceLoader);
 		this.classLoader = resourceLoader.getClassLoader();
-		this.metadataReaderFactory = new CachingMetadataReaderFactory(this.classLoader);
+		String metadataFactory = MetadataReaderFactory.class.getName();
+		this.metadataReaderFactory = beanFactory.containsSingleton(metadataFactory)
+				? (CachingMetadataReaderFactory) beanFactory.getSingleton(metadataFactory)
+				: new CachingMetadataReaderFactory(this.classLoader);
 	}
 
 	@Override
@@ -125,15 +124,16 @@ public class SimpleConditionService implements ConditionService {
 		return true;
 	}
 
-	public AnnotationMetadata getMetadata(Class<?> factory) {
-		return metadata.computeIfAbsent(factory, type -> {
-			try {
-				return metadataReaderFactory.getMetadataReader(type.getName()).getAnnotationMetadata();
-			}
-			catch (IOException e) {
-				throw new IllegalStateException(e);
-			}
-		});
+	private AnnotationMetadata getMetadata(Class<?> factory) {
+		if (factory == null) {
+			factory = Object.class;
+		}
+		try {
+			return metadataReaderFactory.getMetadataReader(factory.getName()).getAnnotationMetadata();
+		}
+		catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 }

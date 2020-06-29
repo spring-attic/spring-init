@@ -47,6 +47,8 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -60,6 +62,8 @@ public class FunctionalInstallerImportRegistrars implements BeanDefinitionRegist
 
 	private Set<Imported> deferred = new LinkedHashSet<>();
 
+	private MetadataReaderFactory metadataReaderFactory;
+
 	private enum Phase {
 
 		USER, DEFERRED;
@@ -72,6 +76,10 @@ public class FunctionalInstallerImportRegistrars implements BeanDefinitionRegist
 
 	public FunctionalInstallerImportRegistrars(GenericApplicationContext context) {
 		this.context = context;
+		String metadataFactory = MetadataReaderFactory.class.getName();
+		this.metadataReaderFactory = context.getBeanFactory().containsSingleton(metadataFactory)
+				? (CachingMetadataReaderFactory) context.getBeanFactory().getSingleton(metadataFactory)
+				: new CachingMetadataReaderFactory(context.getClassLoader());
 	}
 
 	@Override
@@ -234,12 +242,11 @@ public class FunctionalInstallerImportRegistrars implements BeanDefinitionRegist
 
 	private String[] selected(ImportSelector registrar, Class<?> importer) {
 		if (registrar instanceof DeferredImportSelector) {
-			return new DeferredConfigurations(
-					Stream.of(registrar.selectImports(AnnotationMetadata.introspect(importer)))
-							.map(name -> ClassUtils.resolveClassName(name, context.getClassLoader()))
-							.collect(Collectors.toList())).list();
+			return new DeferredConfigurations(Stream.of(registrar.selectImports(getMetaData(importer)))
+					.map(name -> ClassUtils.resolveClassName(name, context.getClassLoader()))
+					.collect(Collectors.toList())).list();
 		}
-		return registrar.selectImports(AnnotationMetadata.introspect(importer));
+		return registrar.selectImports(getMetaData(importer));
 	}
 
 	static class DeferredConfigurations extends AutoConfigurations {
@@ -270,8 +277,16 @@ public class FunctionalInstallerImportRegistrars implements BeanDefinitionRegist
 		Class<?> type = imported.getType();
 		Object bean = context.getAutowireCapableBeanFactory().createBean(type);
 		ImportBeanDefinitionRegistrar registrar = (ImportBeanDefinitionRegistrar) bean;
-		registrar.registerBeanDefinitions(AnnotationMetadata.introspect(imported.getSource()), registry,
-				IMPORT_BEAN_NAME_GENERATOR);
+		registrar.registerBeanDefinitions(getMetaData(imported.getSource()), registry, IMPORT_BEAN_NAME_GENERATOR);
+	}
+
+	private AnnotationMetadata getMetaData(Class<?> imported) {
+		try {
+			return this.metadataReaderFactory.getMetadataReader(imported.getName()).getAnnotationMetadata();
+		}
+		catch (IOException e) {
+			throw new IllegalStateException("Cannot find metadata for " + imported, e);
+		}
 	}
 
 	public static final AnnotationBeanNameGenerator IMPORT_BEAN_NAME_GENERATOR = new AnnotationBeanNameGenerator() {

@@ -64,6 +64,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.SpringFactoriesLoader;
+import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -105,9 +106,7 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 				return;
 			}
 			GenericApplicationContext generic = (GenericApplicationContext) context;
-			ConditionService conditions = new SimpleConditionService(generic, generic.getBeanFactory(),
-					context.getEnvironment(), context);
-			initialize(generic, conditions);
+			ConditionService conditions = initialize(generic);
 			functional(generic, conditions);
 			apply(generic, initialized.getSpringApplication(), conditions);
 		}
@@ -127,12 +126,12 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 				}
 			}
 			else if (type == WebApplicationType.REACTIVE) {
-				if (contextType == AnnotationConfigReactiveWebApplicationContext.class) {
+				if (contextType == AnnotationConfigReactiveWebApplicationContext.class || contextType == null) {
 					application.setApplicationContextClass(ReactiveWebServerApplicationContext.class);
 				}
 			}
 			else if (type == WebApplicationType.SERVLET) {
-				if (contextType == AnnotationConfigServletWebServerApplicationContext.class) {
+				if (contextType == AnnotationConfigServletWebServerApplicationContext.class || contextType == null) {
 					application.setApplicationContextClass(ServletWebServerApplicationContext.class);
 				}
 			}
@@ -195,16 +194,23 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 	}
 
 	private void functional(GenericApplicationContext context, ConditionService conditions) {
+		// TODO: it would be better not to have to do this
 		context.registerBean(AnnotationConfigUtils.CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME,
 				SlimConfigurationClassPostProcessor.class, () -> new SlimConfigurationClassPostProcessor());
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 	}
 
-	private void initialize(GenericApplicationContext context, ConditionService conditions) {
-		if (!context.getBeanFactory().containsBeanDefinition(ConditionService.class.getName())) {
-			context.registerBean(ConditionService.class, () -> conditions);
+	private ConditionService initialize(GenericApplicationContext context) {
+		if (!context.getBeanFactory().containsSingleton(ConditionService.class.getName())) {
+			if (!context.getBeanFactory().containsSingleton(MetadataReaderFactory.class.getName())) {
+				context.getBeanFactory().registerSingleton(MetadataReaderFactory.class.getName(),
+						new CachingMetadataReaderFactory(context.getClassLoader()));
+			}
+			context.getBeanFactory().registerSingleton(ConditionService.class.getName(),
+					new SimpleConditionService(context, context.getBeanFactory(), context.getEnvironment(), context));
 			context.registerBean(ImportRegistrars.class, () -> new FunctionalInstallerImportRegistrars(context));
 		}
+		// TODO: do we really need these now?
 		this.autoTypeNames = new HashSet<>(
 				SpringFactoriesLoader.loadFactoryNames(EnableAutoConfiguration.class, context.getClassLoader()));
 		for (String autoName : autoTypeNames) {
@@ -223,6 +229,7 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 				}
 			}
 		}
+		return (ConditionService) context.getBeanFactory().getSingleton(ConditionService.class.getName());
 	}
 
 	private void apply(GenericApplicationContext context) {
