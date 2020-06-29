@@ -78,7 +78,7 @@ public class FunctionalInstallerImportRegistrars implements BeanDefinitionRegist
 		this.context = context;
 		String metadataFactory = MetadataReaderFactory.class.getName();
 		this.metadataReaderFactory = context.getBeanFactory().containsSingleton(metadataFactory)
-				? (CachingMetadataReaderFactory) context.getBeanFactory().getSingleton(metadataFactory)
+				? (MetadataReaderFactory) context.getBeanFactory().getSingleton(metadataFactory)
 				: new CachingMetadataReaderFactory(context.getClassLoader());
 	}
 

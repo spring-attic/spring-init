@@ -60,7 +60,7 @@ public class SimpleConditionService implements ConditionService {
 		this.classLoader = resourceLoader.getClassLoader();
 		String metadataFactory = MetadataReaderFactory.class.getName();
 		this.metadataReaderFactory = beanFactory.containsSingleton(metadataFactory)
-				? (CachingMetadataReaderFactory) beanFactory.getSingleton(metadataFactory)
+				? (MetadataReaderFactory) beanFactory.getSingleton(metadataFactory)
 				: new CachingMetadataReaderFactory(this.classLoader);
 	}
 
