@@ -18,7 +18,6 @@ package app.main;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -29,7 +28,7 @@ import org.springframework.web.server.WebHandler;
  *
  */
 @SpringBootTest
-public class FunctionalApplicationTests {
+public class FunctionalApplicationTests extends AbstractIntegrationTests {
 
 	@Autowired
 	private WebHandler webHandler;
@@ -45,5 +44,4 @@ public class FunctionalApplicationTests {
 	public void test() {
 		client.get().uri("/").exchange().expectBody(String.class).isEqualTo("{\"value\":\"Hello\"}");
 	}
-
 }

@@ -16,18 +16,19 @@
 
 package com.example.bench;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
+import org.junit.jupiter.api.condition.DisabledForJreRange;
+import org.junit.jupiter.api.condition.JRE;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.init.bench.CaptureSystemOutput;
 import org.springframework.init.bench.CaptureSystemOutput.OutputCapture;
 import org.springframework.init.bench.LauncherState;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Dave Syer
@@ -53,6 +54,7 @@ public class LauncherStateTests {
 	}
 
 	@Test
+	@DisabledForJreRange(min = JRE.JAVA_9)
 	public void isolated(OutputCapture output) throws Exception {
 		state.isolated();
 		assertThat(output.toString()).contains("Benchmark app started");
