@@ -26,14 +26,13 @@ import org.springframework.boot.context.TypeExcludeFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.util.ClassUtils;
 
 /**
  * @author Dave Syer
@@ -47,29 +46,28 @@ public class SimpleConditionService implements ConditionService {
 
 	private final ConditionEvaluator evaluator;
 
-	private final ClassLoader classLoader;
+	private final TypeService types;
 
 	private ConfigurableListableBeanFactory beanFactory;
 
 	private MetadataReaderFactory metadataReaderFactory;
 
-	public SimpleConditionService(BeanDefinitionRegistry registry, ConfigurableListableBeanFactory beanFactory,
+	public SimpleConditionService(BeanDefinitionRegistry registry, GenericApplicationContext context,
 			Environment environment, ResourceLoader resourceLoader) {
-		this.beanFactory = beanFactory;
-		this.evaluator = new ConditionEvaluator(registry, environment, resourceLoader);
-		this.classLoader = resourceLoader.getClassLoader();
+		this.beanFactory = context.getBeanFactory();
+		this.evaluator = new ConditionEvaluator(context, registry, environment, resourceLoader);
+		this.types = InfrastructureUtils.getBean(beanFactory, TypeService.class);
 		String metadataFactory = MetadataReaderFactory.class.getName();
-		this.metadataReaderFactory = beanFactory.containsSingleton(metadataFactory)
-				? (MetadataReaderFactory) beanFactory.getSingleton(metadataFactory)
-				: new CachingMetadataReaderFactory(this.classLoader);
+		this.metadataReaderFactory = InfrastructureUtils.containsBean(beanFactory, metadataFactory)
+				? (MetadataReaderFactory) InfrastructureUtils.getBean(beanFactory, MetadataReaderFactory.class)
+				: new CachingMetadataReaderFactory(resourceLoader.getClassLoader());
 	}
 
 	@Override
 	public boolean matches(Class<?> type, ConfigurationPhase phase) {
 		try {
 			return !this.evaluator.shouldSkip(getMetadata(type), phase);
-		}
-		catch (ArrayStoreException e) {
+		} catch (ArrayStoreException e) {
 			return false;
 		}
 	}
@@ -84,7 +82,7 @@ public class SimpleConditionService implements ConditionService {
 		AnnotationMetadata metadata = getMetadata(factory);
 		Set<MethodMetadata> assignable = new HashSet<>();
 		for (MethodMetadata method : metadata.getAnnotatedMethods(Bean.class.getName())) {
-			Class<?> candidate = ClassUtils.resolveClassName(method.getReturnTypeName(), this.classLoader);
+			Class<?> candidate = types.getType(method.getReturnTypeName());
 			// Look for exact match first
 			if (type.equals(candidate)) {
 				return !this.evaluator.shouldSkip(method);
@@ -98,8 +96,11 @@ public class SimpleConditionService implements ConditionService {
 		}
 		// TODO: fail if size() > 1
 		Class<?> base = factory.getSuperclass();
-		if (AnnotationUtils.isAnnotationDeclaredLocally(Configuration.class, base)) {
-			return matches(base, type);
+		if (base != Object.class) {
+			metadata = getMetadata(base);
+			if (metadata.hasAnnotation(Configuration.class.getName())) {
+				return matches(base, type);
+			}
 		}
 		return false;
 	}
@@ -116,8 +117,7 @@ public class SimpleConditionService implements ConditionService {
 				if (filter.match(metadataReaderFactory.getMetadataReader(type.getName()), metadataReaderFactory)) {
 					return false;
 				}
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				throw new IllegalStateException("Cannot read metadata for " + type);
 			}
 		}
@@ -130,8 +130,7 @@ public class SimpleConditionService implements ConditionService {
 		}
 		try {
 			return metadataReaderFactory.getMetadataReader(factory.getName()).getAnnotationMetadata();
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
 	}

@@ -69,6 +69,9 @@ public class SpringClassNames {
 	public static final ClassName CONDITION_SERVICE = ClassName.get("org.springframework.init.func",
 			"ConditionService");
 
+	public static final ClassName INFRASTRUCTURE_UTILS = ClassName.get("org.springframework.init.func",
+			"InfrastructureUtils");
+
 	public static final ClassName IMPORT_REGISTRARS = ClassName.get("org.springframework.init.func",
 			"ImportRegistrars");
 
@@ -110,6 +113,13 @@ public class SpringClassNames {
 
 	public static final ClassName ENABLE_CONFIGURATION_PROPERTIES = ClassName
 			.get("org.springframework.boot.context.properties", "EnableConfigurationProperties");
+
+	public static final ClassName ENABLE_CONFIGURATION_PROPERTIES_REGISTRAR = ClassName
+			.get("org.springframework.boot.context.properties", "EnableConfigurationPropertiesRegistrar");
+
+	public static final ClassName REACTIVE_BEAN_POST_PROCESSORS = ClassName.get(
+			"org.springframework.boot.autoconfigure.web.reactive",
+			"ReactiveWebServerFactoryAutoConfiguration.BeanPostProcessorsRegistrar");
 
 	public static final ClassName CONFIGURATION_PROPERTIES = ClassName
 			.get("org.springframework.boot.context.properties", "ConfigurationProperties");

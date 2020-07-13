@@ -17,10 +17,8 @@
 package org.springframework.init.func;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -29,6 +27,7 @@ import org.springframework.context.annotation.ConditionContext;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.ConfigurationCondition;
 import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.EnvironmentCapable;
@@ -50,21 +49,30 @@ import org.springframework.util.MultiValueMap;
  */
 class ConditionEvaluator {
 
+	/**
+	 * 
+	 */
+	private static final String ON_CLASS_CONDITION = "org.springframework.boot.autoconfigure.condition.OnClassCondition";
+
 	private final ConditionContextImpl context;
+
+	private GenericApplicationContext infrastructure;
 
 	/**
 	 * Create a new {@link ConditionEvaluator} instance.
 	 */
-	public ConditionEvaluator(@Nullable BeanDefinitionRegistry registry,
+	public ConditionEvaluator(GenericApplicationContext infrastructure, @Nullable BeanDefinitionRegistry registry,
 			@Nullable Environment environment, @Nullable ResourceLoader resourceLoader) {
+		this.infrastructure = infrastructure;
 		this.context = new ConditionContextImpl(registry, environment, resourceLoader);
 	}
 
 	/**
-	 * Determine if an item should be skipped based on {@code @Conditional} annotations.
-	 * The {@link ConfigurationPhase} will be deduced from the type of item (i.e. a
-	 * {@code @Configuration} class will be
+	 * Determine if an item should be skipped based on {@code @Conditional}
+	 * annotations. The {@link ConfigurationPhase} will be deduced from the type of
+	 * item (i.e. a {@code @Configuration} class will be
 	 * {@link ConfigurationPhase#PARSE_CONFIGURATION})
+	 * 
 	 * @param metadata the meta data
 	 * @return if the item should be skipped
 	 */
@@ -73,13 +81,14 @@ class ConditionEvaluator {
 	}
 
 	/**
-	 * Determine if an item should be skipped based on {@code @Conditional} annotations.
+	 * Determine if an item should be skipped based on {@code @Conditional}
+	 * annotations.
+	 * 
 	 * @param metadata the meta data
-	 * @param phase the phase of the call
+	 * @param phase    the phase of the call
 	 * @return if the item should be skipped
 	 */
-	public boolean shouldSkip(@Nullable AnnotatedTypeMetadata metadata,
-			@Nullable ConfigurationPhase phase) {
+	public boolean shouldSkip(@Nullable AnnotatedTypeMetadata metadata, @Nullable ConfigurationPhase phase) {
 		if (metadata == null || !metadata.isAnnotated(Conditional.class.getName())) {
 			return false;
 		}
@@ -91,8 +100,12 @@ class ConditionEvaluator {
 		List<Condition> conditions = new ArrayList<>();
 		for (String[] conditionClasses : getConditionClasses(metadata)) {
 			for (String conditionClass : conditionClasses) {
-				Condition condition = getCondition(conditionClass,
-						this.context.getClassLoader());
+				Condition condition = getCondition(conditionClass, this.context.getClassLoader());
+				if (ON_CLASS_CONDITION.equals(conditionClass)) {
+					if (!condition.matches(this.context, metadata)) {
+						return true;
+					}
+				}
 				conditions.add(condition);
 			}
 		}
@@ -102,8 +115,7 @@ class ConditionEvaluator {
 		for (Condition condition : conditions) {
 			ConfigurationPhase requiredPhase = null;
 			if (condition instanceof ConfigurationCondition) {
-				requiredPhase = ((ConfigurationCondition) condition)
-						.getConfigurationPhase();
+				requiredPhase = ((ConfigurationCondition) condition).getConfigurationPhase();
 			}
 			if ((requiredPhase == null || requiredPhase.compareTo(phase) <= 0)
 					&& !condition.matches(this.context, metadata)) {
@@ -116,17 +128,36 @@ class ConditionEvaluator {
 
 	@SuppressWarnings("unchecked")
 	private List<String[]> getConditionClasses(AnnotatedTypeMetadata metadata) {
-		MultiValueMap<String, Object> attributes = metadata
-				.getAllAnnotationAttributes(Conditional.class.getName(), true);
+		MultiValueMap<String, Object> attributes = metadata.getAllAnnotationAttributes(Conditional.class.getName(),
+				true);
 		Object values = (attributes != null ? attributes.get("value") : null);
-		return (List<String[]>) (values != null ? values : Collections.emptyList());
+		List<String[]> result = new ArrayList<>();
+		if (values != null) {
+			for (String[] value : (List<String[]>) values) {
+				boolean isClassCondition = false;
+				for (int i = 0; i < value.length; i++) {
+					String type = value[i];
+					if (ON_CLASS_CONDITION.equals(type)) {
+						isClassCondition = true;
+						if (i > 0) {
+							String tmp = value[0];
+							value[0] = type;
+							value[i] = tmp;
+						}
+					}
+				}
+				if (isClassCondition) {
+					result.add(0, value);
+				} else {
+					result.add(value);
+				}
+			}
+		}
+		return result;
 	}
 
-	private Condition getCondition(String conditionClassName,
-			@Nullable ClassLoader classloader) {
-		Class<?> conditionClass = ClassUtils.resolveClassName(conditionClassName,
-				classloader);
-		return (Condition) BeanUtils.instantiateClass(conditionClass);
+	private Condition getCondition(String conditionClassName, @Nullable ClassLoader classloader) {
+		return (Condition) InfrastructureUtils.getOrCreate(infrastructure, conditionClassName);
 	}
 
 	/**
@@ -147,22 +178,18 @@ class ConditionEvaluator {
 		@Nullable
 		private final ClassLoader classLoader;
 
-		public ConditionContextImpl(@Nullable BeanDefinitionRegistry registry,
-				@Nullable Environment environment,
+		public ConditionContextImpl(@Nullable BeanDefinitionRegistry registry, @Nullable Environment environment,
 				@Nullable ResourceLoader resourceLoader) {
 
 			this.registry = registry;
 			this.beanFactory = deduceBeanFactory(registry);
-			this.environment = (environment != null ? environment
-					: deduceEnvironment(registry));
-			this.resourceLoader = (resourceLoader != null ? resourceLoader
-					: deduceResourceLoader(registry));
+			this.environment = (environment != null ? environment : deduceEnvironment(registry));
+			this.resourceLoader = (resourceLoader != null ? resourceLoader : deduceResourceLoader(registry));
 			this.classLoader = deduceClassLoader(resourceLoader, this.beanFactory);
 		}
 
 		@Nullable
-		private ConfigurableListableBeanFactory deduceBeanFactory(
-				@Nullable BeanDefinitionRegistry source) {
+		private ConfigurableListableBeanFactory deduceBeanFactory(@Nullable BeanDefinitionRegistry source) {
 			if (source instanceof ConfigurableListableBeanFactory) {
 				return (ConfigurableListableBeanFactory) source;
 			}
@@ -179,8 +206,7 @@ class ConditionEvaluator {
 			return new StandardEnvironment();
 		}
 
-		private ResourceLoader deduceResourceLoader(
-				@Nullable BeanDefinitionRegistry source) {
+		private ResourceLoader deduceResourceLoader(@Nullable BeanDefinitionRegistry source) {
 			if (source instanceof ResourceLoader) {
 				return (ResourceLoader) source;
 			}
@@ -230,6 +256,7 @@ class ConditionEvaluator {
 		public ClassLoader getClassLoader() {
 			return this.classLoader;
 		}
+
 	}
 
 }

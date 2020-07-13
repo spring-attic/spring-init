@@ -16,8 +16,9 @@
 
 	<modules>
                 <module>application</module>
-                <module>manual</module>
                 <module>server</module>
+                <module>manual</module>
+                <module>func</module>
                 <module>tomcat</module>
                 <module>jackson</module>
                 <module>mustache</module>

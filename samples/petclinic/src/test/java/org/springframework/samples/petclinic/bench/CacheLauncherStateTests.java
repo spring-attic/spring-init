@@ -16,16 +16,17 @@
 
 package org.springframework.samples.petclinic.bench;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
+import org.junit.jupiter.api.condition.DisabledForJreRange;
+import org.junit.jupiter.api.condition.JRE;
 import org.springframework.init.bench.CaptureSystemOutput;
 import org.springframework.init.bench.CaptureSystemOutput.OutputCapture;
 import org.springframework.samples.petclinic.bench.CacheBenchmarkIT.MainState;
 import org.springframework.samples.petclinic.bench.CacheBenchmarkIT.MainState.Config;
 import org.springframework.samples.petclinic.bench.CacheBenchmarkIT.MainState.Sample;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Dave Syer
@@ -34,71 +35,76 @@ import static org.assertj.core.api.Assertions.assertThat;
 @CaptureSystemOutput
 public class CacheLauncherStateTests {
 
-    @BeforeAll
-    public static void init() {
-        System.setProperty("logging.level.org.springframework.init", "DEBUG");
-    }
+	@BeforeAll
+	public static void init() {
+		System.setProperty("logging.level.org.springframework.init", "DEBUG");
+	}
 
-    @Test
-    public void vanilla(OutputCapture output) throws Exception {
-        MainState state = new MainState();
-        state.setSample(Sample.empty);
-        state.start();
-        state.isolated();
-        state.close();
-        assertThat(output.toString()).contains("Benchmark app started");
-        assertThat(output.toString()).doesNotContain("cacheManager");
-    }
+	@Test
+	@DisabledForJreRange(min = JRE.JAVA_9)
+	public void vanilla(OutputCapture output) throws Exception {
+		MainState state = new MainState();
+		state.setSample(Sample.empty);
+		state.start();
+		state.isolated();
+		state.close();
+		assertThat(output.toString()).contains("Benchmark app started");
+		assertThat(output.toString()).doesNotContain("cacheManager");
+	}
 
-    @Test
-    public void annos(OutputCapture output) throws Exception {
-        MainState state = new MainState();
-        state.setSample(Sample.empty);
-        state.setConfig(Config.annotation);
-        state.start();
-        state.isolated();
-        state.close();
-        assertThat(output.toString()).contains("Benchmark app started");
-        assertThat(output.toString()).doesNotContain("cacheManager");
-    }
+	@Test
+	@DisabledForJreRange(min = JRE.JAVA_9)
+	public void annos(OutputCapture output) throws Exception {
+		MainState state = new MainState();
+		state.setSample(Sample.empty);
+		state.setConfig(Config.annotation);
+		state.start();
+		state.isolated();
+		state.close();
+		assertThat(output.toString()).contains("Benchmark app started");
+		assertThat(output.toString()).doesNotContain("cacheManager");
+	}
 
-    @Test
-    public void manual(OutputCapture output) throws Exception {
-        MainState state = new MainState();
-        state.setSample(Sample.manual);
-        state.setConfig(Config.annotation);
-        state.start();
-        state.isolated();
-        state.close();
-        assertThat(output.toString()).contains("Benchmark app started");
-        assertThat(output.toString()).contains("cacheManager");
-        // Class path from surefire jar cannot be filtered
-        // assertThat(output.toString()).doesNotContain("JCache");
-    }
+	@Test
+	@DisabledForJreRange(min = JRE.JAVA_9)
+	public void manual(OutputCapture output) throws Exception {
+		MainState state = new MainState();
+		state.setSample(Sample.manual);
+		state.setConfig(Config.annotation);
+		state.start();
+		state.isolated();
+		state.close();
+		assertThat(output.toString()).contains("Benchmark app started");
+		assertThat(output.toString()).contains("cacheManager");
+		// Class path from surefire jar cannot be filtered
+		// assertThat(output.toString()).doesNotContain("JCache");
+	}
 
-    @Test
-    public void cache(OutputCapture output) throws Exception {
-        MainState state = new MainState();
-        state.setSample(Sample.cache);
-        state.start();
-        state.isolated();
-        state.close();
-        assertThat(output.toString()).contains("Benchmark app started");
-        assertThat(output.toString()).contains("cacheManager");
-        assertThat(output.toString()).contains("JCache");
-    }
+	@Test
+	@DisabledForJreRange(min = JRE.JAVA_9)
+	public void cache(OutputCapture output) throws Exception {
+		MainState state = new MainState();
+		state.setSample(Sample.cache);
+		state.start();
+		state.isolated();
+		state.close();
+		assertThat(output.toString()).contains("Benchmark app started");
+		assertThat(output.toString()).contains("cacheManager");
+		assertThat(output.toString()).contains("JCache");
+	}
 
-    @Test
-    public void simple(OutputCapture output) throws Exception {
-        MainState state = new MainState();
-        state.setSample(Sample.simple);
-        state.start();
-        state.isolated();
-        state.close();
-        assertThat(output.toString()).contains("Benchmark app started");
-        assertThat(output.toString()).contains("cacheManager");
-        // Class path from surefire jar cannot be filtered
-        // assertThat(output.toString()).doesNotContain("JCache");
-    }
+	@Test
+	@DisabledForJreRange(min = JRE.JAVA_9)
+	public void simple(OutputCapture output) throws Exception {
+		MainState state = new MainState();
+		state.setSample(Sample.simple);
+		state.start();
+		state.isolated();
+		state.close();
+		assertThat(output.toString()).contains("Benchmark app started");
+		assertThat(output.toString()).contains("cacheManager");
+		// Class path from surefire jar cannot be filtered
+		// assertThat(output.toString()).doesNotContain("JCache");
+	}
 
 }
