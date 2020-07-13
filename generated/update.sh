@@ -115,12 +115,6 @@ EOF
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.experimental</groupId>
-			<artifactId>spring-init-library</artifactId>
-			<version>\${slim.version}</version>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.experimental</groupId>
 			<artifactId>spring-init-core</artifactId>
 			<version>\${slim.version}</version>
 			<optional>true</optional>
