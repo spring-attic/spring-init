@@ -1,8 +1,10 @@
 [
   {
     "name": "org.springframework.boot.SpringApplication",
-    "allDeclaredMethods": true,
-    "allDeclaredFields": true
+    "fields" : [
+      { "name" : "applicationContextClass" },
+      { "name" : "primarySources" }
+    ]
   },
   {
     "name": "org.springframework.boot.web.reactive.context.ReactiveWebServerApplicationContext",
