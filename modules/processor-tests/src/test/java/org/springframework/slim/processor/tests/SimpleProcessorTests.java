@@ -210,8 +210,8 @@ public class SimpleProcessorTests {
 		String generated = cr.getGeneratedFileContents(ClassUtils.classPackageAsResourcePath(ReactiveApplication.class)
 				+ "/ReactiveApplicationInitializer.java");
 		System.err.println(generated);
-		assertThat(generated).contains(
-				"new ReactiveWebServerFactoryAutoConfiguration.BeanPostProcessorsRegistrar().registerBeanDefinitions(null, context)");
+		assertThat(generated).contains("new ReactiveWebServerFactoryAutoConfiguration.BeanPostProcessorsRegistrar()");
+		assertThat(generated).contains(".registerBeanDefinitions(null, context)");
 	}
 
 	@Test

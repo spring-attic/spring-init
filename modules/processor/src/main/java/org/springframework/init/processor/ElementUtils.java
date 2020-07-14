@@ -16,6 +16,7 @@
 package org.springframework.init.processor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -131,11 +132,14 @@ public class ElementUtils {
 		return null;
 	}
 
-	public boolean importsWithNoMetadata(TypeElement imported) {
+	static Set<String> NO_METADATA_IMPORTS = new HashSet<>(
+			Arrays.asList(SpringClassNames.REACTIVE_BEAN_POST_PROCESSORS.reflectionName(),
+					SpringClassNames.SERVLET_BEAN_POST_PROCESSORS.reflectionName()));
+
+	public boolean isImportWithNoMetadata(TypeElement imported) {
 		// TODO: There are some imported registrars that don't use the annotation
 		// metadata. We can enumerate them all eventually.
-		return imported.getQualifiedName().toString()
-				.equals(SpringClassNames.REACTIVE_BEAN_POST_PROCESSORS.reflectionName());
+		return NO_METADATA_IMPORTS.contains(imported.getQualifiedName().toString());
 	}
 
 	public boolean isImporter(TypeElement imported) {

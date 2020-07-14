@@ -217,8 +217,10 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 						builder.addStatement("context.registerBean($T.class, () -> new $T())", type, type);
 						builder.endControlFlow();
 					}
-				} else if (utils.importsWithNoMetadata(imported)) {
-					builder.addStatement("new $T().registerBeanDefinitions(null, context)", imported);
+				} else if (utils.isImportWithNoMetadata(imported)) {
+					builder.addStatement(
+							"$T.invokeAwareMethods(new $T(), context.getEnvironment(), context, context).registerBeanDefinitions(null, context)",
+							SpringClassNames.INFRASTRUCTURE_UTILS, imported);
 				} else if (utils.isImporter(imported)) {
 					builder.addStatement("$T.getBean(context.getBeanFactory(), $T.class).add($T.class, \"$L\")",
 							SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.IMPORT_REGISTRARS,

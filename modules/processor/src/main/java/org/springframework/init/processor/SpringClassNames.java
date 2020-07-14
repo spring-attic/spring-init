@@ -123,6 +123,10 @@ public class SpringClassNames {
 			"org.springframework.boot.autoconfigure.web.reactive",
 			"ReactiveWebServerFactoryAutoConfiguration.BeanPostProcessorsRegistrar");
 
+	public static final ClassName SERVLET_BEAN_POST_PROCESSORS = ClassName.get(
+			"org.springframework.boot.autoconfigure.web.servlet",
+			"ServletWebServerFactoryAutoConfiguration.BeanPostProcessorsRegistrar");
+
 	public static final ClassName CONFIGURATION_PROPERTIES = ClassName
 			.get("org.springframework.boot.context.properties", "ConfigurationProperties");
 

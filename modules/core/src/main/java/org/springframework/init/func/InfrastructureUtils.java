@@ -22,7 +22,6 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.support.GenericApplicationContext;
@@ -116,8 +115,8 @@ public class InfrastructureUtils {
 		return context;
 	}
 
-	private static void invokeAwareMethods(Object target, Environment environment, ResourceLoader resourceLoader,
-			BeanDefinitionRegistry registry) {
+	public static <T> T invokeAwareMethods(T target, Environment environment, ResourceLoader resourceLoader,
+			GenericApplicationContext registry) {
 
 		if (target instanceof Aware) {
 			if (target instanceof BeanClassLoaderAware) {
@@ -129,7 +128,7 @@ public class InfrastructureUtils {
 				}
 			}
 			if (target instanceof BeanFactoryAware && registry instanceof BeanFactory) {
-				((BeanFactoryAware) target).setBeanFactory((BeanFactory) registry);
+				((BeanFactoryAware) target).setBeanFactory(registry.getBeanFactory());
 			}
 			if (target instanceof EnvironmentAware) {
 				((EnvironmentAware) target).setEnvironment(environment);
@@ -146,6 +145,8 @@ public class InfrastructureUtils {
 				throw new IllegalStateException("Cannot initialize: " + target.getClass(), e);
 			}
 		}
+
+		return target;
 
 	}
 }
