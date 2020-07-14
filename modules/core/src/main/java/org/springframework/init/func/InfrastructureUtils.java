@@ -15,12 +15,19 @@
  */
 package org.springframework.init.func;
 
+import org.springframework.beans.factory.Aware;
+import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.EnvironmentAware;
+import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.env.Environment;
+import org.springframework.core.io.ResourceLoader;
 
 /**
  * @author Dave Syer
@@ -74,22 +81,7 @@ public class InfrastructureUtils {
 			} else {
 				// Can't use beans to do this because it probably isn't active yet
 				T bean = context.getAutowireCapableBeanFactory().createBean(type);
-				if (bean instanceof BeanFactoryAware) {
-					((BeanFactoryAware) bean).setBeanFactory(main.getBeanFactory());
-				}
-				if (bean instanceof ApplicationContextAware) {
-					((ApplicationContextAware) bean).setApplicationContext(main);
-				}
-				if (bean instanceof EnvironmentAware) {
-					((EnvironmentAware) bean).setEnvironment(main.getEnvironment());
-				}
-				if (bean instanceof InitializingBean) {
-					try {
-						((InitializingBean) bean).afterPropertiesSet();
-					} catch (Exception e) {
-						throw new IllegalStateException("Cannot initialize: " + type, e);
-					}
-				}
+				invokeAwareMethods(bean, context.getEnvironment(), context, context);
 				context.getBeanFactory().registerSingleton(name, bean);
 				// System.err.println(type);
 			}
@@ -124,4 +116,36 @@ public class InfrastructureUtils {
 		return context;
 	}
 
+	private static void invokeAwareMethods(Object target, Environment environment, ResourceLoader resourceLoader,
+			BeanDefinitionRegistry registry) {
+
+		if (target instanceof Aware) {
+			if (target instanceof BeanClassLoaderAware) {
+				ClassLoader classLoader = (registry instanceof ConfigurableBeanFactory
+						? ((ConfigurableBeanFactory) registry).getBeanClassLoader()
+						: resourceLoader.getClassLoader());
+				if (classLoader != null) {
+					((BeanClassLoaderAware) target).setBeanClassLoader(classLoader);
+				}
+			}
+			if (target instanceof BeanFactoryAware && registry instanceof BeanFactory) {
+				((BeanFactoryAware) target).setBeanFactory((BeanFactory) registry);
+			}
+			if (target instanceof EnvironmentAware) {
+				((EnvironmentAware) target).setEnvironment(environment);
+			}
+			if (target instanceof ResourceLoaderAware) {
+				((ResourceLoaderAware) target).setResourceLoader(resourceLoader);
+			}
+		}
+
+		if (target instanceof InitializingBean) {
+			try {
+				((InitializingBean) target).afterPropertiesSet();
+			} catch (Exception e) {
+				throw new IllegalStateException("Cannot initialize: " + target.getClass(), e);
+			}
+		}
+
+	}
 }

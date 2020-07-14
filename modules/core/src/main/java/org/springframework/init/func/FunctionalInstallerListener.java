@@ -26,11 +26,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.Aware;
 import org.springframework.beans.factory.BeanClassLoaderAware;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
@@ -45,8 +41,6 @@ import org.springframework.boot.web.servlet.context.ServletWebServerApplicationC
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.event.SmartApplicationListener;
@@ -55,8 +49,6 @@ import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.Environment;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.ReflectionUtils;
@@ -253,32 +245,18 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 				.getOrCreate(beans, type));
 	}
 
-	public static void invokeAwareMethods(Object target, Environment environment, ResourceLoader resourceLoader,
-			BeanDefinitionRegistry registry) {
-
-		if (target instanceof Aware) {
-			if (target instanceof BeanClassLoaderAware) {
-				ClassLoader classLoader = (registry instanceof ConfigurableBeanFactory
-						? ((ConfigurableBeanFactory) registry).getBeanClassLoader()
-						: resourceLoader.getClassLoader());
-				if (classLoader != null) {
-					((BeanClassLoaderAware) target).setBeanClassLoader(classLoader);
-				}
-			}
-			if (target instanceof BeanFactoryAware && registry instanceof BeanFactory) {
-				((BeanFactoryAware) target).setBeanFactory((BeanFactory) registry);
-			}
-			if (target instanceof EnvironmentAware) {
-				((EnvironmentAware) target).setEnvironment(environment);
-			}
-			if (target instanceof ResourceLoaderAware) {
-				((ResourceLoaderAware) target).setResourceLoader(resourceLoader);
-			}
-		}
-	}
-
 }
 
+/**
+ * Workaround for <a href=
+ * "https://github.com/spring-projects/spring-boot/issues/13825">BeanDefinitionLoader
+ * issue</a>. It needs to have setMetadataReaderFactory() so that Spring Boot
+ * can post process its bean definition and "inject" a custom metadata reader
+ * factory.
+ * 
+ * @author Dave Syer
+ *
+ */
 class SlimConfigurationClassPostProcessor
 		implements BeanDefinitionRegistryPostProcessor, BeanClassLoaderAware, PriorityOrdered {
 
