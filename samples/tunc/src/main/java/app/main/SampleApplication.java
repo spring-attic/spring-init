@@ -41,8 +41,7 @@ public class SampleApplication {
 
 	public static void main(String[] args) {
 		SpringApplication app = new SpringApplicationBuilder(SampleApplication.class)
-				.initializers(new InfrastructureInitializer(new Initializer()))
-				.listeners(new NativePropertiesListener()).build();
+				.initializers(new InfrastructureInitializer(new Initializer())).build();
 		app.run(args);
 	}
 
