@@ -31,7 +31,6 @@
 		<module>library</module>
 		<module>processor</module>
 		<module>processor-tests</module>
-		<module>aspects</module>
 	</modules>
 
 	<properties>
