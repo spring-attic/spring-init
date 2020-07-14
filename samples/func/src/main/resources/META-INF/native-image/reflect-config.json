@@ -12,10 +12,6 @@
     "allDeclaredConstructors": true
   },
   {
-    "name": "org.springframework.boot.context.properties.EnableConfigurationPropertiesRegistrar",
-    "allDeclaredConstructors": true
-  },
-  {
     "name": "org.springframework.boot.context.properties.ConfigurationPropertiesBeanDefinitionValidator",
     "allDeclaredConstructors": true
   },

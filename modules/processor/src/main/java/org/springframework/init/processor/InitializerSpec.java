@@ -209,12 +209,8 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 							SpringClassNames.ENABLE_CONFIGURATION_PROPERTIES.reflectionName(), "value");
 					// TODO: Can we limit this to once only? Is it worth it (would eventually fail
 					// e.g. in test slices)
-					builder.addStatement(
-							"(($T)$T.getOrCreate(context, $T.getBean(context.getBeanFactory(), $T.class).getType($S))).registerBeanDefinitions($T.introspect(Object.class), context)",
-							SpringClassNames.IMPORT_BEAN_DEFINITION_REGISTRAR, SpringClassNames.INFRASTRUCTURE_UTILS,
-							SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.TYPE_SERVICE,
-							SpringClassNames.ENABLE_CONFIGURATION_PROPERTIES_REGISTRAR,
-							SpringClassNames.ANNOTATION_METADATA);
+					builder.addStatement("$T.register(context)",
+							SpringClassNames.CONFIGURATION_PROPERTIES_BINDING_POST_PROCESSOR);
 					for (TypeElement type : types) {
 						builder.beginControlFlow(
 								"if (context.getBeanFactory().getBeanNamesForType($T.class).length==0)", type);
