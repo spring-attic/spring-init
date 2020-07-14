@@ -25,8 +25,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import app.nested.vanilla.Bar;
-
 /**
  * @author Dave Syer
  *

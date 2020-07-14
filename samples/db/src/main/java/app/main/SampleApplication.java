@@ -36,9 +36,8 @@ public class SampleApplication {
 
 	@Bean
 	public RouterFunction<?> userEndpoints() {
-		return route(GET("/"),
-				request -> ok().body(Mono.fromCallable(() -> entities.find(1L))
-						.subscribeOn(Schedulers.elastic()), Foo.class));
+		return route(GET("/"), request -> ok()
+				.body(Mono.fromCallable(() -> entities.find(1L)).subscribeOn(Schedulers.boundedElastic()), Foo.class));
 	}
 
 	public static void main(String[] args) {

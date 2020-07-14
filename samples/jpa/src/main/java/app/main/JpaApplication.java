@@ -29,19 +29,18 @@ public class JpaApplication {
 	public CommandLineRunner runner(ConfigurableListableBeanFactory beans) {
 		return args -> {
 			foos.findById(1L).orElseGet(() -> foos.save(new Foo("Hello")));
-			System.err.println("Class count: " + ManagementFactory.getClassLoadingMXBean()
-					.getTotalLoadedClassCount());
+			System.err.println("Class count: " + ManagementFactory.getClassLoadingMXBean().getTotalLoadedClassCount());
 			System.err.println("Bean count: " + beans.getBeanDefinitionNames().length);
-			System.err.println(
-					"Bean names: " + Arrays.asList(beans.getBeanDefinitionNames()));
+			System.err.println("Bean names: " + Arrays.asList(beans.getBeanDefinitionNames()));
 		};
 	}
 
 	@Bean
 	public RouterFunction<?> userEndpoints() {
 		return route(GET("/"),
-				request -> ok().body(Mono.fromCallable(() -> foos.findById(1L).get())
-						.subscribeOn(Schedulers.elastic()), Foo.class));
+				request -> ok().body(
+						Mono.fromCallable(() -> foos.findById(1L).get()).subscribeOn(Schedulers.boundedElastic()),
+						Foo.class));
 	}
 
 	public static void main(String[] args) {
