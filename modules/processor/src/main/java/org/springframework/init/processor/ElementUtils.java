@@ -70,8 +70,7 @@ public class ElementUtils {
 		return set;
 	}
 
-	private void getAnnotations(Element element, String type, Set<AnnotationMirror> set,
-			Set<AnnotationMirror> seen) {
+	private void getAnnotations(Element element, String type, Set<AnnotationMirror> set, Set<AnnotationMirror> seen) {
 
 		if (element != null) {
 			for (AnnotationMirror annotation : element.getAnnotationMirrors()) {
@@ -89,13 +88,10 @@ public class ElementUtils {
 					}
 					if (!seen.contains(annotation)) {
 						seen.add(annotation);
-						getAnnotations(annotation.getAnnotationType().asElement(), type,
-								set, seen);
+						getAnnotations(annotation.getAnnotationType().asElement(), type, set, seen);
 					}
-				}
-				catch (Throwable t) {
-					messager.printMessage(Kind.ERROR,
-							"Problems working with annotation " + annotationTypename);
+				} catch (Throwable t) {
+					messager.printMessage(Kind.ERROR, "Problems working with annotation " + annotationTypename);
 				}
 			}
 		}
@@ -106,8 +102,7 @@ public class ElementUtils {
 		return getAnnotation(element, type, new HashSet<>());
 	}
 
-	private AnnotationMirror getAnnotation(Element element, String type,
-			Set<AnnotationMirror> seen) {
+	private AnnotationMirror getAnnotation(Element element, String type, Set<AnnotationMirror> seen) {
 		if (element != null) {
 			for (AnnotationMirror annotation : element.getAnnotationMirrors()) {
 				String annotationTypename = annotation.getAnnotationType().toString();
@@ -123,26 +118,34 @@ public class ElementUtils {
 					}
 					if (!seen.contains(annotation)) {
 						seen.add(annotation);
-						annotation = getAnnotation(
-								annotation.getAnnotationType().asElement(), type, seen);
+						annotation = getAnnotation(annotation.getAnnotationType().asElement(), type, seen);
 						if (annotation != null) {
 							return annotation;
 						}
 					}
-				}
-				catch (Throwable t) {
-					messager.printMessage(Kind.ERROR,
-							"Problems working with annotation " + annotationTypename);
+				} catch (Throwable t) {
+					messager.printMessage(Kind.ERROR, "Problems working with annotation " + annotationTypename);
 				}
 			}
 		}
 		return null;
 	}
 
+	public boolean importsWithNoMetadata(TypeElement imported) {
+		// TODO: There are some imported registrars that don't use the annotation
+		// metadata. We can enumerate them all eventually.
+		return imported.getQualifiedName().toString()
+				.equals(SpringClassNames.REACTIVE_BEAN_POST_PROCESSORS.reflectionName());
+	}
+
 	public boolean isImporter(TypeElement imported) {
-		return implementsInterface(imported,
-				SpringClassNames.IMPORT_BEAN_DEFINITION_REGISTRAR)
+		return implementsInterface(imported, SpringClassNames.IMPORT_BEAN_DEFINITION_REGISTRAR)
 				|| implementsInterface(imported, SpringClassNames.IMPORT_SELECTOR);
+	}
+
+	public boolean isConfigurationProperties(TypeElement imported) {
+		return imported.getQualifiedName().toString()
+				.equals(SpringClassNames.ENABLE_CONFIGURATION_PROPERTIES_REGISTRAR.reflectionName());
 	}
 
 	public TypeElement getSuperType(TypeElement type) {
@@ -157,8 +160,7 @@ public class ElementUtils {
 			for (TypeMirror subtype : types.directSupertypes(type)) {
 				Element element = types.asElement(subtype);
 				// Find an interface, any interface...
-				if (element.getModifiers().contains(Modifier.PUBLIC)
-						&& element.getKind() == ElementKind.INTERFACE) {
+				if (element.getModifiers().contains(Modifier.PUBLIC) && element.getKind() == ElementKind.INTERFACE) {
 					return subtype;
 				}
 			}
@@ -170,10 +172,8 @@ public class ElementUtils {
 		return types.erasure(type.asType()).toString();
 	}
 
-	public boolean findTypeInAnnotation(AnnotationMirror imported, String string,
-			String className) {
-		Map<? extends ExecutableElement, ? extends AnnotationValue> values = imported
-				.getElementValues();
+	public boolean findTypeInAnnotation(AnnotationMirror imported, String string, String className) {
+		Map<? extends ExecutableElement, ? extends AnnotationValue> values = imported.getElementValues();
 		for (ExecutableElement element : values.keySet()) {
 			if (values.get(element).accept(typeFinder, null)) {
 				return true;
@@ -182,12 +182,10 @@ public class ElementUtils {
 		return false;
 	}
 
-	public List<TypeElement> getTypesFromAnnotation(AnnotationMirror annotationMirror,
-			String fieldname) {
+	public List<TypeElement> getTypesFromAnnotation(AnnotationMirror annotationMirror, String fieldname) {
 		List<TypeElement> collected = new ArrayList<>();
 		if (annotationMirror != null) {
-			Map<? extends ExecutableElement, ? extends AnnotationValue> values = annotationMirror
-					.getElementValues();
+			Map<? extends ExecutableElement, ? extends AnnotationValue> values = annotationMirror.getElementValues();
 			for (ExecutableElement element : values.keySet()) {
 				if (element.getSimpleName().toString().equals(fieldname)) {
 					values.get(element).accept(typeCollector, collected);
@@ -197,12 +195,10 @@ public class ElementUtils {
 		return collected;
 	}
 
-	public List<AnnotationMirror> getAnnotationsFromAnnotation(
-			AnnotationMirror annotationMirror, String fieldname) {
+	public List<AnnotationMirror> getAnnotationsFromAnnotation(AnnotationMirror annotationMirror, String fieldname) {
 		List<AnnotationMirror> collected = new ArrayList<>();
 		if (annotationMirror != null) {
-			Map<? extends ExecutableElement, ? extends AnnotationValue> values = annotationMirror
-					.getElementValues();
+			Map<? extends ExecutableElement, ? extends AnnotationValue> values = annotationMirror.getElementValues();
 			for (ExecutableElement element : values.keySet()) {
 				if (element.getSimpleName().toString().equals(fieldname)) {
 					values.get(element).accept(annotationCollector, collected);
@@ -212,12 +208,10 @@ public class ElementUtils {
 		return collected;
 	}
 
-	public List<String> getStringsFromAnnotation(AnnotationMirror annotationMirror,
-			String fieldname) {
+	public List<String> getStringsFromAnnotation(AnnotationMirror annotationMirror, String fieldname) {
 		List<String> collected = new ArrayList<>();
 		if (annotationMirror != null) {
-			Map<? extends ExecutableElement, ? extends AnnotationValue> values = annotationMirror
-					.getElementValues();
+			Map<? extends ExecutableElement, ? extends AnnotationValue> values = annotationMirror.getElementValues();
 			for (ExecutableElement element : values.keySet()) {
 				if (element.getSimpleName().toString().equals(fieldname)) {
 					values.get(element).accept(stringCollector, collected);
@@ -228,8 +222,7 @@ public class ElementUtils {
 	}
 
 	// TODO [ac] isn't there a quicker way?
-	private class TypeCollector
-			implements AnnotationValueVisitor<Boolean, List<TypeElement>> {
+	private class TypeCollector implements AnnotationValueVisitor<Boolean, List<TypeElement>> {
 
 		@Override
 		public Boolean visit(AnnotationValue av, List<TypeElement> collected) {
@@ -306,8 +299,7 @@ public class ElementUtils {
 		}
 
 		@Override
-		public Boolean visitArray(List<? extends AnnotationValue> vals,
-				List<TypeElement> collected) {
+		public Boolean visitArray(List<? extends AnnotationValue> vals, List<TypeElement> collected) {
 			for (AnnotationValue value : vals) {
 				// TODO: really?
 				if (this.visit(value, collected) || value.toString().equals("<error>")) {
@@ -324,8 +316,7 @@ public class ElementUtils {
 
 	}
 
-	private class AnnotationCollector
-			implements AnnotationValueVisitor<Boolean, List<AnnotationMirror>> {
+	private class AnnotationCollector implements AnnotationValueVisitor<Boolean, List<AnnotationMirror>> {
 
 		@Override
 		public Boolean visit(AnnotationValue av, List<AnnotationMirror> collected) {
@@ -388,21 +379,18 @@ public class ElementUtils {
 		}
 
 		@Override
-		public Boolean visitEnumConstant(VariableElement c,
-				List<AnnotationMirror> collected) {
+		public Boolean visitEnumConstant(VariableElement c, List<AnnotationMirror> collected) {
 			return false;
 		}
 
 		@Override
-		public Boolean visitAnnotation(AnnotationMirror a,
-				List<AnnotationMirror> collected) {
+		public Boolean visitAnnotation(AnnotationMirror a, List<AnnotationMirror> collected) {
 			collected.add(a);
 			return false;
 		}
 
 		@Override
-		public Boolean visitArray(List<? extends AnnotationValue> vals,
-				List<AnnotationMirror> collected) {
+		public Boolean visitArray(List<? extends AnnotationValue> vals, List<AnnotationMirror> collected) {
 			for (AnnotationValue value : vals) {
 				// TODO: really?
 				if (this.visit(value, collected) || value.toString().equals("<error>")) {
@@ -413,15 +401,13 @@ public class ElementUtils {
 		}
 
 		@Override
-		public Boolean visitUnknown(AnnotationValue av,
-				List<AnnotationMirror> collected) {
+		public Boolean visitUnknown(AnnotationValue av, List<AnnotationMirror> collected) {
 			return false;
 		}
 
 	}
 
-	private class StringCollector
-			implements AnnotationValueVisitor<Boolean, List<String>> {
+	private class StringCollector implements AnnotationValueVisitor<Boolean, List<String>> {
 
 		@Override
 		public Boolean visit(AnnotationValue av, List<String> collected) {
@@ -495,8 +481,7 @@ public class ElementUtils {
 		}
 
 		@Override
-		public Boolean visitArray(List<? extends AnnotationValue> vals,
-				List<String> collected) {
+		public Boolean visitArray(List<? extends AnnotationValue> vals, List<String> collected) {
 			for (AnnotationValue value : vals) {
 				// TODO: really?
 				if (this.visit(value, collected) || value.toString().equals("<error>")) {
@@ -572,12 +557,10 @@ public class ElementUtils {
 
 		@Override
 		public Boolean visitType(TypeMirror t, String name) {
-			if (types.asElement(t) == null
-					|| ((TypeElement) types.asElement(t)).getQualifiedName() == null) {
+			if (types.asElement(t) == null || ((TypeElement) types.asElement(t)).getQualifiedName() == null) {
 				return false;
 			}
-			return ((TypeElement) types.asElement(t)).getQualifiedName().toString()
-					.equals(name);
+			return ((TypeElement) types.asElement(t)).getQualifiedName().toString().equals(name);
 		}
 
 		@Override
@@ -609,13 +592,10 @@ public class ElementUtils {
 	}
 
 	public boolean throwsCheckedException(ExecutableElement beanMethod) {
-		TypeMirror exceptionType = elements.getTypeElement(Exception.class.getName())
-				.asType();
-		TypeMirror runtimeExceptionType = elements
-				.getTypeElement(RuntimeException.class.getName()).asType();
+		TypeMirror exceptionType = elements.getTypeElement(Exception.class.getName()).asType();
+		TypeMirror runtimeExceptionType = elements.getTypeElement(RuntimeException.class.getName()).asType();
 		for (TypeMirror type : beanMethod.getThrownTypes()) {
-			if (types.isSubtype(type, exceptionType)
-					&& !types.isSubtype(type, runtimeExceptionType)) {
+			if (types.isSubtype(type, exceptionType) && !types.isSubtype(type, runtimeExceptionType)) {
 				return true;
 			}
 		}
@@ -654,16 +634,14 @@ public class ElementUtils {
 		return type;
 	}
 
-	public List<TypeElement> getTypesFromAnnotation(TypeElement type, String annotation,
-			String attribute) {
+	public List<TypeElement> getTypesFromAnnotation(TypeElement type, String annotation, String attribute) {
 		Set<TypeElement> list = new LinkedHashSet<>();
 		for (AnnotationMirror mirror : type.getAnnotationMirrors()) {
-			if (((TypeElement) mirror.getAnnotationType().asElement()).getQualifiedName()
-					.toString().equals(annotation)) {
+			if (((TypeElement) mirror.getAnnotationType().asElement()).getQualifiedName().toString()
+					.equals(annotation)) {
 				list.addAll(getTypesFromAnnotation(mirror, attribute));
 			}
-			Set<AnnotationMirror> metas = getAnnotations(
-					mirror.getAnnotationType().asElement(), annotation);
+			Set<AnnotationMirror> metas = getAnnotations(mirror.getAnnotationType().asElement(), annotation);
 			for (AnnotationMirror meta : metas) {
 				list.addAll(getTypesFromAnnotation(meta, attribute));
 			}
@@ -671,16 +649,14 @@ public class ElementUtils {
 		return new ArrayList<>(list);
 	}
 
-	public List<AnnotationMirror> getAnnotationsFromAnnotation(TypeElement type,
-			String annotation, String attribute) {
+	public List<AnnotationMirror> getAnnotationsFromAnnotation(TypeElement type, String annotation, String attribute) {
 		Set<AnnotationMirror> list = new LinkedHashSet<>();
 		for (AnnotationMirror mirror : type.getAnnotationMirrors()) {
-			if (((TypeElement) mirror.getAnnotationType().asElement()).getQualifiedName()
-					.toString().equals(annotation)) {
+			if (((TypeElement) mirror.getAnnotationType().asElement()).getQualifiedName().toString()
+					.equals(annotation)) {
 				list.addAll(getAnnotationsFromAnnotation(mirror, attribute));
 			}
-			AnnotationMirror meta = getAnnotation(mirror.getAnnotationType().asElement(),
-					annotation);
+			AnnotationMirror meta = getAnnotation(mirror.getAnnotationType().asElement(), annotation);
 			if (meta != null) {
 				list.addAll(getAnnotationsFromAnnotation(meta, attribute));
 			}
@@ -688,22 +664,19 @@ public class ElementUtils {
 		return new ArrayList<>(list);
 	}
 
-	public String getStringFromAnnotation(Element type, String annotation,
-			String attribute) {
+	public String getStringFromAnnotation(Element type, String annotation, String attribute) {
 		List<String> list = getStringsFromAnnotation(type, annotation, attribute);
 		return list.isEmpty() ? null : list.iterator().next();
 	}
 
-	public List<String> getStringsFromAnnotation(Element type, String annotation,
-			String attribute) {
+	public List<String> getStringsFromAnnotation(Element type, String annotation, String attribute) {
 		Set<String> list = new HashSet<>();
 		for (AnnotationMirror mirror : type.getAnnotationMirrors()) {
-			if (((TypeElement) mirror.getAnnotationType().asElement()).getQualifiedName()
-					.toString().equals(annotation)) {
+			if (((TypeElement) mirror.getAnnotationType().asElement()).getQualifiedName().toString()
+					.equals(annotation)) {
 				list.addAll(getStringsFromAnnotation(mirror, attribute));
 			}
-			AnnotationMirror meta = getAnnotation(mirror.getAnnotationType().asElement(),
-					annotation);
+			AnnotationMirror meta = getAnnotation(mirror.getAnnotationType().asElement(), annotation);
 			if (meta != null) {
 				list.addAll(getStringsFromAnnotation(meta, attribute));
 			}
@@ -739,8 +712,7 @@ public class ElementUtils {
 		if (!hasAnnotation(param, SpringClassNames.QUALIFIER.toString())) {
 			return null;
 		}
-		String qualifier = getStringFromAnnotation(param,
-				SpringClassNames.QUALIFIER.toString(), "value");
+		String qualifier = getStringFromAnnotation(param, SpringClassNames.QUALIFIER.toString(), "value");
 		return qualifier != null && qualifier.length() == 0 ? null : qualifier;
 	}
 

@@ -15,6 +15,9 @@
  */
 package org.springframework.slim.processor.tests;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -27,28 +30,28 @@ import java.util.stream.Collectors;
 
 import javax.lang.model.element.Modifier;
 
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.TypeSpec;
-import com.squareup.javapoet.TypeSpec.Builder;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.graph.Dependency;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.cloud.function.compiler.java.CompilationMessage;
 import org.springframework.cloud.function.compiler.java.CompilationResult;
 import org.springframework.cloud.function.compiler.java.DependencyResolver;
 import org.springframework.cloud.function.compiler.java.InputFileDescriptor;
 import org.springframework.core.io.FileUrlResource;
+import org.springframework.slim.processor.condition.ConditionalApplication;
+import org.springframework.slim.processor.config.ConfigApplication;
 import org.springframework.slim.processor.infra.CompilerRunner;
 import org.springframework.slim.processor.nested.NestedConfiguration;
 import org.springframework.slim.processor.nested.NestedInterface;
+import org.springframework.slim.processor.reactive.ReactiveApplication;
 import org.springframework.util.ClassUtils;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.TypeSpec.Builder;
 
 /**
  * Simple tests around processor invocation.
@@ -63,7 +66,8 @@ public class SimpleProcessorTests {
 	@Test
 	public void processorInvoked() {
 		CompilationResult cr = CompilerRunner.run(createType("TestClass", false));
-		// "Cannot load META-INF/slim-configuration-processor.properties (normal on first
+		// "Cannot load META-INF/slim-configuration-processor.properties (normal on
+		// first
 		// full build)"
 		assertThat(cr.getCompilationMessages()).extracting("message")
 				.anyMatch(s -> ((String) s).contains("Cannot load"));
@@ -162,6 +166,55 @@ public class SimpleProcessorTests {
 	}
 
 	@Test
+	public void conditionalConfig() {
+		CompilationResult cr = CompilerRunner.run(
+				new InputFileDescriptor(
+						new File("src/test/java/" + ClassUtils.classPackageAsResourcePath(ConditionalApplication.class)
+								+ "/ConditionalApplication.java"),
+						"ConditionalApplication",
+						ClassUtils.getPackageName(ConditionalApplication.class) + ".ConditionalApplication"),
+				getSpringDependencies());
+		assertThat(cr.containsNewFile("SampleConfigurationInitializer.class"));
+		String generated = cr
+				.getGeneratedFileContents(ClassUtils.classPackageAsResourcePath(ConditionalApplication.class)
+						+ "/SampleConfigurationInitializer.java");
+		assertThat(generated).contains("InfrastructureUtils.getBean(");
+		assertThat(generated).contains("conditions.matches(SampleConfiguration.class)");
+	}
+
+	@Test
+	public void configurationPropertiesConfig() {
+		CompilationResult cr = CompilerRunner.run(
+				new InputFileDescriptor(
+						new File("src/test/java/" + ClassUtils.classPackageAsResourcePath(ConfigApplication.class)
+								+ "/ConfigApplication.java"),
+						"ConfigApplication", ClassUtils.getPackageName(ConfigApplication.class) + ".ConfigApplication"),
+				getSpringDependencies());
+		assertThat(cr.containsNewFile("ConfigApplicationInitializer.class"));
+		String generated = cr.getGeneratedFileContents(
+				ClassUtils.classPackageAsResourcePath(ConfigApplication.class) + "/ConfigApplicationInitializer.java");
+		// System.err.println(generated);
+		assertThat(generated).contains("context.registerBean(SampleProperties.class");
+	}
+
+	@Test
+	public void noMetadataImports() {
+		CompilationResult cr = CompilerRunner.run(
+				new InputFileDescriptor(
+						new File("src/test/java/" + ClassUtils.classPackageAsResourcePath(ReactiveApplication.class)
+								+ "/ReactiveApplication.java"),
+						"ReactiveApplication",
+						ClassUtils.getPackageName(ReactiveApplication.class) + ".ReactiveApplication"),
+				getSpringDependencies());
+		assertThat(cr.containsNewFile("ReactiveApplicationInitializer.class"));
+		String generated = cr.getGeneratedFileContents(ClassUtils.classPackageAsResourcePath(ReactiveApplication.class)
+				+ "/ReactiveApplicationInitializer.java");
+		System.err.println(generated);
+		assertThat(generated).contains(
+				"new ReactiveWebServerFactoryAutoConfiguration.BeanPostProcessorsRegistrar().registerBeanDefinitions(null, context)");
+	}
+
+	@Test
 	public void nestedInterface() {
 		CompilationResult cr = CompilerRunner.run(
 				new InputFileDescriptor(
@@ -217,8 +270,7 @@ public class SimpleProcessorTests {
 			List<File> resolvedDependencies = dependencies.stream().map(d -> engine.resolve(d))
 					.collect(Collectors.toList());
 			return resolvedDependencies;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			return null;
 		}
 	}
@@ -266,8 +318,7 @@ public class SimpleProcessorTests {
 		StringBuilder sb = new StringBuilder();
 		try {
 			file.writeTo(sb);
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new IllegalStateException("Unable to write out source file: " + classname, e);
 		}
 		return new InputFileDescriptor(classname, sb.toString());

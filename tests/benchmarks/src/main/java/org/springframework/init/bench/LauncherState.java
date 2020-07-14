@@ -27,7 +27,6 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
-
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -69,8 +68,7 @@ public class LauncherState implements Runnable, Closeable {
 	public void start() throws Exception {
 		System.setProperty("server.port", "0");
 		System.setProperty("spring.jmx.enabled", "false");
-		System.setProperty("spring.config.location",
-				"file:./src/main/resources/application.properties");
+		System.setProperty("spring.config.location", "file:./src/main/resources/application.properties");
 		System.setProperty("spring.main.logStartupInfo", "false");
 		for (Object key : this.args.keySet()) {
 			System.setProperty(key.toString(), this.args.getProperty(key.toString()));
@@ -83,8 +81,7 @@ public class LauncherState implements Runnable, Closeable {
 			ReflectionUtils.makeAccessible(constructor);
 			instance = (Closeable) constructor.newInstance();
 			((Runnable) instance).run();
-		}
-		else {
+		} else {
 			instance = new LauncherApplication(mainClass);
 			run();
 		}
@@ -96,10 +93,8 @@ public class LauncherState implements Runnable, Closeable {
 			Constructor<?> constructor = mainClass.getConstructor();
 			ReflectionUtils.makeAccessible(constructor);
 			instance = (Closeable) constructor.newInstance();
-		}
-		else {
-			Class<?> appClass = mainClass.getClassLoader()
-					.loadClass(LauncherApplication.class.getName());
+		} else {
+			Class<?> appClass = mainClass.getClassLoader().loadClass(LauncherApplication.class.getName());
 			Constructor<?> constructor = appClass.getConstructor(Class.class);
 			ReflectionUtils.makeAccessible(constructor);
 			instance = (Closeable) constructor.newInstance(mainClass);
@@ -107,16 +102,14 @@ public class LauncherState implements Runnable, Closeable {
 		this.runThread = new Thread(() -> {
 			try {
 				run();
-			}
-			catch (Throwable ex) {
+			} catch (Throwable ex) {
 				error = ex;
 			}
 		});
 		this.runThread.start();
 		try {
 			this.runThread.join(timeout);
-		}
-		catch (InterruptedException e) {
+		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}
 	}
@@ -139,8 +132,7 @@ public class LauncherState implements Runnable, Closeable {
 			try {
 				loader.close();
 				loader = null;
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				System.err.println("Failed to close loader " + e);
 			}
 		}
@@ -156,8 +148,7 @@ public class LauncherState implements Runnable, Closeable {
 	}
 
 	private Class<?> loadMainClass(Class<?> type) throws ClassNotFoundException {
-		URL[] urls = filterClassPath(
-				((URLClassLoader) getClass().getClassLoader()).getURLs());
+		URL[] urls = filterClassPath(((URLClassLoader) getClass().getClassLoader()).getURLs());
 		loader = new URLClassLoader(urls, getClass().getClassLoader().getParent());
 		orig = ClassUtils.overrideThreadContextClassLoader(loader);
 		return loader.loadClass(type.getName());

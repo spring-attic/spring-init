@@ -22,11 +22,9 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
-import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.init.func.ConditionService;
-import org.springframework.init.func.FunctionalInstallerImportRegistrars;
+import org.springframework.init.func.FunctionalInstallerListener;
 import org.springframework.init.func.ImportRegistrars;
+import org.springframework.init.func.InfrastructureUtils;
 import org.springframework.init.func.SimpleConditionService;
 import org.springframework.util.ClassUtils;
 
@@ -44,21 +42,9 @@ public class TestModuleInitializer implements ApplicationContextInitializer<Gene
 			// Only used in tests - could move to separate jar
 			return;
 		}
-		ImportRegistrars registrars;
-		// TODO: extract this logic and share with FunctionalInstallerListener?
-		if (!context.getBeanFactory().containsSingleton(ConditionService.class.getName())) {
-			if (!context.getBeanFactory().containsSingleton(MetadataReaderFactory.class.getName())) {
-				context.getBeanFactory().registerSingleton(MetadataReaderFactory.class.getName(),
-						new CachingMetadataReaderFactory(context.getClassLoader()));
-			}
-			context.getBeanFactory().registerSingleton(ConditionService.class.getName(),
-					new SimpleConditionService(context, context.getBeanFactory(), context.getEnvironment(), context));
-			registrars = new FunctionalInstallerImportRegistrars(context);
-			context.registerBean(ImportRegistrars.class, () -> registrars);
-		}
-		else {
-			registrars = context.getBean(ImportRegistrars.class.getName(), ImportRegistrars.class);
-		}
+		FunctionalInstallerListener.initialize(context);
+		ImportRegistrars registrars = InfrastructureUtils.getBean(context.getBeanFactory(),
+				ImportRegistrars.class.getName(), ImportRegistrars.class);
 		for (String name : context.getBeanFactory().getBeanDefinitionNames()) {
 			BeanDefinition definition = context.getBeanFactory().getBeanDefinition(name);
 			if (definition.getBeanClassName().contains("ImportsContextCustomizer$ImportsConfiguration")) {
