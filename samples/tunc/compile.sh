@@ -38,6 +38,16 @@ echo "Compiling $ARTIFACT with $GRAALVM_VERSION"
   -Dspring.spel.ignore=true \
   -Dspring.native.remove-yaml-support=true \
   -Dspring.native.remove-jmx-support=true \
+  --initialize-at-build-time=org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfigurationInitializer \
+  --initialize-at-build-time=org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryAutoConfigurationInitializer \
+  --initialize-at-build-time=org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfiguration_DispatcherServletRegistrationConfigurationInitializer \
+  --initialize-at-build-time=org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfiguration_DispatcherServletConfigurationInitializer \
+  --initialize-at-build-time=org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryConfiguration_EmbeddedTomcatInitializer \
+  --initialize-at-build-time=org.springframework.boot.autoconfigure.web.embedded.EmbeddedWebServerFactoryCustomizerAutoConfiguration_TomcatWebServerFactoryCustomizerConfigurationInitializer \
+  --initialize-at-build-time=org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfigurationInitializer \
+  --initialize-at-build-time=org.springframework.boot.autoconfigure.web.servlet.RouterFunctionAutoConfigurationInitializer \
+  --initialize-at-build-time=org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfigurationInitializer \
+  --initialize-at-build-time=org.springframework.boot.autoconfigure.web.reactive.HttpHandlerAutoConfigurationInitializer \
   -H:+PrintAnalysisCallTree \
   -cp "${CP}" $MAINCLASS >> output.txt ; } 2>> output.txt
 

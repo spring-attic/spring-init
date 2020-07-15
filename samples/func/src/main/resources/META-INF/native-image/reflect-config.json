@@ -12,44 +12,11 @@
     "allDeclaredConstructors": true
   },
   {
-    "name": "org.springframework.boot.context.properties.ConfigurationPropertiesBeanDefinitionValidator",
-    "allDeclaredConstructors": true
-  },
-  {
-    "name": "org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor",
-    "allDeclaredConstructors": true
-  },
-  {
-    "name": "org.springframework.boot.context.properties.BoundConfigurationProperties",
-    "allDeclaredConstructors": true
-  },
-  {
-    "name": "org.springframework.boot.context.properties.ConfigurationBeanFactoryMetadata",
-    "allDeclaredConstructors": true
-  },
-  {
-    "name": "org.springframework.boot.context.properties.ConfigurationPropertiesBinder$Factory",
-    "allDeclaredConstructors": true,
-    "allDeclaredMethods": true
-  },
-  {
     "name": "org.springframework.init.func.SlimConfigurationClassPostProcessor",
     "allDeclaredConstructors": true,
     "allDeclaredMethods": true
   },
   {
     "name": "org.springframework.web.reactive.DispatcherHandler"
-  },
-  {
-    "name": "org.springframework.http.ReactiveHttpInputMessage"
-  },
-  {
-    "name": "reactor.netty.http.server.HttpServer"
-  },
-  {
-    "name": "org.springframework.web.reactive.config.WebFluxConfigurer"
-  },
-  {
-    "name": "org.springframework.http.server.reactive.HttpHandler"
   }
 ]

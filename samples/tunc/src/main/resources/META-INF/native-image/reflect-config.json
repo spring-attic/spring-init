@@ -16,62 +16,15 @@
     "allDeclaredConstructors": true
   },
   {
-    "name": "org.springframework.boot.context.properties.ConfigurationPropertiesBeanDefinitionValidator",
-    "allDeclaredConstructors": true
-  },
-  {
-    "name": "org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor",
-    "allDeclaredConstructors": true
-  },
-  {
-    "name": "org.springframework.boot.context.properties.BoundConfigurationProperties",
-    "allDeclaredConstructors": true
-  },
-  {
-    "name": "org.springframework.boot.context.properties.ConfigurationBeanFactoryMetadata",
-    "allDeclaredConstructors": true
-  },
-  {
-    "name": "org.springframework.boot.context.properties.ConfigurationPropertiesBinder$Factory",
-    "allDeclaredConstructors": true,
-    "allDeclaredMethods": true
-  },
-  {
     "name": "org.springframework.init.func.SlimConfigurationClassPostProcessor",
     "allDeclaredConstructors": true,
     "allDeclaredMethods": true
   },
   {
-    "name": "org.springframework.web.context.ConfigurableWebApplicationContext"
-  },
-  {
-    "name": "org.springframework.web.servlet.config.annotation.WebMvcConfigurer"
-  },
-  {
-    "name": "org.springframework.web.servlet.DispatcherServlet"
-  },
-  {
-    "name": "javax.servlet.ServletRequest"
-  },
-  {
     "name": "javax.servlet.Servlet"
   },
   {
-    "name": "javax.servlet.ServletRegistration"
-  },
-  {
-    "name": "org.apache.catalina.startup.Tomcat"
-  },
-  {
-    "name": "org.apache.coyote.UpgradeProtocol"
-  },
-  {
-    "name": "org.springframework.boot.web.server.WebServerFactoryCustomizerBeanPostProcessor",
-    "allDeclaredConstructors": true
-  },
-  {
-    "name": "org.springframework.boot.web.server.ErrorPageRegistrarBeanPostProcessor",
-    "allDeclaredConstructors": true
+    "name": "org.springframework.web.context.ConfigurableWebApplicationContext"
   },
   {
     "name": "org.springframework.boot.autoconfigure.web.ServerProperties",

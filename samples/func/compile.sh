@@ -38,6 +38,14 @@ echo "Compiling $ARTIFACT with $GRAALVM_VERSION"
   -Dspring.spel.ignore=true \
   -Dspring.native.remove-yaml-support=true \
   -Dspring.native.remove-jmx-support=true \
+  --initialize-at-build-time=org.springframework.boot.autoconfigure.web.reactive.HttpHandlerAutoConfigurationInitializer \
+  --initialize-at-build-time=org.springframework.boot.autoconfigure.web.reactive.ReactiveWebServerFactoryAutoConfigurationInitializer \
+  --initialize-at-build-time=org.springframework.boot.autoconfigure.web.reactive.ReactiveWebServerFactoryConfiguration_EmbeddedNettyInitializer \
+  --initialize-at-build-time=org.springframework.boot.autoconfigure.web.embedded.EmbeddedWebServerFactoryCustomizerAutoConfiguration_NettyWebServerFactoryCustomizerConfigurationInitializer \
+  --initialize-at-build-time=org.springframework.boot.autoconfigure.web.reactive.WebFluxAutoConfigurationInitializer \
+  --initialize-at-build-time=org.springframework.boot.autoconfigure.web.reactive.RouterFunctionAutoConfigurationInitializer \
+  --initialize-at-build-time=org.springframework.boot.autoconfigure.web.reactive.error.ErrorWebFluxAutoConfigurationInitializer \
+  --initialize-at-build-time=org.springframework.boot.autoconfigure.web.reactive.HttpHandlerAutoConfigurationInitializer \
   -H:+PrintAnalysisCallTree \
   -cp "${CP}" $MAINCLASS >> output.txt ; } 2>> output.txt
 
