@@ -16,14 +16,11 @@
 
 package app.aware;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 import lib.aware.Bar;
 
@@ -32,7 +29,6 @@ import lib.aware.Bar;
  *
  */
 @SpringBootTest(properties = "spring.functional.enabled=false")
-@RunWith(SpringRunner.class)
 public class SampleApplicationTests {
 
 	@Autowired
