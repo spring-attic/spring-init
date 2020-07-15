@@ -3,7 +3,6 @@ package app.main;
 import static org.springframework.web.servlet.function.RouterFunctions.route;
 import static org.springframework.web.servlet.function.ServerResponse.ok;
 
-import org.springframework.boot.NativePropertiesListener;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfigurationInitializer;

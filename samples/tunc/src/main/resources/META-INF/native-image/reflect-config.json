@@ -80,9 +80,5 @@
   {
     "name": "org.springframework.boot.autoconfigure.web.ServerProperties$Servlet",
     "allDeclaredMethods": true
-  },
-  {
-    "name": "org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver",
-    "allDeclaredConstructors": true
   }
 ]
