@@ -16,17 +16,6 @@
     "allDeclaredConstructors": true
   },
   {
-    "name": "org.springframework.init.func.SlimConfigurationClassPostProcessor",
-    "allDeclaredConstructors": true,
-    "allDeclaredMethods": true
-  },
-  {
-    "name": "javax.servlet.Servlet"
-  },
-  {
-    "name": "org.springframework.web.context.ConfigurableWebApplicationContext"
-  },
-  {
     "name": "org.springframework.boot.autoconfigure.web.ServerProperties",
     "allDeclaredMethods": true
   },
