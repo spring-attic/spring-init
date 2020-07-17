@@ -162,7 +162,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		code.add("enabled =\n");
 		for (int i = 0; i < types.size(); i++) {
 			Class<?> type = types.get(i);
-			code.add("$T.isPresent(\"$L\", null)", SpringClassNames.CLASS_UTILS, utils.asElement(type));
+			code.add("$T.isPresent($S, null)", SpringClassNames.CLASS_UTILS, type.getName());
 			if (i < types.size() - 1) {
 				code.add(" &&\n");
 			} else {

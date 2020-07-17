@@ -67,8 +67,9 @@ public interface ImportRegistrars {
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
-			result = prime * result + ((this.source == null) ? 0 : this.source.getName().hashCode());
-			result = prime * result + ((this.type == null) ? 0 : this.type.getName().hashCode());
+			result = prime * result + Arrays.hashCode(resources);
+			result = prime * result + ((source == null) ? 0 : source.hashCode());
+			result = prime * result + ((type == null) ? 0 : type.hashCode());
 			return result;
 		}
 
@@ -81,15 +82,17 @@ public interface ImportRegistrars {
 			if (getClass() != obj.getClass())
 				return false;
 			Imported other = (Imported) obj;
-			if (this.source == null) {
+			if (!Arrays.equals(resources, other.resources))
+				return false;
+			if (source == null) {
 				if (other.source != null)
 					return false;
-			} else if (!this.source.equals(other.source))
+			} else if (!source.equals(other.source))
 				return false;
-			if (this.type == null) {
+			if (type == null) {
 				if (other.type != null)
 					return false;
-			} else if (!this.type.equals(other.type))
+			} else if (!type.equals(other.type))
 				return false;
 			return true;
 		}

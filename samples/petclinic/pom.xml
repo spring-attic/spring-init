@@ -96,11 +96,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.experimental</groupId>
-			<artifactId>spring-init-benchmarks</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-jdk14</artifactId>
 		</dependency>
@@ -178,34 +173,37 @@
 				<artifactId>spring-init-library</artifactId>
 				<version>${slim.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>org.springframework.experimental</groupId>
-				<artifactId>spring-init-benchmarks</artifactId>
-				<version>${slim.version}</version>
-			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
-	<profiles>
-		<profile>
-			<id>tools.jar</id>
-			<activation>
-				<jdk>[1.8,1.9)</jdk>
-			</activation>
-			<dependencies>
-				<dependency>
-					<groupId>com.sun</groupId>
-					<artifactId>tools</artifactId>
-					<version>${java.version}</version>
-					<scope>system</scope>
-					<systemPath>${java.home}/../lib/tools.jar</systemPath>
-				</dependency>
-			</dependencies>
-		</profile>
-	</profiles>
-
 	<build>
 		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>pre-compile</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.springframework.experimental</groupId>
+				<artifactId>spring-init-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>sources</id>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<inherited>false</inherited>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
@@ -213,6 +211,7 @@
 					<skip>true</skip>
 				</configuration>
 			</plugin>
+
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -233,6 +232,7 @@
 					</execution>
 				</executions>
 			</plugin>
+
 			<plugin>
 				<groupId>com.google.cloud.tools</groupId>
 				<artifactId>jib-maven-plugin</artifactId>
@@ -250,6 +250,7 @@
 					</container>
 				</configuration>
 			</plugin>
+
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
@@ -269,6 +270,7 @@
 					</execution>
 				</executions>
 			</plugin>
+
 
 			<!-- Spring Boot Actuator displays build-related information if a git.properties file is present at the classpath -->
 			<plugin>
@@ -290,6 +292,7 @@
 					<failOnNoGitDirectory>false</failOnNoGitDirectory>
 				</configuration>
 			</plugin>
+
 
 			<plugin>
 				<groupId>ro.isdc.wro4j</groupId>
@@ -324,24 +327,6 @@
 				</dependencies>
 			</plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<annotationProcessorPaths>
-						<path>
-							<groupId>org.openjdk.jmh</groupId>
-							<artifactId>jmh-generator-annprocess</artifactId>
-							<version>${jmh.version}</version>
-						</path>
-						<path>
-							<groupId>org.springframework.experimental</groupId>
-							<artifactId>spring-init-processor</artifactId>
-							<version>${slim.version}</version>
-						</path>
-					</annotationProcessorPaths>
-				</configuration>
-			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -353,6 +338,7 @@
 					</systemProperties>
 				</configuration>
 			</plugin>
+
 
 		</plugins>
 	</build>
