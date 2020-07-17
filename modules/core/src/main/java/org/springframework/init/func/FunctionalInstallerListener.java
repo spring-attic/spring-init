@@ -34,14 +34,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.context.event.ApplicationContextInitializedEvent;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
-import org.springframework.boot.web.reactive.context.AnnotationConfigReactiveWebApplicationContext;
 import org.springframework.boot.web.reactive.context.ReactiveWebServerApplicationContext;
-import org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext;
 import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.event.SmartApplicationListener;
 import org.springframework.context.support.GenericApplicationContext;
@@ -101,21 +98,15 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 			}
 			logger.info("Preparing application context");
 			SpringApplication application = prepared.getSpringApplication();
-			WebApplicationType type = getWebApplicationType(application, prepared.getEnvironment());
-			Class<?> contextType = getApplicationContextType(application);
-			if (type == WebApplicationType.NONE) {
-				if (contextType == AnnotationConfigApplicationContext.class || contextType == null) {
-					application.setApplicationContextClass(GenericApplicationContext.class);
+			application.setApplicationContextFactory(type -> {
+				if (type == WebApplicationType.REACTIVE) {
+					return new ReactiveWebServerApplicationContext();
+				} else if (type == WebApplicationType.SERVLET) {
+					return new ServletWebServerApplicationContext();
+				} else {
+					return new GenericApplicationContext();
 				}
-			} else if (type == WebApplicationType.REACTIVE) {
-				if (contextType == AnnotationConfigReactiveWebApplicationContext.class || contextType == null) {
-					application.setApplicationContextClass(ReactiveWebServerApplicationContext.class);
-				}
-			} else if (type == WebApplicationType.SERVLET) {
-				if (contextType == AnnotationConfigServletWebServerApplicationContext.class || contextType == null) {
-					application.setApplicationContextClass(ServletWebServerApplicationContext.class);
-				}
-			}
+			});
 		}
 	}
 
@@ -127,17 +118,6 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 			return false;
 		}
 		return true;
-	}
-
-	private WebApplicationType getWebApplicationType(SpringApplication application,
-			ConfigurableEnvironment environment) {
-		if (environment.getProperty("spring.main.web-application-type") != null) {
-			// Environment hasn't been bound to SpringApplication yet so if this is set we
-			// won't know it
-			return WebApplicationType
-					.valueOf(environment.getProperty("spring.main.web-application-type").toUpperCase());
-		}
-		return application.getWebApplicationType();
 	}
 
 	private void findInitializers(GenericApplicationContext beans, SpringApplication application) {
@@ -168,16 +148,6 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 		Set<Object> sources = (Set<Object>) ReflectionUtils.getField(field, application);
 		sources.remove(source);
 		application.getSources().remove(source);
-	}
-
-	private Class<?> getApplicationContextType(SpringApplication application) {
-		Field field = ReflectionUtils.findField(SpringApplication.class, "applicationContextClass");
-		ReflectionUtils.makeAccessible(field);
-		try {
-			return (Class<?>) ReflectionUtils.getField(field, application);
-		} catch (Exception e) {
-			return null;
-		}
 	}
 
 	private boolean isEnabled(ConfigurableEnvironment environment) {
