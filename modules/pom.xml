@@ -29,8 +29,8 @@
 	<modules>
 		<module>core</module>
 		<module>library</module>
-		<module>processor</module>
-		<module>processor-tests</module>
+		<module>tools</module>
+		<module>maven-plugin</module>
 	</modules>
 
 	<properties>

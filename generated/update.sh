@@ -11,8 +11,6 @@ function init() {
 
     mkdir -p $module/src/main
 
-    cp -rf $src/src/main/java $src/src/main/resources $module/src/main
-
 }
 
 function optionals() {
@@ -36,6 +34,8 @@ EOF
 function generate() {
     src=$1; shift
     pom=$1; shift
+    basePackage=$1; shift;
+    groupId=$1; shift;
     artifactId=$1; shift;
     version=$1; shift;
 	opts=$1; shift
@@ -67,27 +67,19 @@ function generate() {
 	<build>
 		<plugins>
 			<plugin>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<includes>
-						<include>**/*Initializer.class</include>
-					</includes>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-source-plugin</artifactId>
-				<configuration>
-					<includes>
-						<include>**/*Initializer.java</include>
-					</includes>
-				</configuration>
+				<groupId>org.springframework.experimental</groupId>
+				<artifactId>spring-init-maven-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>attach-sources</id>
+						<id>sources</id>
+						<phase>process-sources</phase>
 						<goals>
-							<goal>jar</goal>
+							<goal>generate</goal>
 						</goals>
-						<phase>package</phase>
+						<inherited>false</inherited>
+						<configuration>
+							<basePackage>${basePackage}</basePackage>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -108,6 +100,11 @@ EOF
 	if ! [ -z ${opts} ] && [ -f ${opts} ]; then cat $opts >> $tmpfile; fi
     cat >> $tmpfile <<EOF
 		<dependency>
+			<groupId>${groupId}</groupId>
+			<artifactId>${artifactId}</artifactId>
+			<version>${version}</version>
+		</dependency>
+		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>jsr305</artifactId>
 			<version>3.0.2</version>
@@ -118,12 +115,6 @@ EOF
 			<artifactId>spring-init-core</artifactId>
 			<version>\${slim.version}</version>
 			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.experimental</groupId>
-			<artifactId>spring-init-processor</artifactId>
-			<version>\${slim.version}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -150,19 +141,19 @@ src=$cache/spring-boot-project/spring-boot-autoconfigure
 tgt=`dirname $0`/autoconfigure
 init $tgt $src
 (cd $cache; mkdir -p build && optionals spring-boot-autoconfigure > build/opts-autoconfigure)
-generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml spring-boot-autoconfigure 2.4.0-SNAPSHOT $cache/build/opts-autoconfigure
+generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml org.springframework.boot org.springframework.boot.autoconfigure spring-boot-autoconfigure 2.4.0-SNAPSHOT $cache/build/opts-autoconfigure
 
 src=$cache/spring-boot-project/spring-boot-actuator-autoconfigure
 tgt=`dirname $0`/actuator
 init $tgt $src
 (cd $cache; mkdir -p build && optionals spring-boot-actuator-autoconfigure > build/opts-actuator-autoconfigure)
-generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml spring-boot-actuator-autoconfigure 2.4.0-SNAPSHOT $cache/build/opts-actuator-autoconfigure
+generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml org.springframework.boot.actuator org.springframework.boot spring-boot-actuator-autoconfigure 2.4.0-SNAPSHOT $cache/build/opts-actuator-autoconfigure
 
 src=$cache/spring-boot-project/spring-boot-test-autoconfigure
 tgt=`dirname $0`/test
 init $tgt $src
 (cd $cache; mkdir -p build && optionals spring-boot-test-autoconfigure > build/opts-test-autoconfigure)
-generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml spring-boot-test-autoconfigure 2.4.0-SNAPSHOT $cache/build/opts-test-autoconfigure
+generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml org.springframework.boot.test org.springframework.boot spring-boot-test-autoconfigure 2.4.0-SNAPSHOT $cache/build/opts-test-autoconfigure
 
 cache=`dirname $0`/sources/spring-security
 if ! [ -e $cache ]; then
@@ -175,6 +166,6 @@ fi
 src=$cache/config
 tgt=`dirname $0`/security
 init $tgt $src
-generate $src/build/poms/pom-default.xml $tgt/pom.xml spring-security-config 5.4.0-SNAPSHOT
+generate $src/build/poms/pom-default.xml $tgt/pom.xml org.springframework.security.config org.springframework.security spring-security-config 5.4.0-SNAPSHOT
 
 
