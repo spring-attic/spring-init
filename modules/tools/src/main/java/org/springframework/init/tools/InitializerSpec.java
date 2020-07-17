@@ -482,14 +482,15 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 										.map(thing -> "$T.class").collect(Collectors.joining(", "))
 								+ "))";
 						result.types.add(SpringClassNames.RESOLVABLE_TYPE);
-						result.types.add(TypeName.get(((ParameterizedType)value).getRawType()));
+						result.types.add(TypeName.get(((ParameterizedType) value).getRawType()));
 						Arrays.asList(((ParameterizedType) value).getActualTypeArguments()).forEach(t -> {
+							if (t instanceof ParameterizedType) {
+								t = ((ParameterizedType)t).getRawType();
+							}
 							TypeName v = TypeName.get(t);
 							// The target type itself is generic. So far we only support
-							// one
-							// level of generic parameters. Further levels could be
-							// supported
-							// by adding calls to ResolvableType
+							// one level of generic parameters. Further levels could be
+							// supported by adding calls to ResolvableType
 							if ("?".equals(v.toString())) {
 								result.types.add(TypeName.OBJECT);
 							} else {
@@ -529,9 +530,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 					TypeName value = TypeName.get(type);
 					if (type instanceof ParameterizedType
 							&& ((ParameterizedType) type).getActualTypeArguments().length > 0) {
-						// The target type itself is generic. So far we only support one
-						// level of generic parameters. Further levels could be supported
-						// by adding calls to ResolvableType
+						// The target type itself is generic.
 						result.format = "context.getBeanProvider($T.forClassWithGenerics($T.class, $T.class))";
 						result.types.add(SpringClassNames.RESOLVABLE_TYPE);
 						if ("?".equals(value.toString())) {
@@ -540,6 +539,11 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 							result.types.add(value);
 						}
 						type = ((ParameterizedType) type).getActualTypeArguments()[0];
+						if (type instanceof ParameterizedType) {
+							// So far we only support one level of generic parameters. Further levels could
+							// be supported by adding calls to ResolvableType
+							type = ((ParameterizedType) type).getRawType();
+						}
 					} else if (ResolvableType.forType(type).isArray()) {
 						// TODO: something special with an array of generic types?
 					}
@@ -601,7 +605,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 			String qualifier = utils.getQualifier(param);
 			if (paramType instanceof ParameterizedType) {
 				// We don't care any more
-				paramType = ((ParameterizedType)paramType).getRawType();
+				paramType = ((ParameterizedType) paramType).getRawType();
 			}
 			if (utils.isLazy(param)) {
 				code.append("$T.lazy($T.class, () -> ");

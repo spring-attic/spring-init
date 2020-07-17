@@ -141,13 +141,13 @@ src=$cache/spring-boot-project/spring-boot-autoconfigure
 tgt=`dirname $0`/autoconfigure
 init $tgt $src
 (cd $cache; mkdir -p build && optionals spring-boot-autoconfigure > build/opts-autoconfigure)
-generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml org.springframework.boot org.springframework.boot.autoconfigure spring-boot-autoconfigure 2.4.0-SNAPSHOT $cache/build/opts-autoconfigure
+generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml org.springframework.boot.autoconfigure  org.springframework.boot spring-boot-autoconfigure 2.4.0-SNAPSHOT $cache/build/opts-autoconfigure
 
 src=$cache/spring-boot-project/spring-boot-actuator-autoconfigure
 tgt=`dirname $0`/actuator
 init $tgt $src
 (cd $cache; mkdir -p build && optionals spring-boot-actuator-autoconfigure > build/opts-actuator-autoconfigure)
-generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml org.springframework.boot.actuator org.springframework.boot spring-boot-actuator-autoconfigure 2.4.0-SNAPSHOT $cache/build/opts-actuator-autoconfigure
+generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml org.springframework.boot.actuate.autoconfigure org.springframework.boot spring-boot-actuator-autoconfigure 2.4.0-SNAPSHOT $cache/build/opts-actuator-autoconfigure
 
 src=$cache/spring-boot-project/spring-boot-test-autoconfigure
 tgt=`dirname $0`/test

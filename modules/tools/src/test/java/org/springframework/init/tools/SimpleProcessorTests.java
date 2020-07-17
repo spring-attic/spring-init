@@ -47,6 +47,7 @@ public class SimpleProcessorTests {
 		// System.err.println(files);
 		assertThat(files.toString()).contains("bar(context.getBean(Foo.class))");
 		assertThat(files.toString()).contains("runner(context.getBean(Bar.class))");
+		// TODO: need to use ObjectProvider to wire a Bar<Collection<Foo>> correctly
 	}
 
 	@Test
@@ -63,6 +64,15 @@ public class SimpleProcessorTests {
 		assertThat(files).hasSize(2);
 		assertThat(files.toString()).contains("bar(context.getBeansOfType(Foo.class))");
 		assertThat(files.toString()).contains("ResolvableType.forClassWithGenerics(Bar.class, Foo.class)");
+	}
+
+	@Test
+	public void providerOfCollectionOfGeneric() {
+		Set<JavaFile> files = new InitializerClassProcessor().process(app("provider.collection"));
+		assertThat(files).hasSize(2);
+		System.err.println(files);
+		assertThat(files.toString()).contains("bar(context.getBeansOfType(Foo.class))");
+		assertThat(files.toString()).contains("ResolvableType.forClassWithGenerics(Collection.class, Bar.class)");
 	}
 
 	@Test

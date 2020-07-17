@@ -1,5 +1,8 @@
 package app.generic;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -22,9 +25,21 @@ public class SampleConfiguration {
 	}
 
 	@Bean
-	// This one generates an initializer that won't compile on command line (Eclipse is
-	// fine)
+	public Bar<Collection<Foo>> bars(Foo foo) {
+		return new Bar<>(Arrays.asList(foo));
+	}
+
+	@Bean
 	public CommandLineRunner runner(Bar<Foo> bar) {
+		return args -> {
+			System.out.println("Message: " + message);
+			System.out.println("Bar: " + bar);
+			System.out.println("Foo: " + bar);
+		};
+	}
+
+	@Bean
+	public CommandLineRunner another(Bar<Collection<Foo>> bar) {
 		return args -> {
 			System.out.println("Message: " + message);
 			System.out.println("Bar: " + bar);
