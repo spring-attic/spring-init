@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -37,7 +38,7 @@ public class InitializerClassProcessor {
 	}
 
 	private Set<Class<?>> collectTypes(Class<?> type, Predicate<Class<?>> typeSelectionCondition) {
-		Set<Class<?>> types = new HashSet<>();
+		Set<Class<?>> types = new LinkedHashSet<>();
 		collectTypes(type, types, typeSelectionCondition);
 		return types;
 	}
@@ -58,7 +59,7 @@ public class InitializerClassProcessor {
 							.and(cls -> utils.hasAnnotation(cls, SpringClassNames.COMPONENT.toString())));
 				}
 			}
-			for (Class<?> element : type.getDeclaredClasses()) {
+			for (Class<?> element : utils.getMemberClasses(type)) {
 				if (utils.hasAnnotation(element, SpringClassNames.CONFIGURATION.toString())) {
 					logger.info("Found nested @Configuration in " + element);
 					imports.addNested(type, element);
@@ -94,7 +95,7 @@ public class InitializerClassProcessor {
 
 	public Set<JavaFile> process(String packageName) {
 		Set<JavaFile> result = new HashSet<>();
-		Set<Class<?>> types = new HashSet<>();
+		Set<Class<?>> types = new LinkedHashSet<>();
 		collectTypes(packageName, types,
 				te -> !Modifier.isAbstract(te.getModifiers()) && !Modifier.isStatic(te.getModifiers()));
 		for (Class<?> type : types) {

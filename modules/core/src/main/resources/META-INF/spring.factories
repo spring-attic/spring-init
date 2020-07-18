@@ -3,5 +3,7 @@ org.springframework.init.func.InfrastructureListener,\
 org.springframework.init.func.FunctionalInstallerListener
 
 org.springframework.context.ApplicationContextInitializer=\
-org.springframework.init.func.InfrastructureInitializer,\
-org.springframework.init.test.TestModuleInitializer
+org.springframework.init.func.InfrastructureInitializer
+
+org.springframework.test.context.ContextCustomizerFactory=\
+org.springframework.init.test.FunctionalContextCustomizerFactory

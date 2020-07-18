@@ -333,4 +333,18 @@ public class ElementUtils {
 		String name = type.toString();
 		return name.contains("<") ? name.substring(0, name.indexOf("<")) : name;
 	}
+
+	public Class<?>[] getMemberClasses(Class<?> type) {
+		Class<?>[] classes = type.getDeclaredClasses();
+		for (int i = 0; i < classes.length; i++) {
+			Class<?> cls = classes[i];
+			// Hack for DispatcherServletAutoConfiguration
+			if (cls.getName().endsWith("RegistrationConfiguration") && i<classes.length-1) {
+				classes[i] = classes[i+1];
+				classes[i+1] = cls;
+				break;
+			}
+		}
+		return classes;
+	}
 }

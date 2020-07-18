@@ -98,16 +98,31 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 			}
 			logger.info("Preparing application context");
 			SpringApplication application = prepared.getSpringApplication();
-			application.setApplicationContextFactory(type -> {
-				if (type == WebApplicationType.REACTIVE) {
-					return new ReactiveWebServerApplicationContext();
-				} else if (type == WebApplicationType.SERVLET) {
-					return new ServletWebServerApplicationContext();
-				} else {
-					return new GenericApplicationContext();
-				}
-			});
+			if (!isSliceTest(prepared)) {
+				application.setApplicationContextFactory(type -> {
+					if (type == WebApplicationType.REACTIVE) {
+						return new ReactiveWebServerApplicationContext();
+					} else if (type == WebApplicationType.SERVLET) {
+						return new ServletWebServerApplicationContext();
+					} else {
+						return new GenericApplicationContext();
+					}
+				});
+			}
 		}
+	}
+
+	private boolean isSliceTest(ApplicationEnvironmentPreparedEvent prepared) {
+		// TODO: there has to be a better way to detect this
+		if (prepared.getEnvironment().getProperty(
+				"org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTestContextBootstrapper",
+				Boolean.class, false)
+				|| prepared.getEnvironment().getProperty(
+						"org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTestContextBootstrapper",
+						Boolean.class, false)) {
+			return true;
+		}
+		return false;
 	}
 
 	private boolean isPresent(ConfigurableApplicationContext context) {

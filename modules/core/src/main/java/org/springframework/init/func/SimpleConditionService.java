@@ -69,6 +69,8 @@ public class SimpleConditionService implements ConditionService {
 			return !this.evaluator.shouldSkip(getMetadata(type), phase);
 		} catch (ArrayStoreException e) {
 			return false;
+		} catch (IllegalStateException e) {
+			return false;
 		}
 	}
 
