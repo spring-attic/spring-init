@@ -103,6 +103,7 @@ EOF
 			<groupId>${groupId}</groupId>
 			<artifactId>${artifactId}</artifactId>
 			<version>${version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
