@@ -21,15 +21,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.init.func.InfrastructureInitializer;
-import org.springframework.test.context.ContextConfiguration;
 
 /**
  * @author Dave Syer
  *
  */
 @SpringBootTest
-@ContextConfiguration(initializers = TestInitializer.class)
 public class FunctionalApplicationTests {
 
 	@Autowired
@@ -41,10 +38,4 @@ public class FunctionalApplicationTests {
 		assertThat(bar.getFoo().getValue()).isNotNull();
 	}
 
-}
-
-class TestInitializer extends InfrastructureInitializer {
-	public TestInitializer() {
-		super(new Initializer());
-	}
 }

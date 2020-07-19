@@ -18,11 +18,13 @@ package org.springframework.init.func;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ServiceLoader;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.Ordered;
+import org.springframework.util.ClassUtils;
 
 /**
  * @author Dave Syer
@@ -35,6 +37,7 @@ public class InfrastructureInitializer implements ApplicationContextInitializer<
 	private int order = Ordered.HIGHEST_PRECEDENCE + 5;
 
 	public InfrastructureInitializer() {
+		this(new ApplicationContextInitializer<?>[0]);
 	}
 
 	public InfrastructureInitializer(ApplicationContextInitializer<?>... initializers) {
@@ -44,6 +47,10 @@ public class InfrastructureInitializer implements ApplicationContextInitializer<
 	public InfrastructureInitializer(int order, ApplicationContextInitializer<?>... initializers) {
 		this.order = order;
 		this.initializers.addAll(Arrays.asList(initializers));
+		ServiceLoader<InfrastructureProvider> loader = ServiceLoader.load(InfrastructureProvider.class, ClassUtils.getDefaultClassLoader());
+		for (InfrastructureProvider provider : loader) {
+			this.initializers.addAll(provider.getInitializers());
+		}
 	}
 
 	@Override
