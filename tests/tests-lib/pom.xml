@@ -40,7 +40,7 @@
 	<properties>
 		<java.version>1.8</java.version>
 		<start-class>app.main.SampleApplication</start-class>
-		<thin.version>1.0.23.RELEASE</thin.version>
+		<spring-init.version>${project.version}</spring-init.version>
 	</properties>
 
 
@@ -54,17 +54,33 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>pre-compile</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.springframework.experimental</groupId>
+				<artifactId>spring-init-maven-plugin</artifactId>
+				<version>${spring-init.version}</version>
+				<executions>
+					<execution>
+						<id>sources</id>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<inherited>false</inherited>
+					</execution>
+				</executions>
 				<configuration>
-					<annotationProcessorPaths>
-						<path>
-							<groupId>${project.groupId}</groupId>
-							<artifactId>spring-init-processor</artifactId>
-							<version>${project.version}</version>
-						</path>
-					</annotationProcessorPaths>
-					<showWarnings>true</showWarnings>
+					<basePackage>lib</basePackage>
 				</configuration>
 			</plugin>
 		</plugins>

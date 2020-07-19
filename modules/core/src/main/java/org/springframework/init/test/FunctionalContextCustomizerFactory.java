@@ -19,7 +19,7 @@ package org.springframework.init.test;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.GenericApplicationContext;
@@ -42,36 +42,40 @@ class FunctionalContextCustomizerFactory implements ContextCustomizerFactory {
 	@Override
 	public ContextCustomizer createContextCustomizer(Class<?> testClass,
 			List<ContextConfigurationAttributes> configurationAttributes) {
-		return new FunctionalContextCustomizer();
+		return new FunctionalContextCustomizer(testClass);
 	}
-	
+
+	private boolean isSliceTest(Class<?> testClass) {
+		return AnnotatedElementUtils.hasAnnotation(testClass, ImportAutoConfiguration.class);
+	}
+
 	class FunctionalContextCustomizer implements ContextCustomizer {
+
+		private Class<?> testClass;
+
+		public FunctionalContextCustomizer(Class<?> testClass) {
+			this.testClass = testClass;
+		}
 
 		@Override
 		public void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
 			if (!isEnabled(context.getEnvironment())) {
 				return;
 			}
-			FunctionalInstallerListener.initialize((GenericApplicationContext)context);
+			FunctionalInstallerListener.initialize((GenericApplicationContext) context);
 			ImportRegistrars registrars = InfrastructureUtils.getBean(context.getBeanFactory(),
 					ImportRegistrars.class.getName(), ImportRegistrars.class);
-			for (String name : context.getBeanFactory().getBeanDefinitionNames()) {
-				BeanDefinition definition = context.getBeanFactory().getBeanDefinition(name);
-				if (definition.getBeanClassName().contains("ImportsContextCustomizer$ImportsConfiguration")) {
-					SimpleConditionService.EXCLUDES_ENABLED = true;
-					Class<?> testClass = (definition != null) ? (Class<?>) definition.getAttribute("testClass") : null;
-					if (testClass != null) {
-						Set<Import> merged = AnnotatedElementUtils.findAllMergedAnnotations(testClass, Import.class);
-						for (Import ann : merged) {
-							for (Class<?> imported : ann.value()) {
-								registrars.add(testClass, imported);
-							}
-						}
+			if (this.testClass != null) {
+				SimpleConditionService.EXCLUDES_ENABLED = true;
+				Set<Import> merged = AnnotatedElementUtils.findAllMergedAnnotations(testClass, Import.class);
+				for (Import ann : merged) {
+					for (Class<?> imported : ann.value()) {
+						registrars.add(testClass, imported);
 					}
 				}
 			}
 		}
-		
+
 		private boolean isEnabled(ConfigurableEnvironment environment) {
 			return environment.getProperty("spring.functional.enabled", Boolean.class, true);
 		}
