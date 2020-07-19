@@ -32,11 +32,6 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.experimental</groupId>
-			<artifactId>spring-init-processor</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 			<exclusions>
@@ -98,7 +93,6 @@
 		<java.version>1.8</java.version>
 		<start-class>app.main.SampleApplication</start-class>
 		<generated.version>2.4.0-SNAPSHOT</generated.version>
-		<generated.sources>${project.build.directory}/generated-sources/java</generated.sources>
 	</properties>
 
 	<build>
@@ -141,28 +135,6 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
-
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<!-- Need to ensure the generated source folder is added to the project 
-							classpath, in jdt.ls -->
-						<id>add-source</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>add-source</goal>
-						</goals>
-						<configuration>
-							<sources>
-								<source>${generated.sources}</source>
-							</sources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
 		</plugins>
 	</build>
 

@@ -24,6 +24,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.init.func.FunctionalInstallerListener;
 import org.springframework.init.func.ImportRegistrars;
 import org.springframework.init.func.InfrastructureUtils;
@@ -48,6 +49,9 @@ class FunctionalContextCustomizerFactory implements ContextCustomizerFactory {
 
 		@Override
 		public void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
+			if (!isEnabled(context.getEnvironment())) {
+				return;
+			}
 			FunctionalInstallerListener.initialize((GenericApplicationContext)context);
 			ImportRegistrars registrars = InfrastructureUtils.getBean(context.getBeanFactory(),
 					ImportRegistrars.class.getName(), ImportRegistrars.class);
@@ -68,6 +72,10 @@ class FunctionalContextCustomizerFactory implements ContextCustomizerFactory {
 			}
 		}
 		
+		private boolean isEnabled(ConfigurableEnvironment environment) {
+			return environment.getProperty("spring.functional.enabled", Boolean.class, true);
+		}
+
 	}
 
 }

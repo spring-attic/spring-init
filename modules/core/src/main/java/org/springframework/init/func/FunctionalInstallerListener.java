@@ -119,7 +119,10 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 				Boolean.class, false)
 				|| prepared.getEnvironment().getProperty(
 						"org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTestContextBootstrapper",
-						Boolean.class, false)) {
+						Boolean.class, false)
+				|| prepared.getEnvironment().getProperty(
+						"org.springframework.boot.test.context.SpringBootTestContextBootstrapper", Boolean.class,
+						false)) {
 			return true;
 		}
 		return false;

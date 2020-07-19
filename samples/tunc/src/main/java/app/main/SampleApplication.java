@@ -24,6 +24,7 @@ import org.springframework.init.func.ConditionService;
 import org.springframework.init.func.ConfigurationSource;
 import org.springframework.init.func.InfrastructureInitializer;
 import org.springframework.init.func.SimpleConfigurationSource;
+import org.springframework.init.func.TypeService;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.server.adapter.ForwardedHeaderTransformer;
 import org.springframework.web.servlet.function.RouterFunction;
@@ -93,7 +94,8 @@ class Initializer implements ApplicationContextInitializer<GenericApplicationCon
 	public void initialize(GenericApplicationContext context) {
 		context.registerBean(ConditionService.class, () -> new SampleConditionService());
 		context.registerBean(ConfigurationSource.class, () -> new SimpleConfigurationSource( //
-				new SampleApplicationInitializer(), //
+				(ApplicationContextInitializer<?>) context.getAutowireCapableBeanFactory().createBean(
+						context.getBean(TypeService.class).getType("app.main.SampleApplicationInitializer")), //
 				new PropertyPlaceholderAutoConfigurationInitializer(), //
 				new ConfigurationPropertiesAutoConfigurationInitializer(), //
 				new ServletWebServerFactoryAutoConfigurationInitializer(), //
