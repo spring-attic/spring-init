@@ -70,7 +70,7 @@ public class SimpleProcessorTests {
 	public void providerOfCollectionOfGeneric() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("provider.collection"));
 		assertThat(files).hasSize(2);
-		System.err.println(files);
+		// System.err.println(files);
 		assertThat(files.toString()).contains("bar(context.getBeansOfType(Foo.class))");
 		assertThat(files.toString()).contains("ResolvableType.forClassWithGenerics(Collection.class, Bar.class)");
 	}
@@ -143,6 +143,15 @@ public class SimpleProcessorTests {
 		assertThat(files).hasSize(2);
 		// System.err.println(files);
 		assertThat(files.toString()).contains("new SampleConfigurationInitializer().initialize(context)");
+	}
+
+	@Test
+	public void servlet() {
+		Set<JavaFile> files = new InitializerClassProcessor().process(app("servlet"));
+		assertThat(files).hasSize(1);
+		// System.err.println(files);
+		assertThat(files.toString()).contains("InfrastructureUtils.invokeAwareMethods(new ServletWebServerFactoryAutoConfiguration.BeanPostProcessorsRegistrar()");
+		assertThat(files.toString()).contains(".registerBeanDefinitions(null, context)");
 	}
 
 	private Class<?> app(String pkg) {
