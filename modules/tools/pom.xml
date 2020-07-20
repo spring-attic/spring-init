@@ -19,6 +19,11 @@
 			<version>1.13.0</version>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.experimental</groupId>
+			<artifactId>spring-init-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 			<optional>true</optional>

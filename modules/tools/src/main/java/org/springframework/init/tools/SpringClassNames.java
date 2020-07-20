@@ -15,6 +15,39 @@
  */
 package org.springframework.init.tools;
 
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.context.annotation.ImportResource;
+import org.springframework.context.annotation.ImportSelector;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.ResolvableType;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.init.func.ConditionService;
+import org.springframework.init.func.ImportRegistrars;
+import org.springframework.init.func.InfrastructureUtils;
+import org.springframework.init.func.ObjectUtils;
+import org.springframework.init.func.TypeService;
+import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ClassUtils;
+
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 
@@ -24,91 +57,75 @@ import com.squareup.javapoet.ParameterizedTypeName;
  */
 public class SpringClassNames {
 
-	public static final ClassName IMPORT_SELECTOR = ClassName.get("org.springframework.context.annotation",
-			"ImportSelector");
+	public static final ClassName IMPORT_SELECTOR = ClassName.get(ImportSelector.class);
 
-	public static final ClassName OBJECT_PROVIDER = ClassName.get("org.springframework.beans.factory",
-			"ObjectProvider");
+	public static final ClassName OBJECT_PROVIDER = ClassName.get(ObjectProvider.class);
 
 	public static final ClassName IMPORT_BEAN_DEFINITION_REGISTRAR = ClassName
-			.get("org.springframework.context.annotation", "ImportBeanDefinitionRegistrar");
+			.get(ImportBeanDefinitionRegistrar.class);
 
-	public static final ClassName ANNOTATION_METADATA = ClassName.get("org.springframework.core.type",
-			"AnnotationMetadata");
+	public static final ClassName ANNOTATION_METADATA = ClassName.get(AnnotationMetadata.class);
 
-	public static final ClassName CONFIGURATION = ClassName.get("org.springframework.context.annotation",
-			"Configuration");
+	public static final ClassName CONFIGURATION = ClassName.get(Configuration.class);
 
-	public static final ClassName COMPONENT = ClassName.get("org.springframework.stereotype", "Component");
+	public static final ClassName COMPONENT = ClassName.get(Component.class);
 
-	public static final ClassName QUALIFIER = ClassName.get("org.springframework.beans.factory.annotation",
-			"Qualifier");
+	public static final ClassName QUALIFIER = ClassName.get(Qualifier.class);
 
-	public static final ClassName LAZY = ClassName.get("org.springframework.context.annotation", "Lazy");
+	public static final ClassName LAZY = ClassName.get(Lazy.class);
 
 	public static final ClassName BEAN_FACTORY_ANNOTATION_UTILS = ClassName
-			.get("org.springframework.beans.factory.annotation", "BeanFactoryAnnotationUtils");
+			.get(BeanFactoryAnnotationUtils.class);
 
-	public static final ClassName COMPONENT_SCAN = ClassName.get("org.springframework.context.annotation",
-			"ComponentScan");
+	public static final ClassName COMPONENT_SCAN = ClassName.get(ComponentScan.class);
 
 	public static final ClassName SPRING_BOOT_CONFIGURATION = ClassName.get("org.springframework.boot",
 			"SpringBootConfiguration");
 
-	public static final ClassName BEAN = ClassName.get("org.springframework.context.annotation", "Bean");
+	public static final ClassName BEAN = ClassName.get(Bean.class);
 
-	public static final ClassName IMPORT = ClassName.get("org.springframework.context.annotation", "Import");
+	public static final ClassName IMPORT = ClassName.get(Import.class);
 
-	public static final ClassName IMPORT_RESOURCE = ClassName.get("org.springframework.context.annotation",
-			"ImportResource");
+	public static final ClassName IMPORT_RESOURCE = ClassName.get(ImportResource.class);
 
-	public static final ClassName NULLABLE = ClassName.get("org.springframework.lang", "Nullable");
+	public static final ClassName NULLABLE = ClassName.get(Nullable.class);
 
-	public static final ClassName OBJECT_UTILS = ClassName.get("org.springframework.init.func", "ObjectUtils");
+	public static final ClassName OBJECT_UTILS = ClassName.get(ObjectUtils.class);
 
-	public static final ClassName CONDITION_SERVICE = ClassName.get("org.springframework.init.func",
-			"ConditionService");
+	public static final ClassName CONDITION_SERVICE = ClassName.get(ConditionService.class);
 
-	public static final ClassName TYPE_SERVICE = ClassName.get("org.springframework.init.func", "TypeService");
+	public static final ClassName TYPE_SERVICE = ClassName.get(TypeService.class);
 
-	public static final ClassName INFRASTRUCTURE_UTILS = ClassName.get("org.springframework.init.func",
-			"InfrastructureUtils");
+	public static final ClassName INFRASTRUCTURE_UTILS = ClassName.get(InfrastructureUtils.class);
 
-	public static final ClassName IMPORT_REGISTRARS = ClassName.get("org.springframework.init.func",
-			"ImportRegistrars");
+	public static final ClassName IMPORT_REGISTRARS = ClassName.get(ImportRegistrars.class);
 
-	public static final ClassName APPLICATION_CONTEXT_INITIALIZER = ClassName.get("org.springframework.context",
-			"ApplicationContextInitializer");
+	public static final ClassName APPLICATION_CONTEXT_INITIALIZER = ClassName.get(ApplicationContextInitializer.class);
 
-	public static final ClassName APPLICATION_CONTEXT = ClassName.get("org.springframework.context",
-			"ApplicationContext");
+	public static final ClassName APPLICATION_CONTEXT = ClassName.get(ApplicationContext.class);
 
-	public static final ClassName RESOURCE_LOADER = ClassName.get("org.springframework.core.io", "ResourceLoader");
+	public static final ClassName RESOURCE_LOADER = ClassName.get(ResourceLoader.class);
 
-	public static final ClassName APPLICATION_EVENT_PUBLISHER = ClassName.get("org.springframework.context",
-			"ApplicationEventPublisher");
+	public static final ClassName APPLICATION_EVENT_PUBLISHER = ClassName.get(ApplicationEventPublisher.class);
 
 	public static final ClassName WEB_APPLICATION_CONTEXT = ClassName.get("org.springframework.web.context",
 			"WebApplicationContext");
 
-	public static final ClassName CONFIGURABLE_APPLICATION_CONTEXT = ClassName.get("org.springframework.context",
-			"ConfigurableApplicationContext");
+	public static final ClassName CONFIGURABLE_APPLICATION_CONTEXT = ClassName.get(ConfigurableApplicationContext.class);
 
-	public static final ClassName BEAN_FACTORY = ClassName.get("org.springframework.beans.factory", "BeanFactory");
+	public static final ClassName BEAN_FACTORY = ClassName.get(BeanFactory.class);
 
-	public static final ClassName LISTABLE_BEAN_FACTORY = ClassName.get("org.springframework.beans.factory",
-			"ListableBeanFactory");
+	public static final ClassName LISTABLE_BEAN_FACTORY = ClassName.get(ListableBeanFactory.class);
 
 	public static final ClassName CONFIGURABLE_LISTABLE_BEAN_FACTORY = ClassName
-			.get("org.springframework.beans.factory.config", "ConfigurableListableBeanFactory");
+			.get(ConfigurableListableBeanFactory.class);
 
-	public static final ClassName GENERIC_APPLICATION_CONTEXT = ClassName.get("org.springframework.context.support",
-			"GenericApplicationContext");
+	public static final ClassName GENERIC_APPLICATION_CONTEXT = ClassName.get(GenericApplicationContext.class);
 
 	public static final ParameterizedTypeName INITIALIZER_TYPE = ParameterizedTypeName
 			.get(APPLICATION_CONTEXT_INITIALIZER, GENERIC_APPLICATION_CONTEXT);
 
-	public static final ClassName CONDITIONAL = ClassName.get("org.springframework.context.annotation", "Conditional");
+	public static final ClassName CONDITIONAL = ClassName.get(Conditional.class);
 
 	public static final ClassName CONDITIONAL_ON_CLASS = ClassName
 			.get("org.springframework.boot.autoconfigure.condition", "ConditionalOnClass");
@@ -133,10 +150,10 @@ public class SpringClassNames {
 	public static final ClassName CONFIGURATION_PROPERTIES_BINDING_POST_PROCESSOR = ClassName
 			.get("org.springframework.boot.context.properties", "ConfigurationPropertiesBindingPostProcessor");
 
-	public static final ClassName RESOLVABLE_TYPE = ClassName.get("org.springframework.core", "ResolvableType");
+	public static final ClassName RESOLVABLE_TYPE = ClassName.get(ResolvableType.class);
 
-	public static final ClassName CLASS_UTILS = ClassName.get("org.springframework.util", "ClassUtils");
+	public static final ClassName CLASS_UTILS = ClassName.get(ClassUtils.class);
 
-	public static final ClassName FACTORY_BEAN = ClassName.get("org.springframework.beans.factory", "FactoryBean");
+	public static final ClassName FACTORY_BEAN = ClassName.get(FactoryBean.class);
 
 }
