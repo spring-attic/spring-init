@@ -124,7 +124,7 @@ public class ElementUtils {
 	public boolean isImportWithNoMetadata(Class<?> imported) {
 		// TODO: There are some imported registrars that don't use the annotation
 		// metadata. We can enumerate them all eventually.
-		return NO_METADATA_IMPORTS.contains(imported.getName());
+		return NO_METADATA_IMPORTS.contains(imported.getName().replace("$", "."));
 	}
 
 	public boolean isImporter(Class<?> imported) {

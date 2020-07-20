@@ -22,7 +22,7 @@ import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAut
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfigurationInitializer;
 import org.springframework.boot.autoconfigure.web.embedded.JettyWebServerFactoryCustomizer;
 import org.springframework.boot.autoconfigure.web.embedded.UndertowWebServerFactoryCustomizer;
-import org.springframework.boot.autoconfigure.web.reactive.RouterFunctionAutoConfigurationInitializer;
+import org.springframework.boot.autoconfigure.web.servlet.RouterFunctionAutoConfigurationInitializer;
 import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfigurationInitializer;
 import org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryAutoConfigurationInitializer;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfigurationInitializer;
@@ -55,8 +55,8 @@ public class SampleInfrastructureProvider implements InfrastructureProvider {
 								new PropertyPlaceholderAutoConfigurationInitializer(), //
 								new ConfigurationPropertiesAutoConfigurationInitializer(), //
 								new ServletWebServerFactoryAutoConfigurationInitializer(), //
-								new DispatcherServletAutoConfigurationInitializer(), //
 								new RouterFunctionAutoConfigurationInitializer(), //
+								new DispatcherServletAutoConfigurationInitializer(), //
 								new ErrorMvcAutoConfigurationInitializer() //
 						)));
 	}

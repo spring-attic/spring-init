@@ -55,7 +55,7 @@ public class InitializerClassProcessor {
 					bases.add(type);
 				}
 				for (Class<?> base : bases) {
-					collectTypes(base.getPackageName(), types, typeSelectionCondition
+					collectTypes(ClassUtils.getPackageName(base), types, typeSelectionCondition
 							.and(cls -> utils.hasAnnotation(cls, SpringClassNames.COMPONENT.toString())));
 				}
 			}

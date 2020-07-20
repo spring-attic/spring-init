@@ -12,6 +12,10 @@
     "allDeclaredMethods": true
   },
   {
+    "name": "app.main.SampleApplicationInitializer",
+    "allDeclaredConstructors": true
+  },
+  {
     "name": "org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext",
     "allDeclaredConstructors": true
   },
