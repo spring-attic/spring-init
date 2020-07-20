@@ -32,7 +32,6 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.context.event.ApplicationContextInitializedEvent;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.boot.web.reactive.context.ReactiveWebServerApplicationContext;
@@ -46,7 +45,6 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
-import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
@@ -110,6 +108,8 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 						return new GenericApplicationContext();
 					}
 				});
+			} else if (application.getWebApplicationType() == WebApplicationType.NONE) {
+				application.setApplicationContextFactory(type -> new GenericApplicationContext());
 			}
 		}
 	}
@@ -125,10 +125,6 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 				|| prepared.getEnvironment().getProperty(
 						"org.springframework.boot.test.context.SpringBootTestContextBootstrapper", Boolean.class,
 						false)) {
-			Class<?> main = prepared.getSpringApplication().getMainApplicationClass();
-			if (main!=null) {
-				return AnnotatedElementUtils.hasAnnotation(main, ImportAutoConfiguration.class);
-			}
 			return true;
 		}
 		return false;

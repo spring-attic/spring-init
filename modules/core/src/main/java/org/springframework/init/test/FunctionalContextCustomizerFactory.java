@@ -19,7 +19,6 @@ package org.springframework.init.test;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.GenericApplicationContext;
@@ -43,10 +42,6 @@ class FunctionalContextCustomizerFactory implements ContextCustomizerFactory {
 	public ContextCustomizer createContextCustomizer(Class<?> testClass,
 			List<ContextConfigurationAttributes> configurationAttributes) {
 		return new FunctionalContextCustomizer(testClass);
-	}
-
-	private boolean isSliceTest(Class<?> testClass) {
-		return AnnotatedElementUtils.hasAnnotation(testClass, ImportAutoConfiguration.class);
 	}
 
 	class FunctionalContextCustomizer implements ContextCustomizer {
