@@ -36,6 +36,15 @@ public class SimpleProcessorTests {
 	}
 
 	@Test
+	public void conditionalOnMissingType() {
+		Set<JavaFile> files = new InitializerClassProcessor().process(app("condition.type"));
+		assertThat(files).hasSize(3);
+		// System.err.println(files);
+		assertThat(files.toString()).contains("conditions.matches(ConditionalConfiguration.class)");
+		assertThat(files.toString()).contains("ClassUtils.isPresent(\"not.going.to.be.There\", null)");
+	}
+
+	@Test
 	public void resource() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("resource"));
 		assertThat(files).hasSize(1);
@@ -131,7 +140,7 @@ public class SimpleProcessorTests {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("vsble"));
 		assertThat(files).hasSize(1);
 		assertThat(files.toString())
-				.contains("ClassUtils.resolveClassName(\"app.vsble.sub.Runner\", context.getClassLoader())");
+				.contains("types.getType(\"app.vsble.sub.Runner\")");
 		assertThat(files.toString()).contains(
 				"context.getBean(SampleApplication.class).bar(context.getBean(Foo.class)), def -> def.setInitMethodName(\"start\")");
 	}

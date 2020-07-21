@@ -95,7 +95,7 @@ public class ScanningProcessorTests {
 		Set<JavaFile> files = new InitializerClassProcessor().process("app.vsble");
 		assertThat(files).hasSize(3);
 		assertThat(files.toString())
-				.contains("ClassUtils.resolveClassName(\"app.vsble.sub.Runner\", context.getClassLoader())");
+				.contains("types.getType(\"app.vsble.sub.Runner\")");
 		assertThat(files.toString()).contains(
 				"context.getBean(SampleApplication.class).bar(context.getBean(Foo.class)), def -> def.setInitMethodName(\"start\")");
 	}
