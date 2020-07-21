@@ -298,9 +298,9 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 					SpringClassNames.CONDITION_SERVICE);
 			builder.beginControlFlow("if (conditions.matches($T.class))", type);
 		}
+		builder.beginControlFlow("if (context.getBeanFactory().getBeanNamesForType($T.class).length==0)", type);
 		builder.addStatement("$T types = $T.getBean(context.getBeanFactory(), $T.class)", SpringClassNames.TYPE_SERVICE,
 				SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.TYPE_SERVICE);
-		builder.beginControlFlow("if (context.getBeanFactory().getBeanNamesForType($T.class).length==0)", type);
 		boolean conditionsAvailable = addScannedComponents(builder, conditional);
 		addNewBeanForConfig(builder, type);
 		for (Method method : getBeanMethods(type)) {
