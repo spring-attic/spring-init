@@ -16,7 +16,6 @@
 
 package org.springframework.init.func;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -24,7 +23,6 @@ import java.util.Set;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.io.Resource;
 
 /**
  * @author Dave Syer
@@ -57,13 +55,7 @@ public class FunctionalInstallerImportRegistrars implements ImportRegistrars {
 	@Override
 	public void add(Class<?> importer, String typeName) {
 		if (typeName.endsWith(".xml")) {
-			Resource[] resources;
-			try {
-				resources = context.getResources(typeName);
-			} catch (IOException e) {
-				throw new IllegalStateException("Cannot load resources: " + typeName, e);
-			}
-			this.imported.add(new Imported(importer, resources));
+			this.imported.add(new Imported(importer, typeName));
 		} else {
 			if (isAutoConfiguration(importer, typeName) && !context.getEnvironment()
 					.getProperty(EnableAutoConfiguration.ENABLED_OVERRIDE_PROPERTY, Boolean.class, true)) {

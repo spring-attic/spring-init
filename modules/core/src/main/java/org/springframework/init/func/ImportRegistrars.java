@@ -16,10 +16,7 @@
 
 package org.springframework.init.func;
 
-import java.util.Arrays;
 import java.util.Set;
-
-import org.springframework.core.io.Resource;
 
 /**
  * @author Dave Syer
@@ -39,19 +36,19 @@ public interface ImportRegistrars {
 
 		private Class<?> type;
 
-		private Resource[] resources;
+		private String resources;
 
 		public Imported(Class<?> source, Class<?> type) {
 			this.source = source;
 			this.type = type;
 		}
 
-		public Imported(Class<?> source, Resource[] resources) {
+		public Imported(Class<?> source, String resources) {
 			this.source = source;
 			this.resources = resources;
 		}
 
-		public Resource[] getResources() {
+		public String getResources() {
 			return resources;
 		}
 
@@ -64,16 +61,6 @@ public interface ImportRegistrars {
 		}
 
 		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + Arrays.hashCode(resources);
-			result = prime * result + ((source == null) ? 0 : source.hashCode());
-			result = prime * result + ((type == null) ? 0 : type.hashCode());
-			return result;
-		}
-
-		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
 				return true;
@@ -82,7 +69,10 @@ public interface ImportRegistrars {
 			if (getClass() != obj.getClass())
 				return false;
 			Imported other = (Imported) obj;
-			if (!Arrays.equals(resources, other.resources))
+			if (resources == null) {
+				if (other.resources != null)
+					return false;
+			} else if (!resources.equals(other.resources))
 				return false;
 			if (source == null) {
 				if (other.source != null)
@@ -98,12 +88,20 @@ public interface ImportRegistrars {
 		}
 
 		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((resources == null) ? 0 : resources.hashCode());
+			result = prime * result + ((source == null) ? 0 : source.hashCode());
+			result = prime * result + ((type == null) ? 0 : type.hashCode());
+			return result;
+		}
+
+		@Override
 		public String toString() {
 			return "Imported [source=" + this.source.getName()
 
-					+ ", location="
-					+ (this.type == null ? Arrays.asList(this.resources == null ? new Resource[0] : resources)
-							: type.getName())
+					+ ", location=" + (this.type == null ? this.resources == null ? "" : resources : type.getName())
 					+ "]";
 		}
 

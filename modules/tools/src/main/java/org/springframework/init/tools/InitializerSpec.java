@@ -244,22 +244,25 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 						// ignore
 					}
 					builder.beginControlFlow("try");
-					//  TODO: Have another look at the BeanNameGenerator if https://jira.spring.io/browse/DATACMNS-1770 is fixed
+					// TODO: Have another look at the BeanNameGenerator if
+					// https://jira.spring.io/browse/DATACMNS-1770 is fixed
 					if (accessible) {
 						builder.addStatement(
 								"$T.invokeAwareMethods(new $T(), context.getEnvironment(), context, context).registerBeanDefinitions($T.getBean(context.getBeanFactory(), $T.class).getMetadataReader($S).getAnnotationMetadata(), context, $T.getBean(context.getBeanFactory(), $T.class))",
 								SpringClassNames.INFRASTRUCTURE_UTILS, imported, SpringClassNames.INFRASTRUCTURE_UTILS,
-								SpringClassNames.METADATA_READER_FACTORY, configurationType.getName(), SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.BEAN_NAME_GENERATOR);
+								SpringClassNames.METADATA_READER_FACTORY, configurationType.getName(),
+								SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.BEAN_NAME_GENERATOR);
 					} else {
 						builder.addStatement(
 								"(($T)$T.getOrCreate(context, $S)).registerBeanDefinitions($T.getBean(context.getBeanFactory(), $T.class).getMetadataReader($S).getAnnotationMetadata(), context, $T.getBean(context.getBeanFactory(), $T.class))",
 								SpringClassNames.IMPORT_BEAN_DEFINITION_REGISTRAR,
 								SpringClassNames.INFRASTRUCTURE_UTILS, imported.getName().replace("$", "."),
 								SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.METADATA_READER_FACTORY,
-								configurationType.getName(), SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.BEAN_NAME_GENERATOR);
+								configurationType.getName(), SpringClassNames.INFRASTRUCTURE_UTILS,
+								SpringClassNames.BEAN_NAME_GENERATOR);
 					}
-					builder.nextControlFlow("catch ($T e)", IOException.class).addStatement(" throw new IllegalStateException(e)")
-							.endControlFlow();
+					builder.nextControlFlow("catch ($T e)", IOException.class)
+							.addStatement(" throw new IllegalStateException(e)").endControlFlow();
 				} else if (utils.hasAnnotation(imported, SpringClassNames.CONFIGURATION.toString())) {
 					ClassName initializerName = InitializerSpec.toInitializerNameFromConfigurationName(imported);
 					if (!ClassUtils.isPresent(initializerName.toString(), null)) {
@@ -310,9 +313,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		Set<String> locations = resources.getResources().get(configurationType);
 		if (locations != null) {
 			for (String location : locations) {
-				builder.addStatement("$T.getBean(context.getBeanFactory(), $T.class).add($T.class, \"$L\")",
-						SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.IMPORT_REGISTRARS, configurationType,
-						location);
+				builder.addStatement("new $T($S).initialize(context)", SpringClassNames.XML_INITIALIZER, location);
 			}
 		}
 	}

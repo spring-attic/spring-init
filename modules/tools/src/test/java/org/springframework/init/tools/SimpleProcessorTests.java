@@ -36,6 +36,13 @@ public class SimpleProcessorTests {
 	}
 
 	@Test
+	public void resource() {
+		Set<JavaFile> files = new InitializerClassProcessor().process(app("resource"));
+		assertThat(files).hasSize(1);
+		assertThat(files.toString()).contains("new XmlInitializer(\"bar-config.xml\").initialize(context)");
+	}
+
+	@Test
 	public void collection() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("collection"));
 		assertThat(files).hasSize(2);

@@ -32,7 +32,6 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
-import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.context.ApplicationContextInitializer;
@@ -43,7 +42,6 @@ import org.springframework.context.annotation.DeferredImportSelector;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.context.annotation.ImportSelector;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
@@ -275,23 +273,5 @@ public class FunctionalInstallerPostProcessor implements BeanDefinitionRegistryP
 			return beanClassName;
 		}
 	};
-
-	static class XmlInitializer implements ApplicationContextInitializer<GenericApplicationContext> {
-
-		private final Resource[] resources;
-
-		public XmlInitializer(Resource[] resources) {
-			this.resources = resources;
-		}
-
-		@Override
-		public void initialize(GenericApplicationContext context) {
-			XmlBeanDefinitionReader xml = new XmlBeanDefinitionReader(context);
-			for (Resource resource : resources) {
-				xml.loadBeanDefinitions(resource);
-			}
-		}
-
-	}
 
 }

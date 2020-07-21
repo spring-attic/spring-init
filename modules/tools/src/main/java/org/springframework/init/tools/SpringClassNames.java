@@ -46,6 +46,7 @@ import org.springframework.init.func.ImportRegistrars;
 import org.springframework.init.func.InfrastructureUtils;
 import org.springframework.init.func.ObjectUtils;
 import org.springframework.init.func.TypeService;
+import org.springframework.init.func.XmlInitializer;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
@@ -101,6 +102,8 @@ public class SpringClassNames {
 	public static final ClassName INFRASTRUCTURE_UTILS = ClassName.get(InfrastructureUtils.class);
 
 	public static final ClassName IMPORT_REGISTRARS = ClassName.get(ImportRegistrars.class);
+
+	public static final ClassName XML_INITIALIZER = ClassName.get(XmlInitializer.class);
 
 	public static final ClassName APPLICATION_CONTEXT_INITIALIZER = ClassName.get(ApplicationContextInitializer.class);
 
