@@ -128,8 +128,15 @@ public class ElementUtils {
 	}
 
 	public boolean isImporter(Class<?> imported) {
-		return implementsInterface(imported, ImportBeanDefinitionRegistrar.class)
-				|| implementsInterface(imported, ImportSelector.class);
+		return isImportSelector(imported) || isImportBeanDefinitionRegistrar(imported);
+	}
+
+	public boolean isImportSelector(Class<?> imported) {
+		return implementsInterface(imported, ImportSelector.class);
+	}
+
+	public boolean isImportBeanDefinitionRegistrar(Class<?> imported) {
+		return implementsInterface(imported, ImportBeanDefinitionRegistrar.class);
 	}
 
 	public boolean isConfigurationProperties(Class<?> imported) {

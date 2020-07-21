@@ -52,7 +52,7 @@ public class InitializerSpecs {
 		if (initializers.containsKey(initializer)) {
 			return;
 		}
-		initializers.put(initializer, new InitializerSpec(this.utils, initializer, imports, components));
+		initializers.put(initializer, new InitializerSpec(this, this.utils, initializer, imports, components));
 		findNestedInitializers(initializer, new HashSet<>());
 	}
 

@@ -47,6 +47,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.ClassUtils;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -81,7 +82,10 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 
 	private boolean hasEnabled = false;
 
-	public InitializerSpec(ElementUtils utils, Class<?> type, Imports imports, Components components) {
+	private InitializerSpecs specs;
+
+	public InitializerSpec(InitializerSpecs specs, ElementUtils utils, Class<?> type, Imports imports, Components components) {
+		this.specs = specs;
 		this.utils = utils;
 		this.components = components;
 		this.className = toInitializerNameFromConfigurationName(type);
@@ -225,17 +229,22 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 					builder.addStatement(
 							"$T.invokeAwareMethods(new $T(), context.getEnvironment(), context, context).registerBeanDefinitions(null, context)",
 							SpringClassNames.INFRASTRUCTURE_UTILS, imported);
-				} else if (utils.isImporter(imported)) {
+				} else if (utils.isImportSelector(imported)) {
 					builder.addStatement("$T.getBean(context.getBeanFactory(), $T.class).add($T.class, \"$L\")",
 							SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.IMPORT_REGISTRARS,
 							configurationType, imported.getCanonicalName());
-				} else if (utils.getPackage(imported).equals(pkg) || components.getAll().contains(imported)) {
-					builder.addStatement("new $T().initialize(context)",
-							InitializerSpec.toInitializerNameFromConfigurationName(imported));
+				} else if (utils.isImportBeanDefinitionRegistrar(imported)) {
+					builder.addStatement("$T.getBean(context.getBeanFactory(), $T.class).add($T.class, \"$L\")",
+							SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.IMPORT_REGISTRARS,
+							configurationType, imported.getCanonicalName());
 				} else {
-					builder.addStatement("$T.getBean(context.getBeanFactory(), $T.class).add($T.class, \"$L\")",
-							SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.IMPORT_REGISTRARS,
-							configurationType, imported.getCanonicalName());
+					ClassName initializerName = InitializerSpec.toInitializerNameFromConfigurationName(imported);
+					if (!ClassUtils.isPresent(initializerName.toString(), null)) {
+						// Hack an initializer together (ideally we'd have full coverage in all dependencies)
+						logger.warn("Creating initializer on the fly for: " + imported.getName());
+						specs.addInitializer(imported);
+					}
+					builder.addStatement("new $T().initialize(context)", initializerName);
 				}
 			}
 		}
@@ -485,7 +494,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 						result.types.add(TypeName.get(((ParameterizedType) value).getRawType()));
 						Arrays.asList(((ParameterizedType) value).getActualTypeArguments()).forEach(t -> {
 							if (t instanceof ParameterizedType) {
-								t = ((ParameterizedType)t).getRawType();
+								t = ((ParameterizedType) t).getRawType();
 							}
 							TypeName v = TypeName.get(t);
 							// The target type itself is generic. So far we only support
