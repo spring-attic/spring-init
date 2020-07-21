@@ -30,6 +30,7 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.context.event.ApplicationContextInitializedEvent;
@@ -192,6 +193,11 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 				SimpleConditionService conditions = new SimpleConditionService(context, context,
 						context.getEnvironment(), context);
 				infrastructure.getBeanFactory().registerSingleton(ConditionService.class.getName(), conditions);
+			}
+			if (!InfrastructureUtils.containsBean(context.getBeanFactory(), BeanNameGenerator.class)) {
+				// TODO: maybe use DefaultBeanNameGenerator (but Spring Data passes null for the registry)
+				BeanNameGenerator generator = (definition, registry) -> definition.getBeanClassName();
+				infrastructure.getBeanFactory().registerSingleton(BeanNameGenerator.class.getName(), generator);
 			}
 			FunctionalInstallerImportRegistrars registrar = new FunctionalInstallerImportRegistrars(context);
 			infrastructure.getBeanFactory().registerSingleton(ImportRegistrars.class.getName(), registrar);

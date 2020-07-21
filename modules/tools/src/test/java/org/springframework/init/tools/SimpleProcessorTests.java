@@ -31,6 +31,8 @@ public class SimpleProcessorTests {
 	public void simpleConditional() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(ConditionalApplication.class);
 		assertThat(files).hasSize(2);
+		// System.err.println(files);
+		assertThat(files.toString()).contains("registerBeanDefinitions(InfrastructureUtils.getBean(context.getBeanFactory(), MetadataReaderFactory.class).getMetadataReader(");
 	}
 
 	@Test
@@ -134,7 +136,9 @@ public class SimpleProcessorTests {
 		assertThat(files.toString()).contains("new SampleConfigurationInitializer().initialize(context)");
 		assertThat(files.toString()).contains("context.getBean(SampleConfiguration.class).foo()");
 		assertThat(files.toString()).contains(
-				".add(SampleApplication.class, \"org.springframework.boot.autoconfigure.AutoConfigurationPackages.Registrar\")");
+				"InfrastructureUtils.getOrCreate(context, \"org.springframework.boot.autoconfigure.AutoConfigurationPackages.Registrar\")");
+		assertThat(files.toString()).contains(
+				".getMetadataReader(\"app.scan.sub.SampleApplication\").getAnnotationMetadata()");
 	}
 
 	@Test

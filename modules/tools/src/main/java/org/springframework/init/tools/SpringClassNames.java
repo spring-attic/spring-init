@@ -22,6 +22,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ApplicationEventPublisher;
@@ -39,6 +40,7 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.init.func.ConditionService;
 import org.springframework.init.func.ImportRegistrars;
 import org.springframework.init.func.InfrastructureUtils;
@@ -105,6 +107,10 @@ public class SpringClassNames {
 	public static final ClassName APPLICATION_CONTEXT = ClassName.get(ApplicationContext.class);
 
 	public static final ClassName RESOURCE_LOADER = ClassName.get(ResourceLoader.class);
+
+	public static final ClassName METADATA_READER_FACTORY = ClassName.get(MetadataReaderFactory.class);
+
+	public static final ClassName BEAN_NAME_GENERATOR = ClassName.get(BeanNameGenerator.class);
 
 	public static final ClassName APPLICATION_EVENT_PUBLISHER = ClassName.get(ApplicationEventPublisher.class);
 

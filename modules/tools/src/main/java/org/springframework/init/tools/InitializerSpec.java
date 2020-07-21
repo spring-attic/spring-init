@@ -15,6 +15,7 @@
  */
 package org.springframework.init.tools;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
@@ -84,7 +85,8 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 
 	private InitializerSpecs specs;
 
-	public InitializerSpec(InitializerSpecs specs, ElementUtils utils, Class<?> type, Imports imports, Components components) {
+	public InitializerSpec(InitializerSpecs specs, ElementUtils utils, Class<?> type, Imports imports,
+			Components components) {
 		this.specs = specs;
 		this.utils = utils;
 		this.components = components;
@@ -234,17 +236,43 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 							SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.IMPORT_REGISTRARS,
 							configurationType, imported.getCanonicalName());
 				} else if (utils.isImportBeanDefinitionRegistrar(imported)) {
-					builder.addStatement("$T.getBean(context.getBeanFactory(), $T.class).add($T.class, \"$L\")",
-							SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.IMPORT_REGISTRARS,
-							configurationType, imported.getCanonicalName());
-				} else {
+					boolean accessible = false;
+					try {
+						accessible = imported.getName().startsWith(pkg)
+								|| java.lang.reflect.Modifier.isPublic(imported.getConstructor().getModifiers());
+					} catch (Exception e) {
+						// ignore
+					}
+					builder.beginControlFlow("try");
+					//  TODO: Have another look at the BeanNameGenerator if https://jira.spring.io/browse/DATACMNS-1770 is fixed
+					if (accessible) {
+						builder.addStatement(
+								"$T.invokeAwareMethods(new $T(), context.getEnvironment(), context, context).registerBeanDefinitions($T.getBean(context.getBeanFactory(), $T.class).getMetadataReader($S).getAnnotationMetadata(), context, $T.getBean(context.getBeanFactory(), $T.class))",
+								SpringClassNames.INFRASTRUCTURE_UTILS, imported, SpringClassNames.INFRASTRUCTURE_UTILS,
+								SpringClassNames.METADATA_READER_FACTORY, configurationType.getName(), SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.BEAN_NAME_GENERATOR);
+					} else {
+						builder.addStatement(
+								"(($T)$T.getOrCreate(context, $S)).registerBeanDefinitions($T.getBean(context.getBeanFactory(), $T.class).getMetadataReader($S).getAnnotationMetadata(), context, $T.getBean(context.getBeanFactory(), $T.class))",
+								SpringClassNames.IMPORT_BEAN_DEFINITION_REGISTRAR,
+								SpringClassNames.INFRASTRUCTURE_UTILS, imported.getName().replace("$", "."),
+								SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.METADATA_READER_FACTORY,
+								configurationType.getName(), SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.BEAN_NAME_GENERATOR);
+					}
+					builder.nextControlFlow("catch ($T e)", IOException.class).addStatement(" throw new IllegalStateException(e)")
+							.endControlFlow();
+				} else if (utils.hasAnnotation(imported, SpringClassNames.CONFIGURATION.toString())) {
 					ClassName initializerName = InitializerSpec.toInitializerNameFromConfigurationName(imported);
 					if (!ClassUtils.isPresent(initializerName.toString(), null)) {
-						// Hack an initializer together (ideally we'd have full coverage in all dependencies)
-						logger.warn("Creating initializer on the fly for: " + imported.getName());
+						// Hack an initializer together (ideally we'd have full coverage in all
+						// dependencies)
+						if (!imported.getName().startsWith(pkg)) {
+							logger.warn("Creating initializer on the fly for: " + imported.getName());
+						}
 						specs.addInitializer(imported);
 					}
 					builder.addStatement("new $T().initialize(context)", initializerName);
+				} else {
+					builder.addStatement("context.registerBean($T.class)", imported);
 				}
 			}
 		}
