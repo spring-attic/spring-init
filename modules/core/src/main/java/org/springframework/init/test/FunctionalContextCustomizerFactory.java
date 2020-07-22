@@ -61,8 +61,8 @@ class FunctionalContextCustomizerFactory implements ContextCustomizerFactory {
 			ImportRegistrars registrars = InfrastructureUtils.getBean(context.getBeanFactory(),
 					ImportRegistrars.class.getName(), ImportRegistrars.class);
 			if (this.testClass != null) {
-				SimpleConditionService.EXCLUDES_ENABLED = true;
 				Set<Import> merged = AnnotatedElementUtils.findAllMergedAnnotations(testClass, Import.class);
+				SimpleConditionService.EXCLUDES_ENABLED = !merged.isEmpty();
 				for (Import ann : merged) {
 					for (Class<?> imported : ann.value()) {
 						registrars.add(testClass, imported);

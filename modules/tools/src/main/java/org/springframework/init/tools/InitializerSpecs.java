@@ -59,15 +59,19 @@ public class InitializerSpecs {
 	private void findNestedInitializers(Class<?> type, Set<Class<?>> types) {
 		if (!types.contains(type) && !Modifier.isAbstract(type.getModifiers())
 				&& utils.hasAnnotation(type, Configuration.class.getName())) {
-			addInitializer(type);
-			for (Class<?> element : type.getDeclaredClasses()) {
-				if (Modifier.isStatic(element.getModifiers())) {
-					if (utils.hasAnnotation(element, SpringClassNames.CONFIGURATION.toString())) {
-						imports.addNested(type, element);
+			try {
+				for (Class<?> element : type.getDeclaredClasses()) {
+					if (Modifier.isStatic(element.getModifiers())) {
+						if (utils.hasAnnotation(element, SpringClassNames.CONFIGURATION.toString())) {
+							imports.addNested(type, element);
+						}
+						findNestedInitializers(element, types);
 					}
-					findNestedInitializers(element, types);
 				}
+			} catch (NoClassDefFoundError e) {
+				return;
 			}
+			addInitializer(type);
 			types.add(type);
 		}
 

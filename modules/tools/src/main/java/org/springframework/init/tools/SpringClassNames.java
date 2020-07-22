@@ -45,6 +45,7 @@ import org.springframework.init.func.ConditionService;
 import org.springframework.init.func.ImportRegistrars;
 import org.springframework.init.func.InfrastructureUtils;
 import org.springframework.init.func.ObjectUtils;
+import org.springframework.init.func.SimpleConditionService;
 import org.springframework.init.func.TypeService;
 import org.springframework.init.func.XmlInitializer;
 import org.springframework.lang.Nullable;
@@ -84,6 +85,8 @@ public class SpringClassNames {
 
 	public static final ClassName SPRING_BOOT_CONFIGURATION = ClassName.get("org.springframework.boot",
 			"SpringBootConfiguration");
+	
+	public static final ClassName ENABLE_AUTO_CONFIGURATION = ClassName.get("org.springframework.boot.autoconfigure", "EnableAutoConfiguration");
 
 	public static final ClassName BEAN = ClassName.get(Bean.class);
 
@@ -96,6 +99,8 @@ public class SpringClassNames {
 	public static final ClassName OBJECT_UTILS = ClassName.get(ObjectUtils.class);
 
 	public static final ClassName CONDITION_SERVICE = ClassName.get(ConditionService.class);
+
+	public static final ClassName SIMPLE_CONDITION_SERVICE = ClassName.get(SimpleConditionService.class);
 
 	public static final ClassName TYPE_SERVICE = ClassName.get(TypeService.class);
 

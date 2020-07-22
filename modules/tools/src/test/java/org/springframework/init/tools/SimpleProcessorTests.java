@@ -157,7 +157,7 @@ public class SimpleProcessorTests {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("selector"));
 		assertThat(files).hasSize(1);
 		assertThat(files.toString())
-				.contains("InfrastructureUtils.getBean(context.getBeanFactory(), ImportRegistrars.class).add(SampleApplication.class, \"app.selector.SampleRegistrar\")");
+				.contains("InfrastructureUtils.getBean(context.getBeanFactory(), ImportRegistrars.class).add(SampleApplication.class, SampleRegistrar.class)");
 		assertThat(files.toString())
 				.contains("new PropertyPlaceholderAutoConfigurationInitializer().initialize(context)");
 	}

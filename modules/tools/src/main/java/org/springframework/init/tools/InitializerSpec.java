@@ -43,11 +43,23 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ResourceLoaderAware;
+import org.springframework.context.annotation.ImportSelector;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.init.func.DefaultTypeService;
+import org.springframework.init.func.FunctionalInstallerListener;
+import org.springframework.init.func.InfrastructureUtils;
+import org.springframework.init.func.TypeService;
 import org.springframework.util.ClassUtils;
 
 import com.squareup.javapoet.ClassName;
@@ -62,6 +74,8 @@ import com.squareup.javapoet.TypeSpec.Builder;
  *
  */
 public class InitializerSpec implements Comparable<InitializerSpec> {
+
+	private static MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory();
 
 	private static Log logger = LogFactory.getLog(InitializerSpec.class);
 
@@ -215,7 +229,25 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		}
 	}
 
-	private void addImported(MethodSpec.Builder builder, Class<?> element, Class<?> imported) {
+	private void addDeferredImport(com.squareup.javapoet.MethodSpec.Builder builder, Class<?> element,
+			Class<?> imported) {
+		if (utils.hasAnnotation(imported, SpringClassNames.CONFIGURATION.toString())) {
+			ClassName initializerName = InitializerSpec.toInitializerNameFromConfigurationName(imported);
+			if (!ClassUtils.isPresent(initializerName.toString(), null)) {
+				// Hack an initializer together (ideally we'd have full coverage in all
+				// dependencies)
+				if (!imported.getName().startsWith(pkg)) {
+					logger.warn("Creating initializer on the fly for: " + imported.getName());
+				}
+				specs.addInitializer(imported);
+			}
+			builder.addStatement("registrars.defer(new $T())", initializerName);
+		} else {
+			registerBean(builder, imported);
+		}
+	}
+
+	private void addImport(MethodSpec.Builder builder, Class<?> element, Class<?> imported) {
 		if (utils.isConfigurationProperties(imported)) {
 			List<Class<?>> types = utils.getTypesFromAnnotation(configurationType,
 					SpringClassNames.ENABLE_CONFIGURATION_PROPERTIES.reflectionName(), "value");
@@ -232,14 +264,8 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 			builder.addStatement(
 					"$T.invokeAwareMethods(new $T(), context.getEnvironment(), context, context).registerBeanDefinitions(null, context)",
 					SpringClassNames.INFRASTRUCTURE_UTILS, imported);
-		} else if (utils.isDeferredImportSelector(imported)) {
-			builder.addStatement("$T.getBean(context.getBeanFactory(), $T.class).add($T.class, $S)",
-					SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.IMPORT_REGISTRARS, configurationType,
-					imported.getCanonicalName());
 		} else if (utils.isImportSelector(imported)) {
-			builder.addStatement("$T.getBean(context.getBeanFactory(), $T.class).add($T.class, $S)",
-					SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.IMPORT_REGISTRARS, configurationType,
-					imported.getCanonicalName());
+			addImportSelector(builder, imported);
 		} else if (utils.isAutoConfigurationPackages(imported)) {
 			// TODO: extract base packages from configurationType
 			builder.addStatement("$T.register(context, $S)", SpringClassNames.AUTOCONFIGURATION_PACKAGES, pkg);
@@ -280,6 +306,77 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		}
 	}
 
+	private void addImportSelector(com.squareup.javapoet.MethodSpec.Builder builder, Class<?> imported) {
+		if (InitializerApplication.closedWorld) {
+
+			AnnotationMetadata metadata;
+			try {
+				metadata = metadataReaderFactory.getMetadataReader(configurationType.getName()).getAnnotationMetadata();
+			} catch (IOException e) {
+				throw new IllegalStateException("Cannot retrieve metadata for " + imported.getName(), e);
+			}
+			// TODO: Read application.properties?
+			GenericApplicationContext context = new GenericApplicationContext();
+			GenericApplicationContext main = new GenericApplicationContext();
+			context.refresh();
+			InfrastructureUtils.install(main.getBeanFactory(), context);
+			context.getBeanFactory().registerSingleton(TypeService.class.getName(),
+					new DefaultTypeService(context.getClassLoader()));
+			FunctionalInstallerListener.initialize(main);
+			ImportSelector selector = (ImportSelector) InfrastructureUtils.getOrCreate(main, imported);
+			if (selector instanceof ResourceLoaderAware) {
+				((ResourceLoaderAware) selector).setResourceLoader(new DefaultResourceLoader());
+			}
+			if (utils.isDeferredImportSelector(imported)) {
+				if (!isAutoConfiguration(configurationType, imported.getName())) {
+					registerImport(builder, imported);
+					return;
+				}
+				builder.beginControlFlow("if (context.getEnvironment().getProperty($T.ENABLED_OVERRIDE_PROPERTY, Boolean.class, true))", SpringClassNames.ENABLE_AUTO_CONFIGURATION);
+				builder.addStatement("$T registrars = $T.getBean(context.getBeanFactory(), $T.class)",
+						SpringClassNames.IMPORT_REGISTRARS, SpringClassNames.INFRASTRUCTURE_UTILS,
+						SpringClassNames.IMPORT_REGISTRARS);
+				List<Class<?>> types = new ArrayList<>();
+				for (String selected : selector.selectImports(metadata)) {
+					if (ClassUtils.isPresent(selected, null)) {
+						types.add(ClassUtils.resolveClassName(selected, null));
+					}
+				}
+				// TODO: check it is actually autoconfigs first
+				for (Class<?> type : new DeferredConfigurations(types).list()) {
+					addDeferredImport(builder, imported, type);
+				}
+				builder.endControlFlow();
+			} else {
+				for (String selected : selector.selectImports(metadata)) {
+					if (ClassUtils.isPresent(selected, null)) {
+						addImport(builder, imported, ClassUtils.resolveClassName(selected, null));
+					}
+				}
+			}
+
+		} else {
+			registerImport(builder, imported);
+		}
+	}
+
+	private void registerImport(com.squareup.javapoet.MethodSpec.Builder builder, Class<?> imported) {
+		if (isAccessible(imported)) {
+			builder.addStatement("$T.getBean(context.getBeanFactory(), $T.class).add($T.class, $T.class)",
+					SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.IMPORT_REGISTRARS, configurationType,
+					imported);
+		} else {
+			builder.addStatement("$T.getBean(context.getBeanFactory(), $T.class).add($T.class, $S)",
+					SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.IMPORT_REGISTRARS, configurationType,
+					imported.getCanonicalName());
+		}
+	}
+
+	private boolean isAutoConfiguration(Class<?> importer, String typeName) {
+		// TODO: maybe work out a better way to detect auto configs
+		return typeName.endsWith("AutoConfigurationImportSelector");
+	}
+
 	private boolean isAccessible(Class<?> imported) {
 		boolean accessible = false;
 		try {
@@ -295,7 +392,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		Set<Class<?>> registrarInitializers = imports.getImports().get(element);
 		if (registrarInitializers != null) {
 			for (Class<?> imported : registrarInitializers) {
-				addImported(builder, element, imported);
+				addImport(builder, element, imported);
 			}
 		}
 	}
@@ -382,11 +479,11 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		} else {
 			builder.addStatement("context.registerBean(types.getType($S))", imported.getName());
 
-		}		
+		}
 	}
 
 	private void includes(com.squareup.javapoet.MethodSpec.Builder builder, Class<?> imported) {
-		if (java.lang.reflect.Modifier.isPublic(imported.getModifiers())) {
+		if (isAccessible(imported)) {
 			builder.beginControlFlow("if (conditions.includes($T.class))", imported);
 		} else {
 			builder.beginControlFlow("if (conditions.includes(types.getType($S)))", imported.getName());
@@ -765,6 +862,18 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 	@Override
 	public int compareTo(InitializerSpec o) {
 		return this.className.compareTo(o.getClassName());
+	}
+
+	static class DeferredConfigurations extends AutoConfigurations {
+
+		protected DeferredConfigurations(Collection<Class<?>> classes) {
+			super(classes);
+		}
+
+		public Class<?>[] list() {
+			return getClasses().toArray(new Class<?>[0]);
+		}
+
 	}
 
 }

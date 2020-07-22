@@ -83,6 +83,14 @@ public class InitMojo extends AbstractMojo {
 	private boolean skip;
 
 	/**
+	 * Set the closed world flag - configuration can not be changed with classpath changes or environment properties.
+	 * 
+	 * @since 1.3.2
+	 */
+	@Parameter(property = "spring-init.generate.closed-world", defaultValue = "false")
+	private boolean closedWorld;
+
+	/**
 	 * The name of the main class. If not specified the first compiled class found
 	 * that contains a 'main' method will be used.
 	 * 
@@ -132,7 +140,14 @@ public class InitMojo extends AbstractMojo {
 				: realm.getParent();
 		URLClassLoader loader = new URLClassLoader(getClassPathUrls(), parent);
 		ClassLoader original = null;
+		getLog().info("Project: " + project);
 		try {
+			if (closedWorld) {
+				getLog().info("Closed world");
+				System.setProperty("spring.init.closed-world", "true");
+			} else {
+				getLog().info("Open world");
+			}
 			original = ClassUtils.overrideThreadContextClassLoader(loader);
 			Class<?> type = loader.loadClass(SPRING_INIT_APPLICATION_CLASS_NAME);
 			getLog().info("Generating: " + start + " in: " + outputDirectory);
@@ -142,6 +157,7 @@ public class InitMojo extends AbstractMojo {
 			throw new MojoExecutionException("Cannot generate initializer class: " + SPRING_INIT_APPLICATION_CLASS_NAME,
 					e);
 		} finally {
+			System.setProperty("spring.init.closed-world", "false");
 			if (original != null) {
 				ClassUtils.overrideThreadContextClassLoader(original);
 			}

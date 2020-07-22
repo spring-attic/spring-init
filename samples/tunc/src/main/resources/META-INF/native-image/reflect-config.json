@@ -16,10 +16,6 @@
     "allDeclaredConstructors": true
   },
   {
-    "name": "org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext",
-    "allDeclaredConstructors": true
-  },
-  {
     "name": "org.springframework.boot.autoconfigure.web.ServerProperties",
     "allDeclaredMethods": true
   },

@@ -29,26 +29,35 @@ import com.squareup.javapoet.JavaFile;
  */
 public class InitializerApplication {
 
+	static boolean closedWorld = false;
+
 	public static void main(String[] args) {
 		String start = args[0];
 		File dir = new File(args[1]);
 		dir.mkdirs();
 		InitializerClassProcessor processor = new InitializerClassProcessor();
 		Set<JavaFile> files;
-		if (ClassUtils.isPresent(start, null)) {
-			// It's a class:
-			Class<?> type = ClassUtils.resolveClassName(start, null);
-			files = processor.process(type);
-		} else {
-			// Assume it's a package:
-			files = processor.process(start);
+		if (!System.getProperty("spring.init.closed-world", "false").equals("false")) {
+			closedWorld = true;
 		}
-		for (JavaFile file : files) {
-			try {
-				file.writeTo(dir);
-			} catch (IOException e) {
-				throw new IllegalStateException("Cannot write in: " + dir);
+		try {
+			if (ClassUtils.isPresent(start, null)) {
+				// It's a class:
+				Class<?> type = ClassUtils.resolveClassName(start, null);
+				files = processor.process(type);
+			} else {
+				// Assume it's a package:
+				files = processor.process(start);
 			}
+			for (JavaFile file : files) {
+				try {
+					file.writeTo(dir);
+				} catch (IOException e) {
+					throw new IllegalStateException("Cannot write in: " + dir);
+				}
+			}
+		} finally {
+			closedWorld = false;
 		}
 	}
 
