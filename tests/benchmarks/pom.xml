@@ -33,6 +33,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.springframework.experimental</groupId>
+			<artifactId>spring-boot-autoconfigure-func</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webflux</artifactId>
 			<scope>test</scope>
@@ -151,13 +156,35 @@
 							<artifactId>jmh-generator-annprocess</artifactId>
 							<version>${jmh.version}</version>
 						</path>
-						<path>
-							<groupId>org.springframework.experimental</groupId>
-							<artifactId>spring-init-processor</artifactId>
-							<version>${slim.version}</version>
-						</path>
 					</annotationProcessorPaths>
 				</configuration>
+				<executions>
+					<execution>
+						<id>pre-compile</id>
+						<phase>generate-test-sources</phase>
+						<goals>
+							<goal>testCompile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.springframework.experimental</groupId>
+				<artifactId>spring-init-maven-plugin</artifactId>
+				<version>${slim.version}</version>
+				<executions>
+					<execution>
+						<id>sources</id>
+						<phase>process-test-sources</phase>
+						<goals>
+							<goal>test-generate</goal>
+						</goals>
+						<inherited>false</inherited>
+						<configuration>
+							<basePackage>com.example</basePackage>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

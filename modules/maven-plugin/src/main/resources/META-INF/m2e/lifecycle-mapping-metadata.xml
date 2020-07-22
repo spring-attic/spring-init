@@ -5,6 +5,7 @@
 			<pluginExecutionFilter>
 				<goals>
 					<goal>generate</goal>
+					<goal>test-generate</goal>
 				</goals>
 			</pluginExecutionFilter>
 			<action>

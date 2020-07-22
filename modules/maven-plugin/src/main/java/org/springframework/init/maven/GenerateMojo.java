@@ -44,7 +44,7 @@ import org.springframework.util.ClassUtils;
 import com.squareup.javapoet.ClassName;
 
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_SOURCES, requiresProject = true, threadSafe = true, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME, requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME)
-public class InitMojo extends AbstractMojo {
+public class GenerateMojo extends AbstractMojo {
 
 	private static final String SPRING_BOOT_APPLICATION_CLASS_NAME = "org.springframework.boot.SpringBootConfiguration";
 
