@@ -94,6 +94,7 @@ public class ScanningProcessorTests {
 	public void notVisibleComponent() {
 		Set<JavaFile> files = new InitializerClassProcessor().process("app.vsble");
 		assertThat(files).hasSize(3);
+		System.err.println(files);
 		assertThat(files.toString())
 				.contains("types.getType(\"app.vsble.sub.Runner\")");
 		assertThat(files.toString()).contains(

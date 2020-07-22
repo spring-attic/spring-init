@@ -16,7 +16,11 @@
 
 package org.springframework.init.func;
 
+import java.util.List;
 import java.util.Set;
+
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.support.GenericApplicationContext;
 
 /**
  * @author Dave Syer
@@ -29,6 +33,10 @@ public interface ImportRegistrars {
 	void add(Class<?> importer, String typeName);
 
 	Set<Imported> getImports();
+
+	void defer(ApplicationContextInitializer<?>... initializers);
+
+	List<ApplicationContextInitializer<GenericApplicationContext>> getDeferred();
 
 	public static class Imported {
 

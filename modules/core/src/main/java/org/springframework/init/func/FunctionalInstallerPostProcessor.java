@@ -125,11 +125,17 @@ public class FunctionalInstallerPostProcessor implements BeanDefinitionRegistryP
 				added = findAdded(seen, registry);
 			}
 		}
+		for (ApplicationContextInitializer<GenericApplicationContext> initializer : registrar.getDeferred()) {
+			initializer.initialize(context);
+		}
 	}
 
 	private void register(BeanDefinitionRegistry registry,
 			List<ApplicationContextInitializer<GenericApplicationContext>> configurations) {
 		for (ApplicationContextInitializer<GenericApplicationContext> initializer : configurations) {
+			initializer.initialize(context);
+		}
+		for (ApplicationContextInitializer<GenericApplicationContext> initializer : registrar.getDeferred()) {
 			initializer.initialize(context);
 		}
 	}

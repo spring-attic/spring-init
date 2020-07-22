@@ -16,12 +16,15 @@
 
 package org.springframework.init.func;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.support.GenericApplicationContext;
 
 /**
@@ -35,6 +38,8 @@ public class FunctionalInstallerImportRegistrars implements ImportRegistrars {
 	private TypeService types;
 
 	private Set<Imported> imported = new LinkedHashSet<>();
+
+	private Set<ApplicationContextInitializer<GenericApplicationContext>> deferred = new LinkedHashSet<>();
 
 	public FunctionalInstallerImportRegistrars(GenericApplicationContext context) {
 		this.context = context;
@@ -63,6 +68,20 @@ public class FunctionalInstallerImportRegistrars implements ImportRegistrars {
 			}
 			this.imported.add(new Imported(importer, types.getType(typeName)));
 		}
+	}
+
+	@Override
+	public void defer(ApplicationContextInitializer<?>... initializers) {
+		for (ApplicationContextInitializer<?> initializer : initializers) {
+			@SuppressWarnings("unchecked")
+			ApplicationContextInitializer<GenericApplicationContext> generic = (ApplicationContextInitializer<GenericApplicationContext>) initializer;
+			this.deferred .add(generic);
+		}
+	}
+	
+	@Override
+	public List<ApplicationContextInitializer<GenericApplicationContext>> getDeferred() {
+		return new ArrayList<>(this.deferred);
 	}
 
 	private boolean isAutoConfiguration(Class<?> importer, String typeName) {

@@ -215,76 +215,87 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		}
 	}
 
+	private void addImported(MethodSpec.Builder builder, Class<?> element, Class<?> imported) {
+		if (utils.isConfigurationProperties(imported)) {
+			List<Class<?>> types = utils.getTypesFromAnnotation(configurationType,
+					SpringClassNames.ENABLE_CONFIGURATION_PROPERTIES.reflectionName(), "value");
+			// TODO: Can we limit this to once only? Is it worth it (would eventually fail
+			// e.g. in test slices)
+			builder.addStatement("$T.register(context)",
+					SpringClassNames.CONFIGURATION_PROPERTIES_BINDING_POST_PROCESSOR);
+			for (Class<?> type : types) {
+				builder.beginControlFlow("if (context.getBeanFactory().getBeanNamesForType($T.class).length==0)", type);
+				builder.addStatement("context.registerBean($T.class, () -> new $T())", type, type);
+				builder.endControlFlow();
+			}
+		} else if (utils.isImportWithNoMetadata(imported)) {
+			builder.addStatement(
+					"$T.invokeAwareMethods(new $T(), context.getEnvironment(), context, context).registerBeanDefinitions(null, context)",
+					SpringClassNames.INFRASTRUCTURE_UTILS, imported);
+		} else if (utils.isDeferredImportSelector(imported)) {
+			builder.addStatement("$T.getBean(context.getBeanFactory(), $T.class).add($T.class, $S)",
+					SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.IMPORT_REGISTRARS, configurationType,
+					imported.getCanonicalName());
+		} else if (utils.isImportSelector(imported)) {
+			builder.addStatement("$T.getBean(context.getBeanFactory(), $T.class).add($T.class, $S)",
+					SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.IMPORT_REGISTRARS, configurationType,
+					imported.getCanonicalName());
+		} else if (utils.isAutoConfigurationPackages(imported)) {
+			// TODO: extract base packages from configurationType
+			builder.addStatement("$T.register(context, $S)", SpringClassNames.AUTOCONFIGURATION_PACKAGES, pkg);
+		} else if (utils.isImportBeanDefinitionRegistrar(imported)) {
+			boolean accessible = isAccessible(imported);
+			builder.beginControlFlow("try");
+			// TODO: Have another look at the BeanNameGenerator if
+			// https://jira.spring.io/browse/DATACMNS-1770 is fixed
+			if (accessible) {
+				builder.addStatement(
+						"$T.invokeAwareMethods(new $T(), context.getEnvironment(), context, context).registerBeanDefinitions($T.getBean(context.getBeanFactory(), $T.class).getMetadataReader($S).getAnnotationMetadata(), context, $T.getBean(context.getBeanFactory(), $T.class))",
+						SpringClassNames.INFRASTRUCTURE_UTILS, imported, SpringClassNames.INFRASTRUCTURE_UTILS,
+						SpringClassNames.METADATA_READER_FACTORY, configurationType.getName(),
+						SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.BEAN_NAME_GENERATOR);
+			} else {
+				builder.addStatement(
+						"(($T)$T.getOrCreate(context, $S)).registerBeanDefinitions($T.getBean(context.getBeanFactory(), $T.class).getMetadataReader($S).getAnnotationMetadata(), context, $T.getBean(context.getBeanFactory(), $T.class))",
+						SpringClassNames.IMPORT_BEAN_DEFINITION_REGISTRAR, SpringClassNames.INFRASTRUCTURE_UTILS,
+						imported.getName().replace("$", "."), SpringClassNames.INFRASTRUCTURE_UTILS,
+						SpringClassNames.METADATA_READER_FACTORY, configurationType.getName(),
+						SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.BEAN_NAME_GENERATOR);
+			}
+			builder.nextControlFlow("catch ($T e)", IOException.class)
+					.addStatement(" throw new IllegalStateException(e)").endControlFlow();
+		} else if (utils.hasAnnotation(imported, SpringClassNames.CONFIGURATION.toString())) {
+			ClassName initializerName = InitializerSpec.toInitializerNameFromConfigurationName(imported);
+			if (!ClassUtils.isPresent(initializerName.toString(), null)) {
+				// Hack an initializer together (ideally we'd have full coverage in all
+				// dependencies)
+				if (!imported.getName().startsWith(pkg)) {
+					logger.warn("Creating initializer on the fly for: " + imported.getName());
+				}
+				specs.addInitializer(imported);
+			}
+			builder.addStatement("new $T().initialize(context)", initializerName);
+		} else {
+			registerBean(builder, imported);
+		}
+	}
+
+	private boolean isAccessible(Class<?> imported) {
+		boolean accessible = false;
+		try {
+			accessible = ClassUtils.getPackageName(imported).equals(pkg)
+					|| java.lang.reflect.Modifier.isPublic(imported.getConstructor().getModifiers());
+		} catch (Exception e) {
+			// ignore
+		}
+		return accessible;
+	}
+
 	private void addImportInvokers(MethodSpec.Builder builder, Class<?> element) {
 		Set<Class<?>> registrarInitializers = imports.getImports().get(element);
 		if (registrarInitializers != null) {
 			for (Class<?> imported : registrarInitializers) {
-				if (utils.isConfigurationProperties(imported)) {
-					List<Class<?>> types = utils.getTypesFromAnnotation(configurationType,
-							SpringClassNames.ENABLE_CONFIGURATION_PROPERTIES.reflectionName(), "value");
-					// TODO: Can we limit this to once only? Is it worth it (would eventually fail
-					// e.g. in test slices)
-					builder.addStatement("$T.register(context)",
-							SpringClassNames.CONFIGURATION_PROPERTIES_BINDING_POST_PROCESSOR);
-					for (Class<?> type : types) {
-						builder.beginControlFlow(
-								"if (context.getBeanFactory().getBeanNamesForType($T.class).length==0)", type);
-						builder.addStatement("context.registerBean($T.class, () -> new $T())", type, type);
-						builder.endControlFlow();
-					}
-				} else if (utils.isImportWithNoMetadata(imported)) {
-					builder.addStatement(
-							"$T.invokeAwareMethods(new $T(), context.getEnvironment(), context, context).registerBeanDefinitions(null, context)",
-							SpringClassNames.INFRASTRUCTURE_UTILS, imported);
-				} else if (utils.isImportSelector(imported)) {
-					builder.addStatement("$T.getBean(context.getBeanFactory(), $T.class).add($T.class, \"$L\")",
-							SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.IMPORT_REGISTRARS,
-							configurationType, imported.getCanonicalName());
-				} else if (utils.isAutoConfigurationPackages(imported)) {
-					// TODO: extract base packages from configurationType
-					builder.addStatement("$T.register(context, $S)", SpringClassNames.AUTOCONFIGURATION_PACKAGES, pkg);
-				} else if (utils.isImportBeanDefinitionRegistrar(imported)) {
-					boolean accessible = false;
-					try {
-						accessible = imported.getName().startsWith(pkg)
-								|| java.lang.reflect.Modifier.isPublic(imported.getConstructor().getModifiers());
-					} catch (Exception e) {
-						// ignore
-					}
-					builder.beginControlFlow("try");
-					// TODO: Have another look at the BeanNameGenerator if
-					// https://jira.spring.io/browse/DATACMNS-1770 is fixed
-					if (accessible) {
-						builder.addStatement(
-								"$T.invokeAwareMethods(new $T(), context.getEnvironment(), context, context).registerBeanDefinitions($T.getBean(context.getBeanFactory(), $T.class).getMetadataReader($S).getAnnotationMetadata(), context, $T.getBean(context.getBeanFactory(), $T.class))",
-								SpringClassNames.INFRASTRUCTURE_UTILS, imported, SpringClassNames.INFRASTRUCTURE_UTILS,
-								SpringClassNames.METADATA_READER_FACTORY, configurationType.getName(),
-								SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.BEAN_NAME_GENERATOR);
-					} else {
-						builder.addStatement(
-								"(($T)$T.getOrCreate(context, $S)).registerBeanDefinitions($T.getBean(context.getBeanFactory(), $T.class).getMetadataReader($S).getAnnotationMetadata(), context, $T.getBean(context.getBeanFactory(), $T.class))",
-								SpringClassNames.IMPORT_BEAN_DEFINITION_REGISTRAR,
-								SpringClassNames.INFRASTRUCTURE_UTILS, imported.getName().replace("$", "."),
-								SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.METADATA_READER_FACTORY,
-								configurationType.getName(), SpringClassNames.INFRASTRUCTURE_UTILS,
-								SpringClassNames.BEAN_NAME_GENERATOR);
-					}
-					builder.nextControlFlow("catch ($T e)", IOException.class)
-							.addStatement(" throw new IllegalStateException(e)").endControlFlow();
-				} else if (utils.hasAnnotation(imported, SpringClassNames.CONFIGURATION.toString())) {
-					ClassName initializerName = InitializerSpec.toInitializerNameFromConfigurationName(imported);
-					if (!ClassUtils.isPresent(initializerName.toString(), null)) {
-						// Hack an initializer together (ideally we'd have full coverage in all
-						// dependencies)
-						if (!imported.getName().startsWith(pkg)) {
-							logger.warn("Creating initializer on the fly for: " + imported.getName());
-						}
-						specs.addInitializer(imported);
-					}
-					builder.addStatement("new $T().initialize(context)", initializerName);
-				} else {
-					builder.addStatement("context.registerBean($T.class)", imported);
-				}
+				addImported(builder, element, imported);
 			}
 		}
 	}
@@ -351,15 +362,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 						builder.addStatement("new $T().initialize(context)",
 								InitializerSpec.toInitializerNameFromConfigurationName(imported));
 					} else {
-						if (java.lang.reflect.Modifier.isPublic(imported.getModifiers())) {
-							Constructor<?> constructor = getConstructor(imported);
-							ParameterSpecs params = autowireParamsForMethod(constructor);
-							builder.addStatement("context.registerBean($T.class, () -> new $T(" + params.format + "))",
-									ArrayUtils.merge(imported, imported, params.args));
-						} else {
-							builder.addStatement("context.registerBean(types.getType($S))", imported.getName());
-
-						}
+						registerBean(builder, imported);
 					}
 					if (filtered) {
 						builder.endControlFlow();
@@ -368,6 +371,18 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 			}
 		}
 		return conditional;
+	}
+
+	private void registerBean(MethodSpec.Builder builder, Class<?> imported) {
+		if (isAccessible(imported)) {
+			Constructor<?> constructor = getConstructor(imported);
+			ParameterSpecs params = autowireParamsForMethod(constructor);
+			builder.addStatement("context.registerBean($T.class, () -> new $T(" + params.format + "))",
+					ArrayUtils.merge(imported, imported, params.args));
+		} else {
+			builder.addStatement("context.registerBean(types.getType($S))", imported.getName());
+
+		}		
 	}
 
 	private void includes(com.squareup.javapoet.MethodSpec.Builder builder, Class<?> imported) {

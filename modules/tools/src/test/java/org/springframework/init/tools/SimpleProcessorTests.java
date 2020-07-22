@@ -31,7 +31,6 @@ public class SimpleProcessorTests {
 	public void simpleConditional() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(ConditionalApplication.class);
 		assertThat(files).hasSize(2);
-		// System.err.println(files);
 		assertThat(files.toString()).contains("AutoConfigurationPackages.register(");
 	}
 
@@ -139,8 +138,7 @@ public class SimpleProcessorTests {
 	public void notVisibleComponent() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("vsble"));
 		assertThat(files).hasSize(1);
-		assertThat(files.toString())
-				.contains("types.getType(\"app.vsble.sub.Runner\")");
+		assertThat(files.toString()).contains("types.getType(\"app.vsble.sub.Runner\")");
 		assertThat(files.toString()).contains(
 				"context.getBean(SampleApplication.class).bar(context.getBean(Foo.class)), def -> def.setInitMethodName(\"start\")");
 	}
@@ -151,15 +149,23 @@ public class SimpleProcessorTests {
 		assertThat(files).hasSize(2);
 		assertThat(files.toString()).contains("new SampleConfigurationInitializer().initialize(context)");
 		assertThat(files.toString()).contains("context.getBean(SampleConfiguration.class).foo()");
-		assertThat(files.toString()).contains(
-				"AutoConfigurationPackages.register(context, \"app.scan.sub\")");
+		assertThat(files.toString()).contains("AutoConfigurationPackages.register(context, \"app.scan.sub\")");
+	}
+
+	@Test
+	public void selector() {
+		Set<JavaFile> files = new InitializerClassProcessor().process(app("selector"));
+		assertThat(files).hasSize(1);
+		assertThat(files.toString())
+				.contains("InfrastructureUtils.getBean(context.getBeanFactory(), ImportRegistrars.class).add(SampleApplication.class, \"app.selector.SampleRegistrar\")");
+		assertThat(files.toString())
+				.contains("new PropertyPlaceholderAutoConfigurationInitializer().initialize(context)");
 	}
 
 	@Test
 	public void scanOtherPackage() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("scan.other"));
 		assertThat(files).hasSize(2);
-		// System.err.println(files);
 		assertThat(files.toString()).contains("new SampleConfigurationInitializer().initialize(context)");
 	}
 
@@ -167,8 +173,8 @@ public class SimpleProcessorTests {
 	public void servlet() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("servlet"));
 		assertThat(files).hasSize(1);
-		// System.err.println(files);
-		assertThat(files.toString()).contains("InfrastructureUtils.invokeAwareMethods(new ServletWebServerFactoryAutoConfiguration.BeanPostProcessorsRegistrar()");
+		assertThat(files.toString()).contains(
+				"InfrastructureUtils.invokeAwareMethods(new ServletWebServerFactoryAutoConfiguration.BeanPostProcessorsRegistrar()");
 		assertThat(files.toString()).contains(".registerBeanDefinitions(null, context)");
 	}
 
