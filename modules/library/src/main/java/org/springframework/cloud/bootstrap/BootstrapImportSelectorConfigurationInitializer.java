@@ -4,6 +4,7 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.init.func.ImportRegistrars;
 import org.springframework.init.func.InfrastructureUtils;
+import org.springframework.init.func.TypeService;
 
 public class BootstrapImportSelectorConfigurationInitializer
 		implements ApplicationContextInitializer<GenericApplicationContext> {
@@ -13,7 +14,8 @@ public class BootstrapImportSelectorConfigurationInitializer
 		if (context.getBeanFactory().getBeanNamesForType(BootstrapImportSelectorConfiguration.class).length == 0) {
 			InfrastructureUtils.getBean(context.getBeanFactory(), ImportRegistrars.class).add(
 					BootstrapImportSelectorConfiguration.class,
-					"org.springframework.cloud.bootstrap.BootstrapImportSelector");
+					InfrastructureUtils.getBean(context.getBeanFactory(), TypeService.class)
+							.getType("org.springframework.cloud.bootstrap.BootstrapImportSelector"));
 			context.registerBean(BootstrapImportSelectorConfiguration.class,
 					() -> new BootstrapImportSelectorConfiguration());
 		}

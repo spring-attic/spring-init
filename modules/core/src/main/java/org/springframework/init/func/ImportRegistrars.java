@@ -30,8 +30,6 @@ public interface ImportRegistrars {
 
 	void add(Class<?> importer, Class<?> imported);
 
-	void add(Class<?> importer, String typeName);
-
 	Set<Imported> getImports();
 
 	void defer(ApplicationContextInitializer<?>... initializers);

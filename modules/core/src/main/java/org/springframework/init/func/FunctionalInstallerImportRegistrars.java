@@ -22,8 +22,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.support.GenericApplicationContext;
 
@@ -33,19 +31,9 @@ import org.springframework.context.support.GenericApplicationContext;
  */
 public class FunctionalInstallerImportRegistrars implements ImportRegistrars {
 
-	private GenericApplicationContext context;
-
-	private TypeService types;
-
 	private Set<Imported> imported = new LinkedHashSet<>();
 
 	private Set<ApplicationContextInitializer<GenericApplicationContext>> deferred = new LinkedHashSet<>();
-
-	public FunctionalInstallerImportRegistrars(GenericApplicationContext context) {
-		this.context = context;
-		ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
-		this.types = InfrastructureUtils.getBean(beanFactory, TypeService.class);
-	}
 
 	@Override
 	public void add(Class<?> importer, Class<?> imported) {
@@ -55,19 +43,6 @@ public class FunctionalInstallerImportRegistrars implements ImportRegistrars {
 	@Override
 	public Set<Imported> getImports() {
 		return Collections.unmodifiableSet(imported);
-	}
-
-	@Override
-	public void add(Class<?> importer, String typeName) {
-		if (typeName.endsWith(".xml")) {
-			this.imported.add(new Imported(importer, typeName));
-		} else {
-			if (isAutoConfiguration(importer, typeName) && !context.getEnvironment()
-					.getProperty(EnableAutoConfiguration.ENABLED_OVERRIDE_PROPERTY, Boolean.class, true)) {
-				return;
-			}
-			this.imported.add(new Imported(importer, types.getType(typeName)));
-		}
 	}
 
 	@Override
@@ -82,11 +57,6 @@ public class FunctionalInstallerImportRegistrars implements ImportRegistrars {
 	@Override
 	public List<ApplicationContextInitializer<GenericApplicationContext>> getDeferred() {
 		return new ArrayList<>(this.deferred);
-	}
-
-	private boolean isAutoConfiguration(Class<?> importer, String typeName) {
-		// TODO: maybe work out a better way to detect auto configs
-		return typeName.endsWith("AutoConfigurationImportSelector");
 	}
 
 }

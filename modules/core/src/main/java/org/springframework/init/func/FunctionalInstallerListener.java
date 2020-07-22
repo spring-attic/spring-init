@@ -199,7 +199,7 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 				BeanNameGenerator generator = (definition, registry) -> definition.getBeanClassName();
 				infrastructure.getBeanFactory().registerSingleton(BeanNameGenerator.class.getName(), generator);
 			}
-			FunctionalInstallerImportRegistrars registrar = new FunctionalInstallerImportRegistrars(context);
+			FunctionalInstallerImportRegistrars registrar = new FunctionalInstallerImportRegistrars();
 			infrastructure.getBeanFactory().registerSingleton(ImportRegistrars.class.getName(), registrar);
 			// This one is a post processor of the main context...
 			context.getBeanFactory().registerSingleton(FunctionalInstallerPostProcessor.class.getName(),

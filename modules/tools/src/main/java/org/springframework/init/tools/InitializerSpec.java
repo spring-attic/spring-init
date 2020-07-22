@@ -366,7 +366,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 					SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.IMPORT_REGISTRARS, configurationType,
 					imported);
 		} else {
-			builder.addStatement("$T.getBean(context.getBeanFactory(), $T.class).add($T.class, $S)",
+			builder.addStatement("$T.getBean(context.getBeanFactory(), $T.class).add($T.class, types.getType($S))",
 					SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.IMPORT_REGISTRARS, configurationType,
 					imported.getCanonicalName());
 		}
