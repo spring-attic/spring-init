@@ -177,7 +177,7 @@
 						<id>sources</id>
 						<phase>process-test-sources</phase>
 						<goals>
-							<goal>test-generate</goal>
+							<goal>testGenerate</goal>
 						</goals>
 						<inherited>false</inherited>
 						<configuration>
