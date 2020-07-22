@@ -159,6 +159,8 @@ public class SpringClassNames {
 	public static final ClassName CONFIGURATION_PROPERTIES_BINDING_POST_PROCESSOR = ClassName
 			.get("org.springframework.boot.context.properties", "ConfigurationPropertiesBindingPostProcessor");
 
+	public static final ClassName AUTOCONFIGURATION_PACKAGES = ClassName.get("org.springframework.boot.autoconfigure", "AutoConfigurationPackages");
+
 	public static final ClassName RESOLVABLE_TYPE = ClassName.get(ResolvableType.class);
 
 	public static final ClassName CLASS_UTILS = ClassName.get(ClassUtils.class);

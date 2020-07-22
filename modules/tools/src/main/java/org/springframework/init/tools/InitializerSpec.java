@@ -157,8 +157,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 				for (Class<?> type : value) {
 					types.add(type.getName());
 				}
-			} else
-			if (entry.getKey().toString().equals("name")) {
+			} else if (entry.getKey().toString().equals("name")) {
 				String[] value = (String[]) entry.getValue();
 				for (String type : value) {
 					types.add(type);
@@ -241,6 +240,9 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 					builder.addStatement("$T.getBean(context.getBeanFactory(), $T.class).add($T.class, \"$L\")",
 							SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.IMPORT_REGISTRARS,
 							configurationType, imported.getCanonicalName());
+				} else if (utils.isAutoConfigurationPackages(imported)) {
+					// TODO: extract base packages from configurationType
+					builder.addStatement("$T.register(context, $S)", SpringClassNames.AUTOCONFIGURATION_PACKAGES, pkg);
 				} else if (utils.isImportBeanDefinitionRegistrar(imported)) {
 					boolean accessible = false;
 					try {

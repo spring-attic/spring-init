@@ -22,8 +22,8 @@ import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAut
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfigurationInitializer;
 import org.springframework.boot.autoconfigure.web.embedded.JettyWebServerFactoryCustomizer;
 import org.springframework.boot.autoconfigure.web.embedded.UndertowWebServerFactoryCustomizer;
-import org.springframework.boot.autoconfigure.web.servlet.RouterFunctionAutoConfigurationInitializer;
 import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfigurationInitializer;
+import org.springframework.boot.autoconfigure.web.servlet.RouterFunctionAutoConfigurationInitializer;
 import org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryAutoConfigurationInitializer;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfigurationInitializer;
 import org.springframework.boot.web.reactive.filter.OrderedHiddenHttpMethodFilter;
@@ -51,7 +51,7 @@ public class SampleInfrastructureProvider implements InfrastructureProvider {
 						context -> context.registerBean(ConfigurationSource.class, () -> new SimpleConfigurationSource( //
 								(ApplicationContextInitializer<?>) context.getAutowireCapableBeanFactory()
 										.createBean(context.getBean(TypeService.class)
-												.getType("app.main.SampleApplicationInitializer")), //
+												.getType("app.main.SampleApplicationInitializer")),
 								new PropertyPlaceholderAutoConfigurationInitializer(), //
 								new ConfigurationPropertiesAutoConfigurationInitializer(), //
 								new ServletWebServerFactoryAutoConfigurationInitializer(), //

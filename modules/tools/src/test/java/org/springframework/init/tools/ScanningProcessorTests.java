@@ -108,11 +108,7 @@ public class ScanningProcessorTests {
 		assertThat(files.toString()).contains("new SampleConfigurationInitializer().initialize(context)");
 		assertThat(files.toString()).contains("context.getBean(SampleConfiguration.class).foo()");
 		assertThat(files.toString()).contains(
-				"InfrastructureUtils.getBean(context.getBeanFactory(), MetadataReaderFactory.class)");
-		assertThat(files.toString()).contains(
-				"InfrastructureUtils.getOrCreate(context, \"org.springframework.boot.autoconfigure.AutoConfigurationPackages.Registrar\")");
-		assertThat(files.toString()).contains(
-				".getMetadataReader(\"app.scan.sub.SampleApplication\").getAnnotationMetadata()");
+				"AutoConfigurationPackages.register(context, \"app.scan.sub\")");
 	}
 
 	@Test

@@ -354,4 +354,8 @@ public class ElementUtils {
 		}
 		return classes;
 	}
+
+	public boolean isAutoConfigurationPackages(Class<?> imported) {
+		return imported.getName().equals(SpringClassNames.AUTOCONFIGURATION_PACKAGES.toString() + "$Registrar");
+	}
 }
