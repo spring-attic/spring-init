@@ -137,6 +137,9 @@ public class InitializerClassProcessor {
 				initializer.getInitializer();
 				initializers.add(initializer);
 			} catch (Throwable e) {
+				// TODO: this is a sign that something is missing from the classpath, and it
+				// will almost certainly blow up at runtime. It would be better to try and
+				// evaluate @ConditionalOnClass up front (here and inside InitializerSpec).
 				logger.info("Skipping: " + initializer.getClassName());
 			}
 		}
