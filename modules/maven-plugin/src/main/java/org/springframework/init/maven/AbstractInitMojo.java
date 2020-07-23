@@ -23,6 +23,7 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
@@ -137,7 +138,7 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 		if (mainClass == null) {
 			if (this.basePackage == null) {
 				try {
-					mainClass = MainClassFinder.findSingleMainClass(getClassesDirectory(),
+					mainClass = MainClassFinder.findSingleMainClass(getMainClassesDirectory(),
 							SPRING_BOOT_APPLICATION_CLASS_NAME);
 				} catch (IOException ex) {
 					throw new MojoExecutionException(ex.getMessage(), ex);
@@ -149,10 +150,10 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 		if (mainClass == null) {
 			throw new MojoExecutionException("Unable to find a suitable main class, please add a 'mainClass' property");
 		}
-		return mainClass;
+		return mainClass.substring(0, mainClass.lastIndexOf("."));
 	}
 
-	protected abstract File getClassesDirectory();
+	protected abstract File getMainClassesDirectory();
 
 	protected URL[] getClassPathUrls() throws MojoExecutionException {
 		try {
@@ -185,9 +186,17 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 		return false;
 	}
 
-	private void addProjectClasses(List<URL> urls) throws MalformedURLException {
-		urls.add(this.getClassesDirectory().toURI().toURL());
+	private void addProjectClasses(List<URL> urls) {
+		urls.addAll(this.getClassesDirectories().stream().map(file -> {
+			try {
+				return file.toURI().toURL();
+			} catch (MalformedURLException e) {
+				throw new IllegalStateException(e);
+			}
+		}).collect(Collectors.toList()));
 	}
+
+	protected abstract List<File> getClassesDirectories();
 
 	private void addDependencies(List<URL> urls) throws MalformedURLException, MojoExecutionException {
 		Set<Artifact> artifacts = this.project.getArtifacts();

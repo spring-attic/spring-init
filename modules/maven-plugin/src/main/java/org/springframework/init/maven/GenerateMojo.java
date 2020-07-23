@@ -16,6 +16,8 @@
 package org.springframework.init.maven;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -53,7 +55,12 @@ public class GenerateMojo extends AbstractInitMojo {
 	}
 	
 	@Override
-	protected File getClassesDirectory() {
+	protected File getMainClassesDirectory() {
 		return classesDirectory;
+	}
+	
+	@Override
+	protected List<File> getClassesDirectories() {
+		return Arrays.asList(classesDirectory);
 	}
 }

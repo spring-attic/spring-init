@@ -37,7 +37,7 @@ public class SimpleProcessorTests {
 	@Test
 	public void conditionalOnMissingType() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("condition.type"));
-		assertThat(files).hasSize(3);
+		assertThat(files).hasSize(5);
 		// System.err.println(files);
 		assertThat(files.toString()).contains("conditions.matches(ConditionalConfiguration.class)");
 		assertThat(files.toString()).contains("ClassUtils.isPresent(\"not.going.to.be.There\", null)");
@@ -46,21 +46,21 @@ public class SimpleProcessorTests {
 	@Test
 	public void resource() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("resource"));
-		assertThat(files).hasSize(1);
+		assertThat(files).hasSize(3);
 		assertThat(files.toString()).contains("new XmlInitializer(\"bar-config.xml\").initialize(context)");
 	}
 
 	@Test
 	public void collection() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("collection"));
-		assertThat(files).hasSize(2);
+		assertThat(files).hasSize(4);
 		assertThat(files.toString()).contains("runner(context.getBeanProvider(Bar.class)))");
 	}
 
 	@Test
 	public void generic() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("generic"));
-		assertThat(files).hasSize(2);
+		assertThat(files).hasSize(4);
 		// System.err.println(files);
 		assertThat(files.toString()).contains("bar(context.getBean(Foo.class))");
 		assertThat(files.toString()).contains("runner(context.getBean(Bar.class))");
@@ -70,7 +70,7 @@ public class SimpleProcessorTests {
 	@Test
 	public void conditionalBean() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("condition.bean"));
-		assertThat(files).hasSize(2);
+		assertThat(files).hasSize(4);
 		assertThat(files.toString()).contains("ConditionService conditions = InfrastructureUtils.getBean(");
 		assertThat(files.toString()).contains("conditions.matches(SampleConfiguration.class, Bar.class)");
 	}
@@ -78,7 +78,7 @@ public class SimpleProcessorTests {
 	@Test
 	public void providerOfGeneric() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("provider.generic"));
-		assertThat(files).hasSize(2);
+		assertThat(files).hasSize(4);
 		assertThat(files.toString()).contains("bar(context.getBeansOfType(Foo.class))");
 		assertThat(files.toString()).contains("ResolvableType.forClassWithGenerics(Bar.class, Foo.class)");
 	}
@@ -86,7 +86,7 @@ public class SimpleProcessorTests {
 	@Test
 	public void providerOfCollectionOfGeneric() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("provider.collection"));
-		assertThat(files).hasSize(2);
+		assertThat(files).hasSize(4);
 		// System.err.println(files);
 		assertThat(files.toString()).contains("bar(context.getBeansOfType(Foo.class))");
 		assertThat(files.toString()).contains("ResolvableType.forClassWithGenerics(Collection.class, Bar.class)");
@@ -95,7 +95,7 @@ public class SimpleProcessorTests {
 	@Test
 	public void providerOfMultiGeneric() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("provider.multi"));
-		assertThat(files).hasSize(2);
+		assertThat(files).hasSize(4);
 		assertThat(files.toString()).contains("bar(context.getBeansOfType(Foo.class))");
 		assertThat(files.toString()).contains("ResolvableType.forClassWithGenerics(Bar.class, Foo.class, Foo.class)");
 	}
@@ -103,7 +103,7 @@ public class SimpleProcessorTests {
 	@Test
 	public void providerOfArray() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("provider.array"));
-		assertThat(files).hasSize(2);
+		assertThat(files).hasSize(4);
 		assertThat(files.toString()).contains(
 				"runner(context.getBeanProvider(Bar.class).stream().collect(Collectors.toList()).toArray(new Bar[0]))");
 		assertThat(files.toString()).contains("bar(ObjectUtils.array(context, Foo.class))");
@@ -112,7 +112,7 @@ public class SimpleProcessorTests {
 	@Test
 	public void providerOfMap() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("provider.map"));
-		assertThat(files).hasSize(2);
+		assertThat(files).hasSize(4);
 		assertThat(files.toString()).contains("bar(context.getBeansOfType(Foo.class))");
 		assertThat(files.toString()).contains("runner(ObjectUtils.map(context, Bar.class))");
 	}
@@ -120,7 +120,7 @@ public class SimpleProcessorTests {
 	@Test
 	public void map() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("map"));
-		assertThat(files).hasSize(2);
+		assertThat(files).hasSize(4);
 		assertThat(files.toString()).contains("bar(context.getBeansOfType(Foo.class))");
 		assertThat(files.toString()).contains("runner(context.getBeanProvider(Bar.class))");
 	}
@@ -128,7 +128,7 @@ public class SimpleProcessorTests {
 	@Test
 	public void list() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("list"));
-		assertThat(files).hasSize(2);
+		assertThat(files).hasSize(4);
 		assertThat(files.toString()).contains("runner(context.getBeanProvider(Bar.class)))");
 		assertThat(files.toString())
 				.contains("bar(context.getBeanProvider(Foo.class).stream().collect(Collectors.toList()))");
@@ -137,7 +137,8 @@ public class SimpleProcessorTests {
 	@Test
 	public void notVisibleComponent() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("vsble"));
-		assertThat(files).hasSize(1);
+		assertThat(files).hasSize(3);
+		assertThat(files.toString()).contains("types = ");
 		assertThat(files.toString()).contains("types.getType(\"app.vsble.sub.Runner\")");
 		assertThat(files.toString()).contains(
 				"context.getBean(SampleApplication.class).bar(context.getBean(Foo.class)), def -> def.setInitMethodName(\"start\")");
@@ -147,6 +148,7 @@ public class SimpleProcessorTests {
 	public void scanSubPackage() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("scan.sub"));
 		assertThat(files).hasSize(2);
+		assertThat(files.toString()).doesNotContain("types = ");
 		assertThat(files.toString()).contains("new SampleConfigurationInitializer().initialize(context)");
 		assertThat(files.toString()).contains("context.getBean(SampleConfiguration.class).foo()");
 		assertThat(files.toString()).contains("AutoConfigurationPackages.register(context, \"app.scan.sub\")");
@@ -155,7 +157,7 @@ public class SimpleProcessorTests {
 	@Test
 	public void selector() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("selector"));
-		assertThat(files).hasSize(1);
+		assertThat(files).hasSize(3);
 		assertThat(files.toString())
 				.contains("InfrastructureUtils.getBean(context.getBeanFactory(), ImportRegistrars.class).add(SampleApplication.class, SampleRegistrar.class)");
 		assertThat(files.toString())
@@ -165,14 +167,14 @@ public class SimpleProcessorTests {
 	@Test
 	public void scanOtherPackage() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("scan.other"));
-		assertThat(files).hasSize(2);
+		assertThat(files).hasSize(4);
 		assertThat(files.toString()).contains("new SampleConfigurationInitializer().initialize(context)");
 	}
 
 	@Test
 	public void servlet() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("servlet"));
-		assertThat(files).hasSize(1);
+		assertThat(files).hasSize(3);
 		assertThat(files.toString()).contains(
 				"InfrastructureUtils.invokeAwareMethods(new ServletWebServerFactoryAutoConfiguration.BeanPostProcessorsRegistrar()");
 		assertThat(files.toString()).contains(".registerBeanDefinitions(null, context)");

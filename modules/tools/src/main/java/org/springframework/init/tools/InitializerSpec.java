@@ -219,7 +219,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		return builder.build();
 	}
 
-	private void addRegistrarInvokers(MethodSpec.Builder builder) {
+	private void addRegistrarInvokers(CodeBlock.Builder builder) {
 		addImportInvokers(builder, configurationType);
 		Annotation[] annotationMirrors = configurationType.getAnnotations();
 		for (Annotation am : annotationMirrors) {
@@ -229,7 +229,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		}
 	}
 
-	private void addDeferredImport(com.squareup.javapoet.MethodSpec.Builder builder, Class<?> element,
+	private void addDeferredImport(CodeBlock.Builder builder, Class<?> element,
 			Class<?> imported) {
 		if (utils.hasAnnotation(imported, SpringClassNames.CONFIGURATION.toString())) {
 			ClassName initializerName = InitializerSpec.toInitializerNameFromConfigurationName(imported);
@@ -247,7 +247,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		}
 	}
 
-	private void addImport(MethodSpec.Builder builder, Class<?> element, Class<?> imported) {
+	private void addImport(CodeBlock.Builder builder, Class<?> element, Class<?> imported) {
 		if (utils.isConfigurationProperties(imported)) {
 			List<Class<?>> types = utils.getTypesFromAnnotation(configurationType,
 					SpringClassNames.ENABLE_CONFIGURATION_PROPERTIES.reflectionName(), "value");
@@ -306,7 +306,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		}
 	}
 
-	private void addImportSelector(com.squareup.javapoet.MethodSpec.Builder builder, Class<?> imported) {
+	private void addImportSelector(CodeBlock.Builder builder, Class<?> imported) {
 		if (InitializerApplication.closedWorld) {
 
 			AnnotationMetadata metadata;
@@ -360,7 +360,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		}
 	}
 
-	private void registerImport(com.squareup.javapoet.MethodSpec.Builder builder, Class<?> imported) {
+	private void registerImport(CodeBlock.Builder builder, Class<?> imported) {
 		if (isAccessible(imported)) {
 			builder.addStatement("$T.getBean(context.getBeanFactory(), $T.class).add($T.class, $T.class)",
 					SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.IMPORT_REGISTRARS, configurationType,
@@ -388,7 +388,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		return accessible;
 	}
 
-	private void addImportInvokers(MethodSpec.Builder builder, Class<?> element) {
+	private void addImportInvokers(CodeBlock.Builder builder, Class<?> element) {
 		Set<Class<?>> registrarInitializers = imports.getImports().get(element);
 		if (registrarInitializers != null) {
 			for (Class<?> imported : registrarInitializers) {
@@ -409,15 +409,20 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 			builder.beginControlFlow("if (conditions.matches($T.class))", type);
 		}
 		builder.beginControlFlow("if (context.getBeanFactory().getBeanNamesForType($T.class).length==0)", type);
-		builder.addStatement("$T types = $T.getBean(context.getBeanFactory(), $T.class)", SpringClassNames.TYPE_SERVICE,
-				SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.TYPE_SERVICE);
-		boolean conditionsAvailable = addScannedComponents(builder, conditional);
-		addNewBeanForConfig(builder, type);
+		CodeBlock.Builder code = CodeBlock.builder();
+		boolean conditionsAvailable = addScannedComponents(code, conditional);
+		addNewBeanForConfig(code, type);
 		for (Method method : getBeanMethods(type)) {
-			conditionsAvailable |= createBeanMethod(builder, method, type, conditionsAvailable);
+			conditionsAvailable |= createBeanMethod(code, method, type, conditionsAvailable);
 		}
-		addResources(builder);
-		addRegistrarInvokers(builder);
+		addResources(code);
+		addRegistrarInvokers(code);
+		CodeBlock logic = code.build();
+		if (logic.toString().contains("types.")) {
+			builder.addStatement("$T types = $T.getBean(context.getBeanFactory(), $T.class)", SpringClassNames.TYPE_SERVICE,
+					SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.TYPE_SERVICE);
+		}
+		builder.addCode(logic);
 		builder.endControlFlow();
 		if (conditional) {
 			builder.endControlFlow();
@@ -427,7 +432,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		}
 	}
 
-	private void addResources(MethodSpec.Builder builder) {
+	private void addResources(CodeBlock.Builder builder) {
 		Set<String> locations = resources.getResources().get(configurationType);
 		if (locations != null) {
 			for (String location : locations) {
@@ -436,7 +441,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		}
 	}
 
-	private boolean addScannedComponents(MethodSpec.Builder builder, boolean conditional) {
+	private boolean addScannedComponents(CodeBlock.Builder builder, boolean conditional) {
 		Set<Class<?>> set = components.getComponents().get(configurationType);
 		boolean filtered = false;
 		if (!utils.getAnnotationsFromAnnotation(configurationType, SpringClassNames.COMPONENT_SCAN.toString(),
@@ -470,7 +475,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		return conditional;
 	}
 
-	private void registerBean(MethodSpec.Builder builder, Class<?> imported) {
+	private void registerBean(CodeBlock.Builder builder, Class<?> imported) {
 		if (isAccessible(imported)) {
 			Constructor<?> constructor = getConstructor(imported);
 			ParameterSpecs params = autowireParamsForMethod(constructor);
@@ -482,7 +487,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		}
 	}
 
-	private void includes(com.squareup.javapoet.MethodSpec.Builder builder, Class<?> imported) {
+	private void includes(CodeBlock.Builder builder, Class<?> imported) {
 		if (isAccessible(imported)) {
 			builder.beginControlFlow("if (conditions.includes($T.class))", imported);
 		} else {
@@ -490,14 +495,14 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		}
 	}
 
-	private void addNewBeanForConfig(MethodSpec.Builder builder, Class<?> type) {
+	private void addNewBeanForConfig(CodeBlock.Builder code, Class<?> type) {
 		Constructor<?> constructor = getConstructor(type);
 		ParameterSpecs params = autowireParamsForMethod(constructor);
-		builder.addStatement("context.registerBean($T.class, () -> new $T(" + params.format + "))",
+		code.addStatement("context.registerBean($T.class, () -> new $T(" + params.format + "))",
 				ArrayUtils.merge(type, type, params.args));
 	}
 
-	private boolean createBeanMethod(MethodSpec.Builder builder, Method beanMethod, Class<?> type,
+	private boolean createBeanMethod(CodeBlock.Builder builder, Method beanMethod, Class<?> type,
 			boolean conditionsAvailable) {
 		// TODO will need to handle bean methods in private configs
 		try {

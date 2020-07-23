@@ -128,7 +128,19 @@ public class InitializerClassProcessor {
 		}
 		Set<JavaFile> result = new HashSet<>();
 		// Work out what these modules include
+		List<InitializerSpec> initializers = new ArrayList<>();
 		for (InitializerSpec initializer : specs.getInitializers()) {
+			initializer.getInitializer();
+		}
+		for (InitializerSpec initializer : specs.getInitializers()) {
+			try {
+				initializer.getInitializer();
+				initializers.add(initializer);
+			} catch (Throwable e) {
+				logger.info("Skipping: " + initializer.getClassName());
+			}
+		}
+		for (InitializerSpec initializer : initializers) {
 			logger.info("Writing Initializer " + initializer.getPackage() + "." + initializer.getInitializer().name);
 			result.add(JavaFile.builder(initializer.getPackage(), initializer.getInitializer()).build());
 		}

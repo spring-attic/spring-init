@@ -3,9 +3,6 @@
     "name": "org.springframework.boot.SpringApplication",
     "fields": [
       {
-        "name": "applicationContextClass"
-      },
-      {
         "name": "primarySources"
       }
     ],

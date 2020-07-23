@@ -16,6 +16,8 @@
 package org.springframework.init.maven;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -31,8 +33,16 @@ public class GenerateTestsMojo extends AbstractInitMojo {
 	 * 
 	 * @since 1.0.0
 	 */
-	@Parameter(defaultValue = "${project.build.testOutputDirectory}", required = true)
+	@Parameter(defaultValue = "${project.build.outputDirectory}", required = true)
 	private File classesDirectory;
+
+	/**
+	 * Directory containing the classes and resource files that should be scanned.
+	 * 
+	 * @since 1.0.0
+	 */
+	@Parameter(defaultValue = "${project.build.testOutputDirectory}", required = true)
+	private File testClassesDirectory;
 	/**
 	 * Directory containing the generated sources.
 	 * 
@@ -52,7 +62,12 @@ public class GenerateTestsMojo extends AbstractInitMojo {
 	}
 
 	@Override
-	protected File getClassesDirectory() {
+	protected File getMainClassesDirectory() {
 		return classesDirectory;
+	}
+	
+	@Override
+	protected List<File> getClassesDirectories() {
+		return Arrays.asList(testClassesDirectory, classesDirectory);
 	}
 }

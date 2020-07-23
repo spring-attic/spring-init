@@ -23,6 +23,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 import com.squareup.javapoet.JavaFile;
 
@@ -41,8 +42,9 @@ public class ClosedWorldProcessorTests {
 	@Test
 	public void scanSubPackage() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("scan.sub"));
-		assertThat(files).hasSize(2);
+		assertThat(files).hasSizeGreaterThan(2);
 		// System.err.println(files);
+		assertThat(StringUtils.countOccurrencesOf(files.toString(), "defer(")).isGreaterThan(1);
 		assertThat(files.toString()).contains("new SampleConfigurationInitializer().initialize(context)");
 		assertThat(files.toString()).contains("context.getBean(SampleConfiguration.class).foo()");
 		assertThat(files.toString()).contains("AutoConfigurationPackages.register(context, \"app.scan.sub\")");
