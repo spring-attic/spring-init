@@ -33,6 +33,7 @@ echo "Compiling $ARTIFACT with $GRAALVM_VERSION"
 { time native-image \
   --verbose $DEBUG_FLAGS \
   -H:Name=$ARTIFACT \
+  -H:+UseServiceLoaderFeature \
   -Dspring.native.mode=functional \
   -Dspring.xml.ignore=true \
   -Dspring.spel.ignore=true \

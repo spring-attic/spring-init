@@ -24,7 +24,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.context.annotation.Conditional;
-import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.EnvironmentCapable;
@@ -60,32 +59,14 @@ class ConditionEvaluator {
 
 	/**
 	 * Determine if an item should be skipped based on {@code @Conditional}
-	 * annotations. The {@link ConfigurationPhase} will be deduced from the type of
-	 * item (i.e. a {@code @Configuration} class will be
-	 * {@link ConfigurationPhase#PARSE_CONFIGURATION})
-	 * 
-	 * @param metadata the meta data
-	 * @return if the item should be skipped
-	 */
-	public boolean shouldSkip(AnnotatedTypeMetadata metadata) {
-		return shouldSkip(metadata, null);
-	}
-
-	/**
-	 * Determine if an item should be skipped based on {@code @Conditional}
 	 * annotations.
 	 * 
 	 * @param metadata the meta data
-	 * @param phase    the phase of the call
 	 * @return if the item should be skipped
 	 */
-	public boolean shouldSkip(@Nullable AnnotatedTypeMetadata metadata, @Nullable ConfigurationPhase phase) {
+	public boolean shouldSkip(@Nullable AnnotatedTypeMetadata metadata) {
 		if (metadata == null || !metadata.isAnnotated(Conditional.class.getName())) {
 			return false;
-		}
-
-		if (phase == null) {
-			return shouldSkip(metadata, ConfigurationPhase.REGISTER_BEAN);
 		}
 
 		if (hasConditionalOnClass(metadata)) {

@@ -47,7 +47,7 @@ public class OnClassConditionService implements ConditionService {
 	@Override
 	public boolean matches(Class<?> type, ConfigurationPhase phase) {
 		try {
-			return !this.evaluator.shouldSkip(getMetadata(type), phase);
+			return !this.evaluator.shouldSkip(getMetadata(type));
 		} catch (ArrayStoreException e) {
 			return false;
 		} catch (IllegalStateException e) {
