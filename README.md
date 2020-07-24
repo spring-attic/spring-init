@@ -133,20 +133,12 @@ Benchmark startup time (seconds) with annotations, with Spring Init (slim), and 
 
 ```
 class                              method  sample  beans    classes   heap   memory  median  mean   range
-com.example.bench.SlimBenchmarkIT  annos   jlog    85.000   4185.000  6.227  43.667  0.724   0.740  0.017
-com.example.bench.SlimBenchmarkIT  annos   demo    98.000   4962.000  8.255  50.530  0.837   0.855  0.028
-com.example.bench.SlimBenchmarkIT  annos   actr    183.000  5224.000  9.812  53.737  0.986   1.009  0.025
-com.example.bench.SlimBenchmarkIT  annos   conf    181.000  5601.000  8.201  55.619  1.179   1.242  0.057
-com.example.bench.SlimBenchmarkIT  manual  jlog    56.000   4207.000  6.648  43.372  0.646   0.662  0.023
-com.example.bench.SlimBenchmarkIT  manual  demo    56.000   4932.000  7.501  48.560  0.725   0.741  0.024
-com.example.bench.SlimBenchmarkIT  manual  actr    103.000  5320.000  8.272  50.886  0.826   0.844  0.016
-com.example.bench.SlimBenchmarkIT  manual  conf    74.000   4992.000  7.732  49.243  0.830   0.869  0.033
-com.example.bench.SlimBenchmarkIT  slim    jlog    87.000   4416.000  6.334  44.230  0.729   0.737  0.018
-com.example.bench.SlimBenchmarkIT  slim    demo    100.000  5207.000  8.482  51.243  0.841   0.855  0.020
-com.example.bench.SlimBenchmarkIT  slim    actr    185.000  5734.000  8.515  53.691  1.007   1.022  0.021
-com.example.bench.SlimBenchmarkIT  slim    conf    117.000  5290.000  9.215  52.639  0.977   0.993  0.024
+com.example.bench.SlimBenchmarkIT  annos   demo    99.000   5007.000  8.383  50.720  0.793   0.803  0.010
+com.example.bench.SlimBenchmarkIT  annos   actr    185.000  5263.000  9.883  53.772  0.916   0.928  0.017
+com.example.bench.SlimBenchmarkIT  manual  demo    53.000   4717.000  6.982  47.325  0.673   0.684  0.011
+com.example.bench.SlimBenchmarkIT  manual  actr    96.000   4925.000  7.784  49.113  0.751   0.765  0.014
+com.example.bench.SlimBenchmarkIT  slim    demo    97.000   5011.000  8.086  50.202  0.779   0.795  0.026
+com.example.bench.SlimBenchmarkIT  slim    actr    139.000  5247.000  9.219  52.513  0.870   0.885  0.026
 ```
 
-It's not obvious that Spring Init is any faster or uses less memory than the straight annotation-based version with Spring Boot 2.3. It might be a better story in native images, but that remains to be seen.
-
-N.B. the "conf" sample is probably not doing what it says on the can, so none of those measurements is reliable at present. The bean counts in the non-annos versions of that benchmark, for instance, suggest that this is not the whole set of functionality that is running with the annotations.
+Spring Init is slightly faster but not much different memorywise than the straight annotation-based version with Spring Boot 2.4. It is a much better story in native images, but that requires some manual work still (see "func" and "tunc" samples).

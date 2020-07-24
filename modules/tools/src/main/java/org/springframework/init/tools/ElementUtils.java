@@ -29,15 +29,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.squareup.javapoet.ClassName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.annotation.DeferredImportSelector;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.context.annotation.ImportSelector;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ClassUtils;
-
-import com.squareup.javapoet.ClassName;
 
 /**
  * @author Dave Syer
@@ -77,7 +77,8 @@ public class ElementUtils {
 						seen.add(annotation);
 						getAnnotations(annotation.annotationType(), type, set, seen);
 					}
-				} catch (Throwable t) {
+				}
+				catch (Throwable t) {
 					logger.warn("Problems working with annotation " + annotationTypename);
 				}
 			}
@@ -91,28 +92,34 @@ public class ElementUtils {
 
 	private Annotation getAnnotation(AnnotatedElement element, String type, Set<Annotation> seen) {
 		if (element != null) {
-			for (Annotation annotation : element.getAnnotations()) {
-				String annotationTypename = annotation.annotationType().getName();
-				try {
-					if (annotationTypename.startsWith("java.lang")) {
-						continue;
-					}
-					if (annotationTypename.equals(SpringClassNames.NULLABLE.toString())) {
-						continue;
-					}
-					if (type.equals(annotationTypename)) {
-						return annotation;
-					}
-					if (!seen.contains(annotation)) {
-						seen.add(annotation);
-						annotation = getAnnotation(annotation.annotationType(), type, seen);
-						if (annotation != null) {
+			try {
+				for (Annotation annotation : element.getAnnotations()) {
+					String annotationTypename = annotation.annotationType().getName();
+					try {
+						if (annotationTypename.startsWith("java.lang")) {
+							continue;
+						}
+						if (annotationTypename.equals(SpringClassNames.NULLABLE.toString())) {
+							continue;
+						}
+						if (type.equals(annotationTypename)) {
 							return annotation;
 						}
+						if (!seen.contains(annotation)) {
+							seen.add(annotation);
+							annotation = getAnnotation(annotation.annotationType(), type, seen);
+							if (annotation != null) {
+								return annotation;
+							}
+						}
 					}
-				} catch (Throwable t) {
-					logger.error("Problems working with annotation " + annotationTypename, t);
+					catch (Throwable t) {
+						logger.error("Problems working with annotation " + annotationTypename, t);
+					}
 				}
+			}
+			catch (ArrayStoreException e) {
+				// ignore
 			}
 		}
 		return null;
@@ -180,7 +187,8 @@ public class ElementUtils {
 					Object value = values.get(fieldname);
 					if (value instanceof Class<?>) {
 						collected.add((Class<?>) value);
-					} else if (value instanceof Object[]) {
+					}
+					else if (value instanceof Object[]) {
 						for (Object val : (Object[]) value) {
 							if (val instanceof Class<?>) {
 								collected.add((Class<?>) val);
@@ -202,7 +210,8 @@ public class ElementUtils {
 					Object value = values.get(fieldname);
 					if (value instanceof Annotation) {
 						collected.add((Annotation) value);
-					} else if (value instanceof Object[]) {
+					}
+					else if (value instanceof Object[]) {
 						for (Object val : (Object[]) value) {
 							if (val instanceof Annotation) {
 								collected.add((Annotation) val);
@@ -224,7 +233,8 @@ public class ElementUtils {
 					Object value = values.get(fieldname);
 					if (value instanceof String) {
 						collected.add((String) value);
-					} else if (value instanceof Object[]) {
+					}
+					else if (value instanceof Object[]) {
 						for (Object val : (Object[]) value) {
 							if (val instanceof String) {
 								collected.add((String) val);
@@ -351,9 +361,9 @@ public class ElementUtils {
 		for (int i = 0; i < classes.length; i++) {
 			Class<?> cls = classes[i];
 			// Hack for DispatcherServletAutoConfiguration
-			if (cls.getName().endsWith("RegistrationConfiguration") && i<classes.length-1) {
-				classes[i] = classes[i+1];
-				classes[i+1] = cls;
+			if (cls.getName().endsWith("RegistrationConfiguration") && i < classes.length - 1) {
+				classes[i] = classes[i + 1];
+				classes[i + 1] = cls;
 				break;
 			}
 		}
@@ -363,4 +373,5 @@ public class ElementUtils {
 	public boolean isAutoConfigurationPackages(Class<?> imported) {
 		return imported.getName().equals(SpringClassNames.AUTOCONFIGURATION_PACKAGES.toString() + "$Registrar");
 	}
+
 }
