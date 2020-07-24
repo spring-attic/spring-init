@@ -52,8 +52,10 @@ public class InitializerSpecs {
 		if (initializers.containsKey(initializer)) {
 			return;
 		}
-		initializers.put(initializer, new InitializerSpec(this, this.utils, initializer, imports, components));
-		findNestedInitializers(initializer, new HashSet<>());
+		if (utils.isIncluded(initializer)) {
+			initializers.put(initializer, new InitializerSpec(this, this.utils, initializer, imports, components));
+			findNestedInitializers(initializer, new HashSet<>());
+		}
 	}
 
 	private void findNestedInitializers(Class<?> type, Set<Class<?>> types) {
@@ -63,6 +65,9 @@ public class InitializerSpecs {
 				for (Class<?> element : type.getDeclaredClasses()) {
 					if (Modifier.isStatic(element.getModifiers())) {
 						if (utils.hasAnnotation(element, SpringClassNames.CONFIGURATION.toString())) {
+							if (!utils.isIncluded(element)) {
+								continue;
+							}
 							imports.addNested(type, element);
 						}
 						findNestedInitializers(element, types);

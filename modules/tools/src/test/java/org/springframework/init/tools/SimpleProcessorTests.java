@@ -37,10 +37,10 @@ public class SimpleProcessorTests {
 	@Test
 	public void conditionalOnMissingType() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("condition.type"));
-		assertThat(files).hasSize(5);
-		// System.err.println(files);
-		assertThat(files.toString()).contains("conditions.matches(ConditionalConfiguration.class)");
-		assertThat(files.toString()).contains("ClassUtils.isPresent(\"not.going.to.be.There\", null)");
+		assertThat(files).hasSize(4);
+		System.err.println(files);
+		assertThat(files.toString()).contains("context.getBean(SampleConfiguration.class).foo()");
+		assertThat(files.toString()).doesNotContain("ClassUtils.isPresent(\"not.going.to.be.There\", null)");
 	}
 
 	@Test

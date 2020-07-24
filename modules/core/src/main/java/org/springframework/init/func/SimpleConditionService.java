@@ -21,14 +21,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.context.TypeExcludeFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.env.Environment;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
@@ -52,15 +49,14 @@ public class SimpleConditionService implements ConditionService {
 
 	private MetadataReaderFactory metadataReaderFactory;
 
-	public SimpleConditionService(BeanDefinitionRegistry registry, GenericApplicationContext context,
-			Environment environment, ResourceLoader resourceLoader) {
+	public SimpleConditionService(GenericApplicationContext context) {
 		this.beanFactory = context.getBeanFactory();
-		this.evaluator = new ConditionEvaluator(context, registry, environment, resourceLoader);
+		this.evaluator = new ConditionEvaluator(context, context, context.getEnvironment(), context);
 		this.types = InfrastructureUtils.getBean(beanFactory, TypeService.class);
 		String metadataFactory = MetadataReaderFactory.class.getName();
 		this.metadataReaderFactory = InfrastructureUtils.containsBean(beanFactory, metadataFactory)
 				? (MetadataReaderFactory) InfrastructureUtils.getBean(beanFactory, MetadataReaderFactory.class)
-				: new CachingMetadataReaderFactory(resourceLoader.getClassLoader());
+				: new CachingMetadataReaderFactory(context.getClassLoader());
 	}
 
 	@Override

@@ -29,15 +29,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.squareup.javapoet.ClassName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import org.springframework.context.ResourceLoaderAware;
+import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
 import org.springframework.context.annotation.DeferredImportSelector;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.context.annotation.ImportSelector;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.init.func.ConditionService;
+import org.springframework.init.func.DefaultTypeService;
+import org.springframework.init.func.FunctionalInstallerListener;
+import org.springframework.init.func.InfrastructureUtils;
+import org.springframework.init.func.TypeService;
 import org.springframework.util.ClassUtils;
+
+import com.squareup.javapoet.ClassName;
 
 /**
  * @author Dave Syer
@@ -46,6 +55,8 @@ import org.springframework.util.ClassUtils;
 public class ElementUtils {
 
 	private static Log logger = LogFactory.getLog(ElementUtils.class);
+
+	private GenericApplicationContext main;
 
 	public boolean hasAnnotation(AnnotatedElement element, String type) {
 		return getAnnotation(element, type) != null;
@@ -372,6 +383,35 @@ public class ElementUtils {
 
 	public boolean isAutoConfigurationPackages(Class<?> imported) {
 		return imported.getName().equals(SpringClassNames.AUTOCONFIGURATION_PACKAGES.toString() + "$Registrar");
+	}
+
+	private GenericApplicationContext getMain() {
+		if (this.main == null) {
+			// TODO: Read application.properties?
+			GenericApplicationContext context = new GenericApplicationContext();
+			this.main = new GenericApplicationContext();
+			context.refresh();
+			InfrastructureUtils.install(main.getBeanFactory(), context);
+			context.getBeanFactory().registerSingleton(TypeService.class.getName(),
+					new DefaultTypeService(context.getClassLoader()));
+			context.getBeanFactory().registerSingleton(ConditionService.class.getName(),
+					new OnClassConditionService(main));
+			FunctionalInstallerListener.initialize(main);
+		}
+		return this.main;
+	}
+
+	public ImportSelector getImportSelector(Class<?> imported) {
+		ImportSelector selector = (ImportSelector) InfrastructureUtils.getOrCreate(getMain(), imported);
+		if (selector instanceof ResourceLoaderAware) {
+			((ResourceLoaderAware) selector).setResourceLoader(new DefaultResourceLoader());
+		}
+		return selector;
+	}
+
+	public boolean isIncluded(Class<?> imported) {
+		ConditionService conditions = InfrastructureUtils.getBean(getMain().getBeanFactory(), ConditionService.class);
+		return conditions.matches(imported, ConfigurationPhase.PARSE_CONFIGURATION);
 	}
 
 }

@@ -46,20 +46,13 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ImportSelector;
-import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.init.func.DefaultTypeService;
-import org.springframework.init.func.FunctionalInstallerListener;
-import org.springframework.init.func.InfrastructureUtils;
-import org.springframework.init.func.TypeService;
 import org.springframework.util.ClassUtils;
 
 import com.squareup.javapoet.ClassName;
@@ -177,7 +170,6 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 					types.add(type);
 				}
 			}
-			// TODO: enumerate class names as well
 		}
 		if (types.isEmpty()) {
 			return false;
@@ -229,9 +221,8 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		}
 	}
 
-	private void addDeferredImport(CodeBlock.Builder builder, Class<?> element,
-			Class<?> imported) {
-		if (utils.hasAnnotation(imported, SpringClassNames.CONFIGURATION.toString())) {
+	private void addDeferredImport(CodeBlock.Builder builder, Class<?> element, Class<?> imported) {
+		if (utils.hasAnnotation(imported, SpringClassNames.CONFIGURATION.toString()) && utils.isIncluded(imported)) {
 			ClassName initializerName = InitializerSpec.toInitializerNameFromConfigurationName(imported);
 			if (!ClassUtils.isPresent(initializerName.toString(), null)) {
 				// Hack an initializer together (ideally we'd have full coverage in all
@@ -290,7 +281,8 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 			}
 			builder.nextControlFlow("catch ($T e)", IOException.class)
 					.addStatement(" throw new IllegalStateException(e)").endControlFlow();
-		} else if (utils.hasAnnotation(imported, SpringClassNames.CONFIGURATION.toString())) {
+		} else if (utils.hasAnnotation(imported, SpringClassNames.CONFIGURATION.toString())
+				&& utils.isIncluded(imported)) {
 			ClassName initializerName = InitializerSpec.toInitializerNameFromConfigurationName(imported);
 			if (!ClassUtils.isPresent(initializerName.toString(), null)) {
 				// Hack an initializer together (ideally we'd have full coverage in all
@@ -315,24 +307,15 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 			} catch (IOException e) {
 				throw new IllegalStateException("Cannot retrieve metadata for " + imported.getName(), e);
 			}
-			// TODO: Read application.properties?
-			GenericApplicationContext context = new GenericApplicationContext();
-			GenericApplicationContext main = new GenericApplicationContext();
-			context.refresh();
-			InfrastructureUtils.install(main.getBeanFactory(), context);
-			context.getBeanFactory().registerSingleton(TypeService.class.getName(),
-					new DefaultTypeService(context.getClassLoader()));
-			FunctionalInstallerListener.initialize(main);
-			ImportSelector selector = (ImportSelector) InfrastructureUtils.getOrCreate(main, imported);
-			if (selector instanceof ResourceLoaderAware) {
-				((ResourceLoaderAware) selector).setResourceLoader(new DefaultResourceLoader());
-			}
+			ImportSelector selector = utils.getImportSelector(imported);
 			if (utils.isDeferredImportSelector(imported)) {
 				if (!isAutoConfiguration(configurationType, imported.getName())) {
 					registerImport(builder, imported);
 					return;
 				}
-				builder.beginControlFlow("if (context.getEnvironment().getProperty($T.ENABLED_OVERRIDE_PROPERTY, Boolean.class, true))", SpringClassNames.ENABLE_AUTO_CONFIGURATION);
+				builder.beginControlFlow(
+						"if (context.getEnvironment().getProperty($T.ENABLED_OVERRIDE_PROPERTY, Boolean.class, true))",
+						SpringClassNames.ENABLE_AUTO_CONFIGURATION);
 				builder.addStatement("$T registrars = $T.getBean(context.getBeanFactory(), $T.class)",
 						SpringClassNames.IMPORT_REGISTRARS, SpringClassNames.INFRASTRUCTURE_UTILS,
 						SpringClassNames.IMPORT_REGISTRARS);
@@ -398,7 +381,21 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 	}
 
 	private void addBeanMethods(MethodSpec.Builder builder, Class<?> type) {
+		if (!utils.isIncluded(type)) {
+			return;
+		}
 		boolean conditional = utils.hasAnnotation(type, SpringClassNames.CONDITIONAL.toString());
+		CodeBlock.Builder code = CodeBlock.builder();
+		boolean conditionsAvailable = addScannedComponents(code, conditional);
+		try {
+			addNewBeanForConfig(code, type);
+			for (Method method : getBeanMethods(type)) {
+				conditionsAvailable |= createBeanMethod(code, method, type, conditionsAvailable);
+			}
+		} catch (Throwable e) {
+			logger.info("Cannot reflect on: " + type.getName());
+			return;
+		}
 		if (this.hasEnabled) {
 			builder.beginControlFlow("if ($T.enabled)", this.className);
 		}
@@ -409,18 +406,13 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 			builder.beginControlFlow("if (conditions.matches($T.class))", type);
 		}
 		builder.beginControlFlow("if (context.getBeanFactory().getBeanNamesForType($T.class).length==0)", type);
-		CodeBlock.Builder code = CodeBlock.builder();
-		boolean conditionsAvailable = addScannedComponents(code, conditional);
-		addNewBeanForConfig(code, type);
-		for (Method method : getBeanMethods(type)) {
-			conditionsAvailable |= createBeanMethod(code, method, type, conditionsAvailable);
-		}
 		addResources(code);
 		addRegistrarInvokers(code);
 		CodeBlock logic = code.build();
 		if (logic.toString().contains("types.")) {
-			builder.addStatement("$T types = $T.getBean(context.getBeanFactory(), $T.class)", SpringClassNames.TYPE_SERVICE,
-					SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.TYPE_SERVICE);
+			builder.addStatement("$T types = $T.getBean(context.getBeanFactory(), $T.class)",
+					SpringClassNames.TYPE_SERVICE, SpringClassNames.INFRASTRUCTURE_UTILS,
+					SpringClassNames.TYPE_SERVICE);
 		}
 		builder.addCode(logic);
 		builder.endControlFlow();
@@ -460,7 +452,8 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 						}
 						includes(builder, imported);
 					}
-					if (utils.hasAnnotation(imported, SpringClassNames.CONFIGURATION.toString())) {
+					if (utils.hasAnnotation(imported, SpringClassNames.CONFIGURATION.toString())
+							&& utils.isIncluded(imported)) {
 						builder.addStatement("new $T().initialize(context)",
 								InitializerSpec.toInitializerNameFromConfigurationName(imported));
 					} else {
@@ -476,14 +469,15 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 	}
 
 	private void registerBean(CodeBlock.Builder builder, Class<?> imported) {
-		if (isAccessible(imported)) {
-			Constructor<?> constructor = getConstructor(imported);
-			ParameterSpecs params = autowireParamsForMethod(constructor);
-			builder.addStatement("context.registerBean($T.class, () -> new $T(" + params.format + "))",
-					ArrayUtils.merge(imported, imported, params.args));
-		} else {
-			builder.addStatement("context.registerBean(types.getType($S))", imported.getName());
-
+		if (utils.isIncluded(imported)) {
+			if (isAccessible(imported)) {
+				Constructor<?> constructor = getConstructor(imported);
+				ParameterSpecs params = autowireParamsForMethod(constructor);
+				builder.addStatement("context.registerBean($T.class, () -> new $T(" + params.format + "))",
+						ArrayUtils.merge(imported, imported, params.args));
+			} else {
+				builder.addStatement("context.registerBean(types.getType($S))", imported.getName());
+			}
 		}
 	}
 

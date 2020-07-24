@@ -19,11 +19,13 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.io.FileSystemUtils;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.util.FileUtils;
 
 @Mojo(name = "testGenerate", defaultPhase = LifecyclePhase.GENERATE_TEST_SOURCES, requiresProject = true, threadSafe = true, requiresDependencyResolution = ResolutionScope.TEST, requiresDependencyCollection = ResolutionScope.TEST)
 public class GenerateTestsMojo extends AbstractInitMojo {
@@ -43,22 +45,26 @@ public class GenerateTestsMojo extends AbstractInitMojo {
 	 */
 	@Parameter(defaultValue = "${project.build.testOutputDirectory}", required = true)
 	private File testClassesDirectory;
+
+	@Parameter(defaultValue = "${project.build.directory}/generated-sources/init", required = true)
+	private File outputDirectory;
+
 	/**
 	 * Directory containing the generated sources.
 	 * 
 	 * @since 1.0.0
 	 */
 	@Parameter(defaultValue = "${project.build.directory}/generated-test-sources/init", required = true)
-	private File outputDirectory;
+	private File testOutputDirectory;
 
 	@Override
 	protected void postProcess(MavenProject project) {
-		project.addTestCompileSourceRoot(outputDirectory.getAbsolutePath());
+		project.addTestCompileSourceRoot(testOutputDirectory.getAbsolutePath());
 	}
 
 	@Override
 	protected File getOutputDirectory() {
-		return outputDirectory;
+		return testOutputDirectory;
 	}
 
 	@Override

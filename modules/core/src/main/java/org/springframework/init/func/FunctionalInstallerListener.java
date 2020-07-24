@@ -190,8 +190,7 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 						new CachingMetadataReaderFactory(context.getClassLoader()));
 			}
 			if (!InfrastructureUtils.containsBean(context.getBeanFactory(), ConditionService.class)) {
-				SimpleConditionService conditions = new SimpleConditionService(context, context,
-						context.getEnvironment(), context);
+				SimpleConditionService conditions = new SimpleConditionService(context);
 				infrastructure.getBeanFactory().registerSingleton(ConditionService.class.getName(), conditions);
 			}
 			if (!InfrastructureUtils.containsBean(context.getBeanFactory(), BeanNameGenerator.class)) {

@@ -3,9 +3,11 @@ package org.springframework.init.tools;
 import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -128,22 +130,22 @@ public class InitializerClassProcessor {
 		}
 		Set<JavaFile> result = new HashSet<>();
 		// Work out what these modules include
-		List<InitializerSpec> initializers = new ArrayList<>();
-		for (InitializerSpec initializer : specs.getInitializers()) {
-			initializer.getInitializer();
-		}
-		for (InitializerSpec initializer : specs.getInitializers()) {
-			try {
-				initializer.getInitializer();
-				initializers.add(initializer);
-			} catch (Throwable e) {
-				// TODO: this is a sign that something is missing from the classpath, and it
-				// will almost certainly blow up at runtime. It would be better to try and
-				// evaluate @ConditionalOnClass up front (here and inside InitializerSpec).
-				logger.info("Skipping: " + initializer.getClassName());
+		Map<Class<?>, InitializerSpec> initializers = new HashMap<>();
+		for (int count = 1; count > 0;) {
+			int total = initializers.size();
+			for (InitializerSpec initializer : specs.getInitializers()) {
+				try {
+					initializer.getInitializer();
+					initializers.put(initializer.getConfigurationType(), initializer);
+				} catch (Throwable e) {
+					// TODO: this is a sign that something is missing from the classpath, and it
+					// might blow up at runtime.
+					logger.info("Skipping: " + initializer.getClassName(), e);
+				}
 			}
+			count = initializers.size() - total;
 		}
-		for (InitializerSpec initializer : initializers) {
+		for (InitializerSpec initializer : initializers.values()) {
 			logger.info("Writing Initializer " + initializer.getPackage() + "." + initializer.getInitializer().name);
 			result.add(JavaFile.builder(initializer.getPackage(), initializer.getInitializer()).build());
 		}
