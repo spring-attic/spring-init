@@ -57,6 +57,8 @@ import org.springframework.util.ReflectionUtils;
  */
 public class FunctionalInstallerListener implements SmartApplicationListener {
 
+	public static boolean EXCLUDES_ENABLED = false;
+
 	private static final Log logger = LogFactory.getLog(FunctionalInstallerListener.class);
 
 	// TODO: make this class stateless
@@ -190,7 +192,7 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 						new CachingMetadataReaderFactory(context.getClassLoader()));
 			}
 			if (!InfrastructureUtils.containsBean(context.getBeanFactory(), ConditionService.class)) {
-				SimpleConditionService conditions = new SimpleConditionService(context);
+				AnnotationMetadataConditionService conditions = new AnnotationMetadataConditionService(context);
 				infrastructure.getBeanFactory().registerSingleton(ConditionService.class.getName(), conditions);
 			}
 			if (!InfrastructureUtils.containsBean(context.getBeanFactory(), BeanNameGenerator.class)) {

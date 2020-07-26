@@ -27,7 +27,6 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.init.func.FunctionalInstallerListener;
 import org.springframework.init.func.ImportRegistrars;
 import org.springframework.init.func.InfrastructureUtils;
-import org.springframework.init.func.SimpleConditionService;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.ContextCustomizerFactory;
@@ -62,7 +61,7 @@ class FunctionalContextCustomizerFactory implements ContextCustomizerFactory {
 					ImportRegistrars.class.getName(), ImportRegistrars.class);
 			if (this.testClass != null) {
 				Set<Import> merged = AnnotatedElementUtils.findAllMergedAnnotations(testClass, Import.class);
-				SimpleConditionService.EXCLUDES_ENABLED = !merged.isEmpty();
+				FunctionalInstallerListener.EXCLUDES_ENABLED = !merged.isEmpty();
 				for (Import ann : merged) {
 					for (Class<?> imported : ann.value()) {
 						registrars.add(testClass, imported);

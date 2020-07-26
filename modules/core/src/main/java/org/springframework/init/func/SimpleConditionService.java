@@ -16,20 +16,14 @@
 
 package org.springframework.init.func;
 
-import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.boot.context.TypeExcludeFilter;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
-import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.core.type.MethodMetadata;
-import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
-import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.lang.Nullable;
 
 /**
  * @author Dave Syer
@@ -37,37 +31,39 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
  */
 public class SimpleConditionService implements ConditionService {
 
-	public static volatile boolean EXCLUDES_ENABLED = false;
+	private Map<Class<?>, Boolean> typeMatches = new HashMap<>();
 
-	private static final String EXCLUDE_FILTER_BEAN_NAME = "org.springframework.boot.test.autoconfigure.filter.TypeExcludeFilters";
+	private Map<Class<?>, Set<Class<?>>> methodMatches = new HashMap<>();
 
-	private final ConditionEvaluator evaluator;
+	private ConditionService fallback;
 
-	private final TypeService types;
+	public SimpleConditionService(ConditionService service) {
+		this(service, Collections.emptyMap(), Collections.emptyMap());
+	}
 
-	private ConfigurableListableBeanFactory beanFactory;
+	public SimpleConditionService() {
+		this(null, Collections.emptyMap(), Collections.emptyMap());
+	}
 
-	private MetadataReaderFactory metadataReaderFactory;
+	public SimpleConditionService(Map<Class<?>, Boolean> typeMatches, Map<Class<?>, Set<Class<?>>> methodMatches) {
+		this(null, typeMatches, methodMatches);
+	}
 
-	public SimpleConditionService(GenericApplicationContext context) {
-		this.beanFactory = context.getBeanFactory();
-		this.evaluator = new ConditionEvaluator(context, context, context.getEnvironment(), context);
-		this.types = InfrastructureUtils.getBean(beanFactory, TypeService.class);
-		String metadataFactory = MetadataReaderFactory.class.getName();
-		this.metadataReaderFactory = InfrastructureUtils.containsBean(beanFactory, metadataFactory)
-				? (MetadataReaderFactory) InfrastructureUtils.getBean(beanFactory, MetadataReaderFactory.class)
-				: new CachingMetadataReaderFactory(context.getClassLoader());
+	SimpleConditionService(@Nullable ConditionService service, Map<Class<?>, Boolean> typeMatches,
+			Map<Class<?>, Set<Class<?>>> methodMatches) {
+		this.fallback = service;
+		this.typeMatches.putAll(typeMatches);
+		this.methodMatches.putAll(methodMatches);
 	}
 
 	@Override
 	public boolean matches(Class<?> type, ConfigurationPhase phase) {
-		try {
-			return !this.evaluator.shouldSkip(getMetadata(type), phase);
-		} catch (ArrayStoreException e) {
-			return false;
-		} catch (IllegalStateException e) {
-			return false;
+		if (typeMatches.containsKey(type)) {
+			return typeMatches.get(type);
 		}
+		boolean matches = fallback == null ? false : fallback.matches(type, phase);
+		match(type, matches);
+		return matches;
 	}
 
 	@Override
@@ -77,60 +73,39 @@ public class SimpleConditionService implements ConditionService {
 
 	@Override
 	public boolean matches(Class<?> factory, Class<?> type) {
-		AnnotationMetadata metadata = getMetadata(factory);
-		Set<MethodMetadata> assignable = new HashSet<>();
-		for (MethodMetadata method : metadata.getAnnotatedMethods(Bean.class.getName())) {
-			Class<?> candidate = types.getType(method.getReturnTypeName());
-			// Look for exact match first
-			if (type.equals(candidate)) {
-				return !this.evaluator.shouldSkip(method);
-			}
-			if (type.isAssignableFrom(candidate)) {
-				assignable.add(method);
-			}
+		if (methodMatches.containsKey(factory)) {
+			return methodMatches.get(factory).contains(type);
 		}
-		if (assignable.size() == 1) {
-			return !this.evaluator.shouldSkip(assignable.iterator().next());
-		}
-		// TODO: fail if size() > 1
-		Class<?> base = factory.getSuperclass();
-		if (base != Object.class) {
-			metadata = getMetadata(base);
-			if (metadata.hasAnnotation(Configuration.class.getName())) {
-				return matches(base, type);
-			}
-		}
-		return false;
+		boolean matches = fallback == null ? false : fallback.matches(factory, type);
+		match(factory, type, matches);
+		return matches;
 	}
 
 	@Override
 	public boolean includes(Class<?> type) {
-		if (!EXCLUDES_ENABLED) {
-			return true;
-		}
-		// TODO: split this method off into a test component?
-		if (beanFactory.containsSingleton(EXCLUDE_FILTER_BEAN_NAME)) {
-			TypeExcludeFilter filter = (TypeExcludeFilter) beanFactory.getSingleton(EXCLUDE_FILTER_BEAN_NAME);
-			try {
-				if (filter.match(metadataReaderFactory.getMetadataReader(type.getName()), metadataReaderFactory)) {
-					return false;
-				}
-			} catch (IOException e) {
-				throw new IllegalStateException("Cannot read metadata for " + type);
-			}
-		}
-		return true;
+		return fallback == null ? true : fallback.includes(type);
 	}
 
-	private AnnotationMetadata getMetadata(Class<?> factory) {
-		if (factory == null) {
-			factory = Object.class;
+	public SimpleConditionService match(Class<?> type, boolean matches) {
+		typeMatches.put(type, matches);
+		return this;
+	}
+
+	public SimpleConditionService match(Class<?> factory, Class<?> type, boolean matches) {
+		if (matches) {
+			methodMatches.computeIfAbsent(type, key -> new HashSet<>()).add(type);
+		} else {
+			methodMatches.computeIfAbsent(type, key -> new HashSet<>());
 		}
-		try {
-			return metadataReaderFactory.getMetadataReader(factory.getName()).getAnnotationMetadata();
-		} catch (IOException e) {
-			throw new IllegalStateException(e);
-		}
+		return this;
+	}
+
+	public Map<Class<?>, Boolean> getTypeMatches() {
+		return typeMatches;
+	}
+
+	public Map<Class<?>, Set<Class<?>>> getMethodMatches() {
+		return methodMatches;
 	}
 
 }
