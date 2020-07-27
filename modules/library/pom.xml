@@ -21,11 +21,7 @@
 			<groupId>org.springframework.experimental</groupId>
 			<artifactId>spring-boot-autoconfigure-func</artifactId>
 			<version>${generated.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>spring-init-core</artifactId>
-			<version>${project.version}</version>
+			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>

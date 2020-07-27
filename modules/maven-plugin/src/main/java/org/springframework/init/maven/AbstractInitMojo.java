@@ -95,11 +95,14 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 			getLog().debug("skipping run as per configuration.");
 			return;
 		}
+		preProcess(project);
 		generate(getStart());
 		postProcess(project);
 	}
 
 	protected abstract void postProcess(MavenProject project);
+
+	protected abstract void preProcess(MavenProject project);
 
 	private void generate(String start) throws MojoExecutionException {
 		ClassLoader realm = getClass().getClassLoader();

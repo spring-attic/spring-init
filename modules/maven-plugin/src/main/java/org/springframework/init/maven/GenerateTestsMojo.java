@@ -19,13 +19,11 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.io.FileSystemUtils;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.util.FileUtils;
 
 @Mojo(name = "testGenerate", defaultPhase = LifecyclePhase.GENERATE_TEST_SOURCES, requiresProject = true, threadSafe = true, requiresDependencyResolution = ResolutionScope.TEST, requiresDependencyCollection = ResolutionScope.TEST)
 public class GenerateTestsMojo extends AbstractInitMojo {
@@ -59,6 +57,10 @@ public class GenerateTestsMojo extends AbstractInitMojo {
 
 	@Override
 	protected void postProcess(MavenProject project) {
+	}
+
+	@Override
+	protected void preProcess(MavenProject project) {
 		project.addTestCompileSourceRoot(testOutputDirectory.getAbsolutePath());
 	}
 

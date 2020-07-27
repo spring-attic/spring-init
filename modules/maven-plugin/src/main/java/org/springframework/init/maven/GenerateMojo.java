@@ -46,6 +46,10 @@ public class GenerateMojo extends AbstractInitMojo {
 
 	@Override
 	protected void postProcess(MavenProject project) {
+	}
+
+	@Override
+	protected void preProcess(MavenProject project) {
 		project.addCompileSourceRoot(outputDirectory.getAbsolutePath());
 	}
 
