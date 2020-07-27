@@ -178,18 +178,7 @@
 
 	<build>
 		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>pre-compile</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>compile</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+
 			<plugin>
 				<groupId>org.springframework.experimental</groupId>
 				<artifactId>spring-init-maven-plugin</artifactId>
@@ -204,6 +193,7 @@
 					</execution>
 				</executions>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
@@ -211,6 +201,7 @@
 					<skip>true</skip>
 				</configuration>
 			</plugin>
+
 
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -233,6 +224,7 @@
 				</executions>
 			</plugin>
 
+
 			<plugin>
 				<groupId>com.google.cloud.tools</groupId>
 				<artifactId>jib-maven-plugin</artifactId>
@@ -250,6 +242,7 @@
 					</container>
 				</configuration>
 			</plugin>
+
 
 			<plugin>
 				<groupId>org.jacoco</groupId>
@@ -272,6 +265,7 @@
 			</plugin>
 
 
+
 			<!-- Spring Boot Actuator displays build-related information if a git.properties file is present at the classpath -->
 			<plugin>
 				<groupId>pl.project13.maven</groupId>
@@ -292,6 +286,7 @@
 					<failOnNoGitDirectory>false</failOnNoGitDirectory>
 				</configuration>
 			</plugin>
+
 
 
 			<plugin>
@@ -328,6 +323,7 @@
 			</plugin>
 
 
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
@@ -338,6 +334,7 @@
 					</systemProperties>
 				</configuration>
 			</plugin>
+
 
 
 		</plugins>
