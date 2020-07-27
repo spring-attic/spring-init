@@ -15,6 +15,15 @@
  */
 package org.springframework.init.maven;
 
+import static org.twdata.maven.mojoexecutor.MojoExecutor.artifactId;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.configuration;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.executeMojo;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.executionEnvironment;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.goal;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.groupId;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.plugin;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.version;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -26,9 +35,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.BuildPluginManager;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.classworlds.realm.ClassRealm;
@@ -53,6 +65,10 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 	 */
 	@Parameter(defaultValue = "${project}", readonly = true, required = true)
 	private MavenProject project;
+	@Parameter(defaultValue = "${session}", readonly = true, required = true)
+	private MavenSession session;
+	@Component
+	private BuildPluginManager pluginManager;
 	/**
 	 * Skip the execution.
 	 * 
@@ -96,6 +112,12 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 			return;
 		}
 		preProcess(project);
+		String compilerVersion = project.getProperties().getProperty("maven-compiler-plugin.version", "3.8.1");
+		executeMojo(plugin(groupId("org.apache.maven.plugins"), artifactId("maven-compiler-plugin"), version(compilerVersion)),
+				goal("compile"), configuration(), executionEnvironment(project, session, pluginManager));
+		generate(getStart());
+		executeMojo(plugin(groupId("org.apache.maven.plugins"), artifactId("maven-compiler-plugin"), version(compilerVersion)),
+				goal("compile"), configuration(), executionEnvironment(project, session, pluginManager));
 		generate(getStart());
 		postProcess(project);
 	}
