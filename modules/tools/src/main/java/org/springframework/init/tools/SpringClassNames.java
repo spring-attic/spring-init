@@ -43,6 +43,7 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.init.func.ConditionService;
 import org.springframework.init.func.ImportRegistrars;
+import org.springframework.init.func.InfrastructureProvider;
 import org.springframework.init.func.InfrastructureUtils;
 import org.springframework.init.func.ObjectUtils;
 import org.springframework.init.func.AnnotationMetadataConditionService;
@@ -99,6 +100,8 @@ public class SpringClassNames {
 	public static final ClassName OBJECT_UTILS = ClassName.get(ObjectUtils.class);
 
 	public static final ClassName CONDITION_SERVICE = ClassName.get(ConditionService.class);
+
+	public static final ClassName INFRASTRUCTURE_PROVIDER = ClassName.get(InfrastructureProvider.class);
 
 	public static final ClassName SIMPLE_CONDITION_SERVICE = ClassName.get(AnnotationMetadataConditionService.class);
 

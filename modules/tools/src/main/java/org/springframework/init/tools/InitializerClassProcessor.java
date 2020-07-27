@@ -26,6 +26,8 @@ public class InitializerClassProcessor {
 
 	private InitializerSpecs specs;
 
+	private InfrastructureProviderSpecs infras;
+
 	private ElementUtils utils;
 
 	private Imports imports;
@@ -37,6 +39,7 @@ public class InitializerClassProcessor {
 		this.imports = new Imports(this.utils);
 		this.components = new Components(this.utils);
 		this.specs = new InitializerSpecs(this.utils, this.imports, this.components);
+		this.infras = new InfrastructureProviderSpecs(this.utils);
 	}
 
 	private Set<Class<?>> collectTypes(Class<?> type, Predicate<Class<?>> typeSelectionCondition) {
@@ -116,6 +119,10 @@ public class InitializerClassProcessor {
 				logger.info("Found @Configuration in " + type);
 				specs.addInitializer(type);
 			}
+			if (utils.hasAnnotation(type, SpringClassNames.SPRING_BOOT_CONFIGURATION.toString())) {
+				logger.info("Found @SpringBootConfiguration in " + type);
+				infras.addProvider(type);
+			}
 		}
 		// Hoover up any imports that didn't already get turned into initializers
 		for (Class<?> importer : imports.getImports().keySet()) {
@@ -148,6 +155,10 @@ public class InitializerClassProcessor {
 		for (InitializerSpec initializer : initializers.values()) {
 			logger.info("Writing Initializer " + initializer.getPackage() + "." + initializer.getInitializer().name);
 			result.add(JavaFile.builder(initializer.getPackage(), initializer.getInitializer()).build());
+		}
+		for (InfrastructureProviderSpec provider : infras.getProviders()) {
+			logger.info("Writing InfrastructureProvider " + provider.getPackage() + "." + provider.getProvider().name);
+			result.add(JavaFile.builder(provider.getPackage(), provider.getProvider()).build());
 		}
 		return result;
 	}
