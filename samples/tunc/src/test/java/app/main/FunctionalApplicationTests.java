@@ -18,9 +18,12 @@ package app.main;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.File;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.init.tools.ConditionServiceApplication;
 
 /**
  * @author Dave Syer
@@ -36,6 +39,10 @@ public class FunctionalApplicationTests {
 	public void test() {
 		assertThat(bar).isNotNull();
 		assertThat(bar.getFoo().getValue()).isNotNull();
+	}
+
+	public static void main(String[] args) throws Exception {
+		new ConditionServiceApplication().process(SampleApplication.class).writeTo(new File("src/main/java"));
 	}
 
 }
