@@ -42,7 +42,7 @@ public class FunctionalApplicationTests {
 	}
 
 	public static void main(String[] args) throws Exception {
-		new ConditionServiceApplication().process(SampleApplication.class).writeTo(new File("src/main/java"));
+		new ConditionServiceApplication().process(SampleApplication.class).writeTo(new File("target/generated-sources/init"));
 	}
 
 }

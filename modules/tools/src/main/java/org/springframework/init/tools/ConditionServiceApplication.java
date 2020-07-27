@@ -60,6 +60,12 @@ public class ConditionServiceApplication {
 		return JavaFile.builder(ClassUtils.getPackageName(application), generate(application)).build();
 	}
 
+	public void process(Class<?> application, Set<JavaFile> files) {
+		if (ClassUtils.isPresent(application.getName().replace("$", "_") + "Initializer", null)) {
+			files.add(JavaFile.builder(ClassUtils.getPackageName(application), generate(application)).build());
+		}
+	}
+
 	private TypeSpec generate(Class<?> application) {
 		Class<?> initializerClass = ClassUtils.resolveClassName(application.getName().replace("$", "_") + "Initializer",
 				null);

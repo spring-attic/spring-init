@@ -110,6 +110,7 @@ public class InitializerClassProcessor {
 	}
 
 	public Set<JavaFile> process(Class<?> application) {
+		Set<JavaFile> result = new HashSet<>();
 		Set<Class<?>> types = collectTypes(application, te -> //
 		!Modifier.isAbstract(te.getModifiers()) && //
 				!Modifier.isStatic(te.getModifiers()) && //
@@ -122,6 +123,9 @@ public class InitializerClassProcessor {
 			if (utils.hasAnnotation(type, SpringClassNames.SPRING_BOOT_CONFIGURATION.toString())) {
 				logger.info("Found @SpringBootConfiguration in " + type);
 				infras.addProvider(type);
+				if (InitializerApplication.closedWorld) {
+					new ConditionServiceApplication().process(type, result);
+				}
 			}
 		}
 		// Hoover up any imports that didn't already get turned into initializers
@@ -135,7 +139,6 @@ public class InitializerClassProcessor {
 				}
 			}
 		}
-		Set<JavaFile> result = new HashSet<>();
 		// Work out what these modules include
 		Map<Class<?>, InitializerSpec> initializers = new HashMap<>();
 		for (int count = 1; count > 0;) {
