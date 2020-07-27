@@ -23,6 +23,10 @@ import java.util.Set;
 
 import javax.lang.model.element.Modifier;
 
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.WebApplicationType;
+import org.springframework.boot.web.reactive.context.ReactiveWebServerApplicationContext;
+import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
@@ -87,27 +91,27 @@ public class ConditionServiceApplication {
 	}
 
 	private FieldSpec methodMatcher() {
-		FieldSpec.Builder builder = FieldSpec.builder(new ParameterizedTypeReference<Map<Class<?>, Boolean>>() {
+		FieldSpec.Builder builder = FieldSpec.builder(new ParameterizedTypeReference<Map<String, Boolean>>() {
 		}.getType(), "TYPES", Modifier.PRIVATE, Modifier.STATIC);
 		builder.initializer("new $T<>()", HashMap.class);
 		return builder.build();
 	}
 
 	private FieldSpec typeMatcher() {
-		FieldSpec.Builder builder = FieldSpec.builder(new ParameterizedTypeReference<Map<Class<?>, Set<Class<?>>>>() {
+		FieldSpec.Builder builder = FieldSpec.builder(new ParameterizedTypeReference<Map<String, Set<String>>>() {
 		}.getType(), "METHODS", Modifier.PRIVATE, Modifier.STATIC);
 		builder.initializer("new $T<>()", HashMap.class);
 		return builder.build();
 	}
 
-	private CodeBlock methodMatchers(Map<Class<?>, Set<Class<?>>> matches) {
+	private CodeBlock methodMatchers(Map<String, Set<String>> matches) {
 		Builder code = CodeBlock.builder();
-		for (Class<?> type : matches.keySet()) {
-			code.add("METHODS.put($T.class, new $T<>(", type, HashSet.class);
-			Set<Class<?>> set = matches.get(type);
+		for (String type : matches.keySet()) {
+			code.add("METHODS.put($S, new $T<>(", type, HashSet.class);
+			Set<String> set = matches.get(type);
 			if (!set.isEmpty()) {
 				code.add("$T.asList(", Arrays.class);
-				code.add(join("$T.class", set.size()), set.toArray());
+				code.add(join("$S", set.size()), set.toArray());
 				code.add(")");
 			}
 			code.add("));\n");
@@ -123,19 +127,22 @@ public class ConditionServiceApplication {
 		return builder.toString();
 	}
 
-	private CodeBlock typeMatchers(Map<Class<?>, Boolean> matches) {
+	private CodeBlock typeMatchers(Map<String, Boolean> matches) {
 		Builder code = CodeBlock.builder();
-		for (Class<?> type : matches.keySet()) {
-			code.addStatement("TYPES.put($T.class, $L)", type, matches.get(type));
+		for (String type : matches.keySet()) {
+			code.addStatement("TYPES.put($S, $L)", type, matches.get(type));
 		}
 		return code.build();
 	}
 
 	private GenericApplicationContext getMain() {
 		if (this.main == null) {
+			WebApplicationType webType = new SpringApplication().getWebApplicationType();
 			// TODO: Read application.properties?
 			GenericApplicationContext context = new GenericApplicationContext();
-			this.main = new GenericApplicationContext();
+			this.main = webType == WebApplicationType.NONE ? new GenericApplicationContext()
+					: webType == WebApplicationType.REACTIVE ? new ReactiveWebServerApplicationContext()
+							: new ServletWebServerApplicationContext();
 			context.refresh();
 			InfrastructureUtils.install(main.getBeanFactory(), context);
 			context.getBeanFactory().registerSingleton(TypeService.class.getName(),

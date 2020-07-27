@@ -1,7 +1,0 @@
-org.springframework.context.ApplicationListener=\
-org.springframework.init.func.InfrastructureListener,\
-org.springframework.init.func.FunctionalInstallerListener
-
-org.springframework.context.ApplicationContextInitializer=\
-org.springframework.init.func.InfrastructureInitializer,\
-org.springframework.init.test.TestModuleInitializer

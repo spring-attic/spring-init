@@ -31,9 +31,9 @@ import org.springframework.lang.Nullable;
  */
 public class SimpleConditionService implements ConditionService {
 
-	private Map<Class<?>, Boolean> typeMatches = new HashMap<>();
+	private Map<String, Boolean> typeMatches = new HashMap<>();
 
-	private Map<Class<?>, Set<Class<?>>> methodMatches = new HashMap<>();
+	private Map<String, Set<String>> methodMatches = new HashMap<>();
 
 	private ConditionService fallback;
 
@@ -45,12 +45,12 @@ public class SimpleConditionService implements ConditionService {
 		this(null, Collections.emptyMap(), Collections.emptyMap());
 	}
 
-	public SimpleConditionService(Map<Class<?>, Boolean> typeMatches, Map<Class<?>, Set<Class<?>>> methodMatches) {
+	public SimpleConditionService(Map<String, Boolean> typeMatches, Map<String, Set<String>> methodMatches) {
 		this(null, typeMatches, methodMatches);
 	}
 
-	SimpleConditionService(@Nullable ConditionService service, Map<Class<?>, Boolean> typeMatches,
-			Map<Class<?>, Set<Class<?>>> methodMatches) {
+	SimpleConditionService(@Nullable ConditionService service, Map<String, Boolean> typeMatches,
+			Map<String, Set<String>> methodMatches) {
 		this.fallback = service;
 		this.typeMatches.putAll(typeMatches);
 		this.methodMatches.putAll(methodMatches);
@@ -58,8 +58,8 @@ public class SimpleConditionService implements ConditionService {
 
 	@Override
 	public boolean matches(Class<?> type, ConfigurationPhase phase) {
-		if (typeMatches.containsKey(type)) {
-			return typeMatches.get(type);
+		if (typeMatches.containsKey(type.getName())) {
+			return typeMatches.get(type.getName());
 		}
 		boolean matches = fallback == null ? false : fallback.matches(type, phase);
 		match(type, matches);
@@ -73,11 +73,11 @@ public class SimpleConditionService implements ConditionService {
 
 	@Override
 	public boolean matches(Class<?> factory, Class<?> type) {
-		if (methodMatches.containsKey(factory)) {
-			return methodMatches.get(factory).contains(type);
+		if (methodMatches.containsKey(factory.getName())) {
+			return methodMatches.get(factory.getName()).contains(type.getName());
 		}
 		boolean matches = fallback == null ? false : fallback.matches(factory, type);
-		match(factory, type, matches);
+		match(factory.getName(), type.getName(), matches);
 		return matches;
 	}
 
@@ -87,24 +87,24 @@ public class SimpleConditionService implements ConditionService {
 	}
 
 	public SimpleConditionService match(Class<?> type, boolean matches) {
-		typeMatches.put(type, matches);
+		typeMatches.put(type.getName(), matches);
 		return this;
 	}
 
-	public SimpleConditionService match(Class<?> factory, Class<?> type, boolean matches) {
+	public SimpleConditionService match(String factory, String type, boolean matches) {
 		if (matches) {
-			methodMatches.computeIfAbsent(type, key -> new HashSet<>()).add(type);
+			methodMatches.computeIfAbsent(factory, key -> new HashSet<>()).add(type);
 		} else {
-			methodMatches.computeIfAbsent(type, key -> new HashSet<>());
+			methodMatches.computeIfAbsent(factory, key -> new HashSet<>());
 		}
 		return this;
 	}
 
-	public Map<Class<?>, Boolean> getTypeMatches() {
+	public Map<String, Boolean> getTypeMatches() {
 		return typeMatches;
 	}
 
-	public Map<Class<?>, Set<Class<?>>> getMethodMatches() {
+	public Map<String, Set<String>> getMethodMatches() {
 		return methodMatches;
 	}
 
