@@ -57,18 +57,6 @@
 	<build>
 		<plugins>
 			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>pre-compile</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>compile</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<groupId>org.springframework.experimental</groupId>
 				<artifactId>spring-init-maven-plugin</artifactId>
 				<version>${spring-init.version}</version>

@@ -43,10 +43,6 @@
 					<artifactId>spring-boot-starter-json</artifactId>
 				</exclusion>
 				<exclusion>
-					<groupId>io.netty</groupId>
-					<artifactId>netty-transport-native-epoll</artifactId>
-				</exclusion>
-				<exclusion>
 					<groupId>org.hibernate.validator</groupId>
 					<artifactId>hibernate-validator</artifactId>
 				</exclusion>
