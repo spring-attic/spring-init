@@ -52,7 +52,7 @@ import com.squareup.javapoet.TypeSpec;
  * @author Dave Syer
  *
  */
-public class ConditionServiceApplication {
+public class ConditionServiceGenerator {
 
 	private GenericApplicationContext main;
 

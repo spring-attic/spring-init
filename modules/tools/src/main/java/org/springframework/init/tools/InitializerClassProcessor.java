@@ -124,7 +124,7 @@ public class InitializerClassProcessor {
 				logger.info("Found @SpringBootConfiguration in " + type);
 				infras.addProvider(type);
 				if (InitializerApplication.closedWorld) {
-					new ConditionServiceApplication().process(type, result);
+					new ConditionServiceGenerator().process(type, result);
 				}
 			}
 		}

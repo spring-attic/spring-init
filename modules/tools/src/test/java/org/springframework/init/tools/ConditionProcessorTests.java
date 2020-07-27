@@ -31,14 +31,14 @@ public class ConditionProcessorTests {
 
 	@Test
 	void testConditional() throws Exception {
-		JavaFile file = new ConditionServiceApplication().process(ConditionalApplication.class);
+		JavaFile file = new ConditionServiceGenerator().process(ConditionalApplication.class);
 		// System.err.println(file);
 		assertThat(file.toString()).contains("TYPES.put(");
 	}
 
 	@Test
 	void testConditionalBean() throws Exception {
-		JavaFile file = new ConditionServiceApplication().process(ConditionalBeanApplication.class);
+		JavaFile file = new ConditionServiceGenerator().process(ConditionalBeanApplication.class);
 		System.err.println(file);
 		assertThat(file.toString()).contains("METHODS.put(");
 	}
