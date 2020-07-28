@@ -15,9 +15,7 @@
  */
 package org.springframework.init.tools;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -74,9 +72,7 @@ public class ConditionServiceGenerator {
 				.getOrCreate(getMain(), initializerClass);
 		initializer.initialize(getMain());
 		ImportRegistrars imports = InfrastructureUtils.getBean(main.getBeanFactory(), ImportRegistrars.class);
-		for (ApplicationContextInitializer<GenericApplicationContext> init : imports.getDeferred()) {
-			init.initialize(main);
-		}
+		imports.processDeferred(main);
 		TypeSpec.Builder builder = TypeSpec
 				.classBuilder(ClassName.get(ClassUtils.getPackageName(application), "GeneratedConditionService"));
 		SimpleConditionService conditions = InfrastructureUtils.getBean(main.getBeanFactory(),
@@ -104,33 +100,22 @@ public class ConditionServiceGenerator {
 	}
 
 	private FieldSpec typeMatcher() {
-		FieldSpec.Builder builder = FieldSpec.builder(new ParameterizedTypeReference<Map<String, Set<String>>>() {
+		FieldSpec.Builder builder = FieldSpec.builder(new ParameterizedTypeReference<Map<String, Map<String, Boolean>>>() {
 		}.getType(), "METHODS", Modifier.PRIVATE, Modifier.STATIC);
 		builder.initializer("new $T<>()", HashMap.class);
 		return builder.build();
 	}
 
-	private CodeBlock methodMatchers(Map<String, Set<String>> matches) {
+	private CodeBlock methodMatchers(Map<String, Map<String, Boolean>> matches) {
 		Builder code = CodeBlock.builder();
 		for (String type : matches.keySet()) {
-			code.add("METHODS.put($S, new $T<>(", type, HashSet.class);
-			Set<String> set = matches.get(type);
-			if (!set.isEmpty()) {
-				code.add("$T.asList(", Arrays.class);
-				code.add(join("$S", set.size()), set.toArray());
-				code.add(")");
+			code.addStatement("METHODS.put($S, new $T<>())", type, HashMap.class);
+			Map<String, Boolean> set = matches.get(type);
+			for (String returned : set.keySet()) {
+				code.addStatement("METHODS.get($S).put($S, $L)", type, returned, set.get(returned));
 			}
-			code.add("));\n");
 		}
 		return code.build();
-	}
-
-	private String join(String string, int size) {
-		StringBuilder builder = new StringBuilder(string);
-		for (int i = 1; i < size; i++) {
-			builder.append(", ").append(string);
-		}
-		return builder.toString();
 	}
 
 	private CodeBlock typeMatchers(Map<String, Boolean> matches) {

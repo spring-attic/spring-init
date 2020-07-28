@@ -16,7 +16,6 @@
 
 package org.springframework.init.func;
 
-import java.util.List;
 import java.util.Set;
 
 import org.springframework.context.ApplicationContextInitializer;
@@ -33,8 +32,8 @@ public interface ImportRegistrars {
 	Set<Imported> getImports();
 
 	void defer(ApplicationContextInitializer<?>... initializers);
-
-	List<ApplicationContextInitializer<GenericApplicationContext>> getDeferred();
+	
+	void processDeferred(GenericApplicationContext context);
 
 	public static class Imported {
 

@@ -490,6 +490,7 @@
 						<inherited>false</inherited>
 						<configuration>
 							<basePackage>org.springframework.boot.actuate.autoconfigure</basePackage>
+							<closedWorld>true</closedWorld>
 						</configuration>
 					</execution>
 				</executions>

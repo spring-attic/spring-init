@@ -16,10 +16,9 @@
 
 package org.springframework.init.func;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.springframework.context.ApplicationContextInitializer;
@@ -50,13 +49,24 @@ public class FunctionalInstallerImportRegistrars implements ImportRegistrars {
 		for (ApplicationContextInitializer<?> initializer : initializers) {
 			@SuppressWarnings("unchecked")
 			ApplicationContextInitializer<GenericApplicationContext> generic = (ApplicationContextInitializer<GenericApplicationContext>) initializer;
-			this.deferred .add(generic);
+			this.deferred.add(generic);
 		}
 	}
-	
+
 	@Override
-	public List<ApplicationContextInitializer<GenericApplicationContext>> getDeferred() {
-		return new ArrayList<>(this.deferred);
+	public void processDeferred(GenericApplicationContext context) {
+		Set<ApplicationContextInitializer<GenericApplicationContext>> applied = new HashSet<>();
+		int count = 1;
+		while (count > 0) {
+			count = this.deferred.size();
+			for (ApplicationContextInitializer<GenericApplicationContext> deferred : this.deferred) {
+				if (!applied.contains(deferred)) {
+					applied.add(deferred);
+					deferred.initialize(context);
+				}
+			}
+			count = this.deferred.size() - count;
+		}
 	}
 
 }

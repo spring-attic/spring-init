@@ -125,9 +125,7 @@ public class FunctionalInstallerPostProcessor implements BeanDefinitionRegistryP
 				added = findAdded(seen, registry);
 			}
 		}
-		for (ApplicationContextInitializer<GenericApplicationContext> initializer : registrar.getDeferred()) {
-			initializer.initialize(context);
-		}
+		registrar.processDeferred(context);
 	}
 
 	private void register(BeanDefinitionRegistry registry,
@@ -135,9 +133,7 @@ public class FunctionalInstallerPostProcessor implements BeanDefinitionRegistryP
 		for (ApplicationContextInitializer<GenericApplicationContext> initializer : configurations) {
 			initializer.initialize(context);
 		}
-		for (ApplicationContextInitializer<GenericApplicationContext> initializer : registrar.getDeferred()) {
-			initializer.initialize(context);
-		}
+		registrar.processDeferred(context);
 	}
 
 	private Set<Imported> findAdded(Set<Imported> seen, BeanDefinitionRegistry registry) {

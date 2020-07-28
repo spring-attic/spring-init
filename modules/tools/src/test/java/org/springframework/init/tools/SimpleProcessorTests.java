@@ -20,12 +20,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.actuate.autoconfigure.web.server.ManagementContextAutoConfiguration;
 import org.springframework.init.tools.cond.ConditionalApplication;
 import org.springframework.util.ClassUtils;
 
 import com.squareup.javapoet.JavaFile;
 
 public class SimpleProcessorTests {
+
+	@Test
+	public void managementContext() {
+		Set<JavaFile> files = new InitializerClassProcessor().process(ManagementContextAutoConfiguration.class);
+		// System.err.println(files);
+		assertThat(files).hasSize(4);
+		assertThat(files.toString()).contains("new ManagementContextAutoConfiguration_SameManagementContextConfigurationInitializer().initialize(context)");
+	}
 
 	@Test
 	public void simpleConditional() {
@@ -38,7 +47,7 @@ public class SimpleProcessorTests {
 	public void conditionalOnMissingType() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("condition.type"));
 		assertThat(files).hasSize(5);
-		System.err.println(files);
+		// System.err.println(files);
 		assertThat(files.toString()).contains("context.getBean(SampleConfiguration.class).foo()");
 		assertThat(files.toString()).doesNotContain("ClassUtils.isPresent(\"not.going.to.be.There\", null)");
 	}

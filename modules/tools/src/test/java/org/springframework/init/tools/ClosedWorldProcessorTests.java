@@ -22,6 +22,7 @@ import java.util.Set;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.actuate.autoconfigure.web.server.ManagementContextAutoConfiguration;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -53,6 +54,15 @@ public class ClosedWorldProcessorTests {
 		assertThat(files.toString())
 		.contains("EnableAutoConfiguration.ENABLED_OVERRIDE_PROPERTY");
 	}
+
+	@Test
+	public void managementContext() {
+		Set<JavaFile> files = new InitializerClassProcessor().process(ManagementContextAutoConfiguration.class);
+		// System.err.println(files);
+		assertThat(files).hasSize(7);
+		assertThat(files.toString()).contains("new ManagementContextAutoConfiguration_SameManagementContextConfigurationInitializer().initialize(context)");
+	}
+
 
 	private Class<?> app(String pkg) {
 		return ClassUtils.resolveClassName("app." + pkg + ".SampleApplication", null);

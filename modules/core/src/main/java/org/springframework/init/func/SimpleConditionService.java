@@ -18,9 +18,7 @@ package org.springframework.init.func;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
 import org.springframework.lang.Nullable;
@@ -33,7 +31,7 @@ public class SimpleConditionService implements ConditionService {
 
 	private Map<String, Boolean> typeMatches = new HashMap<>();
 
-	private Map<String, Set<String>> methodMatches = new HashMap<>();
+	private Map<String, Map<String, Boolean>> methodMatches = new HashMap<>();
 
 	private ConditionService fallback;
 
@@ -45,12 +43,12 @@ public class SimpleConditionService implements ConditionService {
 		this(null, Collections.emptyMap(), Collections.emptyMap());
 	}
 
-	public SimpleConditionService(Map<String, Boolean> typeMatches, Map<String, Set<String>> methodMatches) {
+	public SimpleConditionService(Map<String, Boolean> typeMatches, Map<String, Map<String, Boolean>> methodMatches) {
 		this(null, typeMatches, methodMatches);
 	}
 
 	SimpleConditionService(@Nullable ConditionService service, Map<String, Boolean> typeMatches,
-			Map<String, Set<String>> methodMatches) {
+			Map<String, Map<String, Boolean>> methodMatches) {
 		this.fallback = service;
 		this.typeMatches.putAll(typeMatches);
 		this.methodMatches.putAll(methodMatches);
@@ -73,8 +71,8 @@ public class SimpleConditionService implements ConditionService {
 
 	@Override
 	public boolean matches(Class<?> factory, Class<?> type) {
-		if (methodMatches.containsKey(factory.getName())) {
-			return methodMatches.get(factory.getName()).contains(type.getName());
+		if (methodMatches.containsKey(factory.getName()) && methodMatches.get(factory.getName()).containsKey(type.getName())) {
+			return methodMatches.get(factory.getName()).get(type.getName());
 		}
 		boolean matches = fallback == null ? false : fallback.matches(factory, type);
 		match(factory.getName(), type.getName(), matches);
@@ -93,9 +91,9 @@ public class SimpleConditionService implements ConditionService {
 
 	public SimpleConditionService match(String factory, String type, boolean matches) {
 		if (matches) {
-			methodMatches.computeIfAbsent(factory, key -> new HashSet<>()).add(type);
+			methodMatches.computeIfAbsent(factory, key -> new HashMap<>()).put(type, true);
 		} else {
-			methodMatches.computeIfAbsent(factory, key -> new HashSet<>());
+			methodMatches.computeIfAbsent(factory, key -> new HashMap<>()).put(type,  false);
 		}
 		return this;
 	}
@@ -104,7 +102,7 @@ public class SimpleConditionService implements ConditionService {
 		return typeMatches;
 	}
 
-	public Map<String, Set<String>> getMethodMatches() {
+	public Map<String, Map<String, Boolean>> getMethodMatches() {
 		return methodMatches;
 	}
 

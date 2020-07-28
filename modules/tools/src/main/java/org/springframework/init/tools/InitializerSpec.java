@@ -357,7 +357,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 
 	private boolean isAutoConfiguration(Class<?> importer, String typeName) {
 		// TODO: maybe work out a better way to detect auto configs
-		return typeName.endsWith("AutoConfigurationImportSelector");
+		return typeName.endsWith("AutoConfigurationImportSelector") || typeName.endsWith("ManagementContextConfigurationImportSelector");
 	}
 
 	private boolean isAccessible(Class<?> imported) {
