@@ -44,6 +44,8 @@ import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.classworlds.realm.ClassRealm;
+import org.codehaus.plexus.util.Scanner;
+import org.sonatype.plexus.build.incremental.BuildContext;
 import org.springframework.boot.loader.tools.MainClassFinder;
 import org.springframework.init.tools.InitializerApplication;
 import org.springframework.util.ClassUtils;
@@ -67,6 +69,8 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 	private MavenProject project;
 	@Parameter(defaultValue = "${session}", readonly = true, required = true)
 	private MavenSession session;
+	@Component
+	private BuildContext buildContext;
 	@Component
 	private BuildPluginManager pluginManager;
 	/**
@@ -112,13 +116,22 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 			return;
 		}
 		preProcess(project);
-		String compilerVersion = project.getProperties().getProperty("maven-compiler-plugin.version", "3.8.1");
-		executeMojo(plugin(groupId("org.apache.maven.plugins"), artifactId("maven-compiler-plugin"), version(compilerVersion)),
-				goal("compile"), configuration(), executionEnvironment(project, session, pluginManager));
-		generate(getStart());
-		executeMojo(plugin(groupId("org.apache.maven.plugins"), artifactId("maven-compiler-plugin"), version(compilerVersion)),
-				goal("compile"), configuration(), executionEnvironment(project, session, pluginManager));
-		generate(getStart());
+		Scanner scanner = buildContext.newScanner(project.getBasedir());
+		scanner.setIncludes(new String[] { "src/main/java/" });
+		scanner.scan();
+		if (scanner.getIncludedFiles().length > 0) {
+			String compilerVersion = project.getProperties().getProperty("maven-compiler-plugin.version", "3.8.1");
+			executeMojo(
+					plugin(groupId("org.apache.maven.plugins"), artifactId("maven-compiler-plugin"),
+							version(compilerVersion)),
+					goal("compile"), configuration(), executionEnvironment(project, session, pluginManager));
+			generate(getStart());
+			executeMojo(
+					plugin(groupId("org.apache.maven.plugins"), artifactId("maven-compiler-plugin"),
+							version(compilerVersion)),
+					goal("compile"), configuration(), executionEnvironment(project, session, pluginManager));
+			generate(getStart());
+		}
 		postProcess(project);
 	}
 
@@ -145,6 +158,7 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 			getLog().info("Generating: " + start + " in: " + getOutputDirectory());
 			type.getMethod("main", String[].class).invoke(null,
 					new Object[] { new String[] { start, getOutputDirectory().getAbsolutePath() } });
+			buildContext.refresh(getOutputDirectory());
 		} catch (Exception e) {
 			throw new MojoExecutionException("Cannot generate initializer class: " + SPRING_INIT_APPLICATION_CLASS_NAME,
 					e);
