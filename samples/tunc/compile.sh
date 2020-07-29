@@ -20,6 +20,7 @@ if [ "$1" == "-d" ]; then
   DEBUG_FLAGS="-H:GenerateDebugInfo=1 -H:DebugInfoSourceSearchPath=../../src/main/java"
   shift
 fi
+cp target/tomcat-embed-core*.jar target/native-image/lib/tomcat-embed-core*.jar
 
 find target/native-image/lib -type f -not -name \*.jar -exec rm {} \;
 

@@ -16,6 +16,7 @@
 
 package org.springframework.init.func;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -59,7 +60,7 @@ public class FunctionalInstallerImportRegistrars implements ImportRegistrars {
 		int count = 1;
 		while (count > 0) {
 			count = this.deferred.size();
-			for (ApplicationContextInitializer<GenericApplicationContext> deferred : this.deferred) {
+			for (ApplicationContextInitializer<GenericApplicationContext> deferred : new ArrayList<>(this.deferred)) {
 				if (!applied.contains(deferred)) {
 					applied.add(deferred);
 					deferred.initialize(context);
