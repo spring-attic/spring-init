@@ -18,16 +18,6 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.experimental</groupId>
-			<artifactId>spring-boot-autoconfigure-func</artifactId>
-			<version>${generated.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.experimental</groupId>
-			<artifactId>spring-boot-actuator-autoconfigure-func</artifactId>
-			<version>${generated.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.experimental</groupId>
 			<artifactId>spring-boot-test-autoconfigure-func</artifactId>
 			<version>${generated.version}</version>
 			<scope>test</scope>
@@ -36,12 +26,6 @@
 			<groupId>org.springframework.experimental</groupId>
 			<artifactId>spring-init-core</artifactId>
 			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.experimental</groupId>
-			<artifactId>spring-init-tools</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.experimental</groupId>

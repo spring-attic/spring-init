@@ -18,10 +18,8 @@ package app.main;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.init.tools.ConditionServiceGenerator;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.server.WebHandler;
 
@@ -47,7 +45,4 @@ public class FunctionalApplicationTests {
 		client.get().uri("/").exchange().expectBody(String.class).isEqualTo("Hello");
 	}
 
-	public static void main(String[] args) {
-		System.err.println(new ConditionServiceGenerator().process(SampleApplication.class));
-	}
 }
