@@ -94,12 +94,33 @@
 			</plugin>
 
 			<plugin>
+				<groupId>org.springframework.experimental</groupId>
+				<artifactId>spring-graalvm-library-optimizer</artifactId>
+				<version>0.8.0-SNAPSHOT</version>
+				<executions>
+					<execution>
+						<id>generate</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>spring-graalvm-remove-apache-tomcat-reflection</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>optimize</id>
+						<phase>package</phase>
+						<goals>
+							<goal>spring-graalvm-optimize-apache-tomcat</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
 					<image>
-						<!--Not yet working with latest version of graalvm (the feature jar is hardcoded in the buildpack) -->
-						<builder>nebhale/native-image-builder:0.8.0-20200727.100158-91</builder>
+						<builder>nebhale/native-image-builder:defer-to-application</builder>
 						<env>
 							<BP_BOOT_NATIVE_IMAGE>1</BP_BOOT_NATIVE_IMAGE>
 							<BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS>
@@ -124,28 +145,6 @@
 						</env>
 					</image>
 				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.springframework.experimental</groupId>
-				<artifactId>spring-graalvm-library-optimizer</artifactId>
-				<version>0.8.0-SNAPSHOT</version>
-				<executions>
-					<execution>
-						<id>generate</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>spring-graalvm-remove-apache-tomcat-reflection</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>optimize</id>
-						<phase>package</phase>
-						<goals>
-							<goal>spring-graalvm-optimize-apache-tomcat</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 
 		</plugins>
