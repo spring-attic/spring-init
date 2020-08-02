@@ -87,8 +87,8 @@ public class ConditionServiceGenerator {
 		}
 		builder.superclass(SimpleConditionService.class);
 		builder.addModifiers(Modifier.PUBLIC);
-		builder.addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC)
-				.addStatement("super(TYPES, METHODS)").build());
+		builder.addMethod(MethodSpec.constructorBuilder().addParameter(GenericApplicationContext.class, "context").addModifiers(Modifier.PUBLIC)
+				.addStatement("super(new $T(context), TYPES, METHODS)", AnnotationMetadataConditionService.class).build());
 		return builder.build();
 	}
 

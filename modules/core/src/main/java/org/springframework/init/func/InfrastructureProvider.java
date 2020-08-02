@@ -26,6 +26,6 @@ import org.springframework.context.support.GenericApplicationContext;
  */
 public interface InfrastructureProvider {
 
-	Collection<? extends ApplicationContextInitializer<GenericApplicationContext>> getInitializers();
+	Collection<? extends ApplicationContextInitializer<GenericApplicationContext>> getInitializers(GenericApplicationContext main);
 
 }

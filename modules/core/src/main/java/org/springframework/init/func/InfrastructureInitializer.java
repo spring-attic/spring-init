@@ -47,10 +47,6 @@ public class InfrastructureInitializer implements ApplicationContextInitializer<
 	public InfrastructureInitializer(int order, ApplicationContextInitializer<?>... initializers) {
 		this.order = order;
 		this.initializers.addAll(Arrays.asList(initializers));
-		ServiceLoader<InfrastructureProvider> loader = ServiceLoader.load(InfrastructureProvider.class, ClassUtils.getDefaultClassLoader());
-		for (InfrastructureProvider provider : loader) {
-			this.initializers.addAll(provider.getInitializers());
-		}
 	}
 
 	@Override
@@ -64,6 +60,14 @@ public class InfrastructureInitializer implements ApplicationContextInitializer<
 				@SuppressWarnings("unchecked")
 				ApplicationContextInitializer<GenericApplicationContext> generic = (ApplicationContextInitializer<GenericApplicationContext>) initializer;
 				generic.initialize(infra);
+			}
+			ServiceLoader<InfrastructureProvider> loader = ServiceLoader.load(InfrastructureProvider.class, ClassUtils.getDefaultClassLoader());
+			InfrastructureUtils.install(context.getBeanFactory(), infra);
+			for (InfrastructureProvider provider : loader) {
+				InfrastructureUtils.invokeAwareMethods(provider, context.getEnvironment(), context, context);
+				for(ApplicationContextInitializer<GenericApplicationContext> initializer :provider.getInitializers(context)) {
+					initializer.initialize(infra);
+				}
 			}
 			infra.refresh();
 			InfrastructureUtils.install(beanFactory, infra);

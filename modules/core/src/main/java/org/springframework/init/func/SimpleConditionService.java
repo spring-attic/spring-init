@@ -47,11 +47,15 @@ public class SimpleConditionService implements ConditionService {
 		this(null, typeMatches, methodMatches);
 	}
 
-	SimpleConditionService(@Nullable ConditionService service, Map<String, Boolean> typeMatches,
+	public SimpleConditionService(@Nullable ConditionService service, Map<String, Boolean> typeMatches,
 			Map<String, Map<String, Boolean>> methodMatches) {
 		this.fallback = service;
 		this.typeMatches.putAll(typeMatches);
 		this.methodMatches.putAll(methodMatches);
+	}
+
+	public void setFallback(ConditionService fallback) {
+		this.fallback = fallback;
 	}
 
 	@Override
@@ -59,6 +63,7 @@ public class SimpleConditionService implements ConditionService {
 		if (typeMatches.containsKey(type.getName())) {
 			return typeMatches.get(type.getName());
 		}
+		ConditionService fallback = getFallback();
 		boolean matches = fallback == null ? false : fallback.matches(type, phase);
 		match(type, matches);
 		return matches;
@@ -71,16 +76,23 @@ public class SimpleConditionService implements ConditionService {
 
 	@Override
 	public boolean matches(Class<?> factory, Class<?> type) {
-		if (methodMatches.containsKey(factory.getName()) && methodMatches.get(factory.getName()).containsKey(type.getName())) {
+		if (methodMatches.containsKey(factory.getName())
+				&& methodMatches.get(factory.getName()).containsKey(type.getName())) {
 			return methodMatches.get(factory.getName()).get(type.getName());
 		}
+		ConditionService fallback = getFallback();
 		boolean matches = fallback == null ? false : fallback.matches(factory, type);
 		match(factory.getName(), type.getName(), matches);
 		return matches;
 	}
 
+	private ConditionService getFallback() {
+		return this.fallback;
+	}
+
 	@Override
 	public boolean includes(Class<?> type) {
+		ConditionService fallback = getFallback();
 		return fallback == null ? true : fallback.includes(type);
 	}
 
@@ -93,7 +105,7 @@ public class SimpleConditionService implements ConditionService {
 		if (matches) {
 			methodMatches.computeIfAbsent(factory, key -> new HashMap<>()).put(type, true);
 		} else {
-			methodMatches.computeIfAbsent(factory, key -> new HashMap<>()).put(type,  false);
+			methodMatches.computeIfAbsent(factory, key -> new HashMap<>()).put(type, false);
 		}
 		return this;
 	}

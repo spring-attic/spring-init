@@ -69,6 +69,7 @@ public class InfrastructureProviderSpec {
 		MethodSpec.Builder builder = MethodSpec.methodBuilder("getInitializers");
 		builder.addAnnotation(Override.class);
 		builder.addModifiers(Modifier.PUBLIC);
+		builder.addParameter(GenericApplicationContext.class, "main");
 		builder.returns(
 				new ParameterizedTypeReference<Collection<? extends ApplicationContextInitializer<GenericApplicationContext>>>() {
 				}.getType());
@@ -80,7 +81,7 @@ public class InfrastructureProviderSpec {
 		ClassName conditions = getConditionServiceName(type);
 		boolean hasConditions = false;
 		if (ClassUtils.isPresent(conditions.toString(), null)) {
-			builder.addStatement("$T conditions = context -> context.registerBean($T.class, () -> new $T())",
+			builder.addStatement("$T conditions = context -> context.registerBean($T.class, () -> new $T(context))",
 					new ParameterizedTypeReference<ApplicationContextInitializer<GenericApplicationContext>>() {
 					}.getType(), SpringClassNames.CONDITION_SERVICE, conditions);
 			hasConditions = true;

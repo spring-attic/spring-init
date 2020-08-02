@@ -22,6 +22,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.support.GenericApplicationContext;
@@ -135,6 +136,9 @@ public class InfrastructureUtils {
 			}
 			if (target instanceof ResourceLoaderAware) {
 				((ResourceLoaderAware) target).setResourceLoader(resourceLoader);
+			}
+			if (target instanceof ApplicationContextAware) {
+				((ApplicationContextAware) target).setApplicationContext(registry);
 			}
 		}
 
