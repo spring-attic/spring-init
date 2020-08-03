@@ -123,25 +123,6 @@
 						<builder>nebhale/native-image-builder:defer-to-application</builder>
 						<env>
 							<BP_BOOT_NATIVE_IMAGE>1</BP_BOOT_NATIVE_IMAGE>
-							<BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS>
-								-H:+UseServiceLoaderFeature
-								-Dspring.native.mode=functional
-								-Dspring.native.remove-yaml-support=true
-								-Dspring.native.remove-jmx-support=true
-								-Dspring.spel.ignore=true
-								-Dspring.xml.ignore=true
-								-Dspring.backgroundpreinitializer.ignore=true
-								--initialize-at-build-time=org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfigurationInitializer
-  								--initialize-at-build-time=org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryAutoConfigurationInitializer
-  								--initialize-at-build-time=org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfiguration_DispatcherServletRegistrationConfigurationInitializer
-  								--initialize-at-build-time=org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfiguration_DispatcherServletConfigurationInitializer
-  								--initialize-at-build-time=org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryConfiguration_EmbeddedTomcatInitializer
-  								--initialize-at-build-time=org.springframework.boot.autoconfigure.web.embedded.EmbeddedWebServerFactoryCustomizerAutoConfiguration_TomcatWebServerFactoryCustomizerConfigurationInitializer
-  								--initialize-at-build-time=org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfigurationInitializer
-  								--initialize-at-build-time=org.springframework.boot.autoconfigure.web.servlet.RouterFunctionAutoConfigurationInitializer
-  								--initialize-at-build-time=org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfigurationInitializer
-  								--initialize-at-build-time=org.springframework.boot.autoconfigure.web.reactive.HttpHandlerAutoConfigurationInitializer
-							</BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS>
 						</env>
 					</image>
 				</configuration>

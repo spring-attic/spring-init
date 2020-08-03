@@ -60,6 +60,7 @@ public class SimpleConditionService implements ConditionService {
 
 	@Override
 	public boolean matches(Class<?> type, ConfigurationPhase phase) {
+		System.err.println(type.getName() + ": " + typeMatches.get(type.getName()));
 		if (typeMatches.containsKey(type.getName())) {
 			return typeMatches.get(type.getName());
 		}
@@ -76,6 +77,7 @@ public class SimpleConditionService implements ConditionService {
 
 	@Override
 	public boolean matches(Class<?> factory, Class<?> type) {
+		System.err.println(factory.getName() + "#" + type.getName() + ": " + methodMatches.get(type.getName()));
 		if (methodMatches.containsKey(factory.getName())
 				&& methodMatches.get(factory.getName()).containsKey(type.getName())) {
 			return methodMatches.get(factory.getName()).get(type.getName());
