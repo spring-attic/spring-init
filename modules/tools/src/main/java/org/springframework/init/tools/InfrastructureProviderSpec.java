@@ -81,7 +81,7 @@ public class InfrastructureProviderSpec {
 		ClassName conditions = getConditionServiceName(type);
 		boolean hasConditions = false;
 		if (ClassUtils.isPresent(conditions.toString(), null)) {
-			builder.addStatement("$T conditions = context -> context.registerBean($T.class, () -> new $T(context))",
+			builder.addStatement("$T conditions = context -> context.registerBean($T.class, () -> new $T(main))",
 					new ParameterizedTypeReference<ApplicationContextInitializer<GenericApplicationContext>>() {
 					}.getType(), SpringClassNames.CONDITION_SERVICE, conditions);
 			hasConditions = true;

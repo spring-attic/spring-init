@@ -119,7 +119,8 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 		Scanner scanner = buildContext.newScanner(project.getBasedir());
 		scanner.setIncludes(new String[] { "src/main/java/" });
 		scanner.scan();
-		if (scanner.getIncludedFiles().length > 0) {
+		// TODO: better way to tell if we are scanning a jar not src/main/java
+		if (scanner.getIncludedFiles().length > 0 || this.basePackage != null || !new File("src/main/java").exists()) {
 			String compilerVersion = project.getProperties().getProperty("maven-compiler-plugin.version", "3.8.1");
 			executeMojo(
 					plugin(groupId("org.apache.maven.plugins"), artifactId("maven-compiler-plugin"),

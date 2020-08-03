@@ -53,6 +53,14 @@ public class SimpleProcessorTests {
 	}
 
 	@Test
+	public void conditionalOnComponent() {
+		Set<JavaFile> files = new InitializerClassProcessor().process(app("condition.component"));
+		assertThat(files).hasSize(6);
+		// System.err.println(files);
+		assertThat(files.toString()).contains("conditions.matches(Foo.class)");
+	}
+
+	@Test
 	public void resource() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("resource"));
 		assertThat(files).hasSize(4);

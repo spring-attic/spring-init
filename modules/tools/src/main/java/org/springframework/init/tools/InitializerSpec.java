@@ -92,6 +92,8 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 
 	private InitializerSpecs specs;
 
+	private boolean conditional;
+
 	public InitializerSpec(InitializerSpecs specs, ElementUtils utils, Class<?> type, Imports imports,
 			Components components) {
 		this.specs = specs;
@@ -357,7 +359,8 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 
 	private boolean isAutoConfiguration(Class<?> importer, String typeName) {
 		// TODO: maybe work out a better way to detect auto configs
-		return typeName.endsWith("AutoConfigurationImportSelector") || typeName.endsWith("ManagementContextConfigurationImportSelector");
+		return typeName.endsWith("AutoConfigurationImportSelector")
+				|| typeName.endsWith("ManagementContextConfigurationImportSelector");
 	}
 
 	private boolean isAccessible(Class<?> imported) {
@@ -384,13 +387,13 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		if (!utils.isIncluded(type)) {
 			return;
 		}
-		boolean conditional = utils.hasAnnotation(type, SpringClassNames.CONDITIONAL.toString());
+		conditional |= utils.hasAnnotation(type, SpringClassNames.CONDITIONAL.toString());
 		CodeBlock.Builder code = CodeBlock.builder();
-		boolean conditionsAvailable = addScannedComponents(code, conditional);
+		addScannedComponents(code);
 		try {
 			addNewBeanForConfig(code, type);
 			for (Method method : getBeanMethods(type)) {
-				conditionsAvailable |= createBeanMethod(code, method, type, conditionsAvailable);
+				createBeanMethod(code, method, type);
 			}
 		} catch (Throwable e) {
 			logger.info("Cannot reflect on: " + type.getName());
@@ -399,6 +402,8 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		if (this.hasEnabled) {
 			builder.beginControlFlow("if ($T.enabled)", this.className);
 		}
+		addResources(code);
+		addRegistrarInvokers(code);
 		if (conditional) {
 			builder.addStatement("$T conditions = $T.getBean(context.getBeanFactory(), $T.class)",
 					SpringClassNames.CONDITION_SERVICE, SpringClassNames.INFRASTRUCTURE_UTILS,
@@ -406,8 +411,6 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 			builder.beginControlFlow("if (conditions.matches($T.class))", type);
 		}
 		builder.beginControlFlow("if (context.getBeanFactory().getBeanNamesForType($T.class).length==0)", type);
-		addResources(code);
-		addRegistrarInvokers(code);
 		CodeBlock logic = code.build();
 		if (logic.toString().contains("types.")) {
 			builder.addStatement("$T types = $T.getBean(context.getBeanFactory(), $T.class)",
@@ -433,7 +436,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		}
 	}
 
-	private boolean addScannedComponents(CodeBlock.Builder builder, boolean conditional) {
+	private void addScannedComponents(CodeBlock.Builder builder) {
 		Set<Class<?>> set = components.getComponents().get(configurationType);
 		boolean filtered = false;
 		if (!utils.getAnnotationsFromAnnotation(configurationType, SpringClassNames.COMPONENT_SCAN.toString(),
@@ -444,12 +447,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 			for (Class<?> imported : set) {
 				if (!imported.equals(configurationType)) {
 					if (filtered) {
-						if (!conditional) {
-							builder.addStatement("$T conditions = $T.getBean(context.getBeanFactory(), $T.class)",
-									SpringClassNames.CONDITION_SERVICE, SpringClassNames.INFRASTRUCTURE_UTILS,
-									SpringClassNames.CONDITION_SERVICE);
-							conditional = true;
-						}
+						conditional = true;
 						includes(builder, imported);
 					}
 					if (utils.hasAnnotation(imported, SpringClassNames.CONFIGURATION.toString())
@@ -465,19 +463,32 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 				}
 			}
 		}
-		return conditional;
 	}
 
 	private void registerBean(CodeBlock.Builder builder, Class<?> imported) {
 		if (utils.isIncluded(imported)) {
+			boolean conditional = false;
+			if (utils.hasAnnotation(imported, SpringClassNames.CONDITIONAL.toString())) {
+				conditional = true;
+			}
 			if (isAccessible(imported)) {
+				if (conditional) {
+					builder.beginControlFlow("if (conditions.matches($T.class))", imported);
+				}
 				Constructor<?> constructor = getConstructor(imported);
 				ParameterSpecs params = autowireParamsForMethod(constructor);
 				builder.addStatement("context.registerBean($T.class, () -> new $T(" + params.format + "))",
 						ArrayUtils.merge(imported, imported, params.args));
 			} else {
+				if (conditional) {
+					builder.beginControlFlow("if (conditions.matches(types.getType($S)))", imported.getName());
+				}
 				builder.addStatement("context.registerBean(types.getType($S))", imported.getName());
 			}
+			if (conditional) {
+				builder.endControlFlow();
+			}
+			this.conditional |= conditional;
 		}
 	}
 
@@ -496,19 +507,11 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 				ArrayUtils.merge(type, type, params.args));
 	}
 
-	private boolean createBeanMethod(CodeBlock.Builder builder, Method beanMethod, Class<?> type,
-			boolean conditionsAvailable) {
+	private void createBeanMethod(CodeBlock.Builder builder, Method beanMethod, Class<?> type) {
 		// TODO will need to handle bean methods in private configs
 		try {
 			Class<?> returnTypeElement = utils.getReturnType(beanMethod);
 			boolean conditional = utils.hasAnnotation(beanMethod, SpringClassNames.CONDITIONAL.toString());
-			if (conditional) {
-				if (!conditionsAvailable) {
-					builder.addStatement("$T conditions = $T.getBean(context.getBeanFactory(), $T.class)",
-							SpringClassNames.CONDITION_SERVICE, SpringClassNames.INFRASTRUCTURE_UTILS,
-							SpringClassNames.CONDITION_SERVICE);
-				}
-			}
 
 			if (java.lang.reflect.Modifier.isPrivate(returnTypeElement.getModifiers())) {
 
@@ -536,7 +539,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 				builder.endControlFlow();
 			}
 
-			return conditional;
+			this.conditional |= conditional;
 		} catch (Throwable t) {
 			throw new RuntimeException(
 					"Problem performing createBeanMethod for method " + type.toString() + "." + beanMethod.toString(),
