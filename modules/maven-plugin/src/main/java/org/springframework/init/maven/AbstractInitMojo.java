@@ -63,6 +63,14 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 	private static final String SPRING_INIT_APPLICATION_CLASS_NAME = "org.springframework.init.tools.InitializerApplication";
 
 	/**
+	 * Directory containing the generated native image config files.
+	 * 
+	 * @since 1.0.0
+	 */
+	@Parameter(required = false)
+	private File nativeImageDirectory;
+
+	/**
 	 * The Maven project.
 	 * 
 	 * @since 1.0.0
@@ -169,6 +177,10 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 			} else {
 				getLog().info("Open world");
 			}
+			if (this.nativeImageDirectory != null) {
+				System.setProperty("spring.init.build-time-location", this.nativeImageDirectory.getAbsolutePath());
+				getLog().info("Generating native-image config files");
+			}
 			original = ClassUtils.overrideThreadContextClassLoader(loader);
 			Class<?> type = loader.loadClass(SPRING_INIT_APPLICATION_CLASS_NAME);
 			getLog().info("Generating: " + start + " in: " + getOutputDirectory());
@@ -178,8 +190,10 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 		} catch (Exception e) {
 			throw new MojoExecutionException("Cannot generate initializer class: " + SPRING_INIT_APPLICATION_CLASS_NAME,
 					e);
-		} finally {
-			System.setProperty("spring.init.closed-world", "false");
+		}
+		finally {
+			System.clearProperty("spring.init.closed-world");
+			System.clearProperty("spring.init.build-time-location");
 			if (original != null) {
 				ClassUtils.overrideThreadContextClassLoader(original);
 			}

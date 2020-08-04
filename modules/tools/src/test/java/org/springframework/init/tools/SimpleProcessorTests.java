@@ -15,16 +15,16 @@
  */
 package org.springframework.init.tools;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.Set;
 
+import com.squareup.javapoet.JavaFile;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.boot.actuate.autoconfigure.web.server.ManagementContextAutoConfiguration;
 import org.springframework.init.tools.cond.ConditionalApplication;
 import org.springframework.util.ClassUtils;
 
-import com.squareup.javapoet.JavaFile;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SimpleProcessorTests {
 
@@ -33,7 +33,8 @@ public class SimpleProcessorTests {
 		Set<JavaFile> files = new InitializerClassProcessor().process(ManagementContextAutoConfiguration.class);
 		// System.err.println(files);
 		assertThat(files).hasSize(4);
-		assertThat(files.toString()).contains("new ManagementContextAutoConfiguration_SameManagementContextConfigurationInitializer().initialize(context)");
+		assertThat(files.toString()).contains(
+				"new ManagementContextAutoConfiguration_SameManagementContextConfigurationInitializer().initialize(context)");
 	}
 
 	@Test
@@ -49,7 +50,18 @@ public class SimpleProcessorTests {
 		assertThat(files).hasSize(5);
 		// System.err.println(files);
 		assertThat(files.toString()).contains("context.getBean(SampleConfiguration.class).foo()");
-		assertThat(files.toString()).doesNotContain("ClassUtils.isPresent(\"not.going.to.be.There\", null)");
+		assertThat(files.toString()).doesNotContain("\"not.going.to.be.There\"");
+	}
+
+	@Test
+	public void conditionalOnPresentType() {
+		InitializerClassProcessor processor = new InitializerClassProcessor();
+		Set<JavaFile> files = processor.process(app("condition.present"));
+		assertThat(files).hasSize(6);
+		// System.err.println(files);
+		assertThat(files.toString()).contains("context.getBean(SampleConfiguration.class).foo()");
+		assertThat(files.toString()).contains("ClassUtils.isPresent(\"java.lang.String\", null)");
+		assertThat(processor.getBuildTimes()).contains("app.condition.present.ConditionalConfigurationInitializer");
 	}
 
 	@Test
@@ -175,8 +187,8 @@ public class SimpleProcessorTests {
 	public void selector() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("selector"));
 		assertThat(files).hasSize(4);
-		assertThat(files.toString())
-				.contains("InfrastructureUtils.getBean(context.getBeanFactory(), ImportRegistrars.class).add(SampleApplication.class, SampleRegistrar.class)");
+		assertThat(files.toString()).contains(
+				"InfrastructureUtils.getBean(context.getBeanFactory(), ImportRegistrars.class).add(SampleApplication.class, SampleRegistrar.class)");
 		assertThat(files.toString())
 				.contains("new PropertyPlaceholderAutoConfigurationInitializer().initialize(context)");
 	}

@@ -705,6 +705,7 @@
 						<configuration>
 							<basePackage>org.springframework.boot.autoconfigure</basePackage>
 							<force>true</force>
+							<nativeImageDirectory>src/main/resources/META-INF/native-image/${project.groupId}/${project.artifactId}</nativeImageDirectory>
 						</configuration>
 					</execution>
 				</executions>

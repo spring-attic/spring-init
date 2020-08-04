@@ -110,6 +110,10 @@ public class InitializerClassProcessor {
 		return result;
 	}
 
+	public Set<String> getBuildTimes() {
+		return this.specs.getBuildTimes();
+	}
+
 	public Set<JavaFile> process(Class<?> application) {
 		Set<JavaFile> result = new HashSet<>();
 		Set<Class<?>> types = collectTypes(application, te -> //

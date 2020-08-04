@@ -32,6 +32,8 @@ public class InitializerSpecs {
 
 	private Map<Class<?>, InitializerSpec> initializers = new LinkedHashMap<>();
 
+	private Set<String> buildTimes = new HashSet<>();
+
 	private ElementUtils utils;
 
 	private Imports imports;
@@ -73,13 +75,22 @@ public class InitializerSpecs {
 						findNestedInitializers(element, types);
 					}
 				}
-			} catch (NoClassDefFoundError e) {
+			}
+			catch (NoClassDefFoundError e) {
 				return;
 			}
 			addInitializer(type);
 			types.add(type);
 		}
 
+	}
+
+	public void addBuildTime(String type) {
+		this.buildTimes.add(type);
+	}
+
+	public Set<String> getBuildTimes() {
+		return buildTimes;
 	}
 
 }

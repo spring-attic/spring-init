@@ -79,7 +79,7 @@ function generate() {
 						<inherited>false</inherited>
 						<configuration>
 							<basePackage>${basePackage}</basePackage>
-							<force>true</force>
+							<nativeImageDirectory>src/main/resources/META-INF/${project.groupId}/${project.artifactId}</nativeImageDirectory>
 						</configuration>
 					</execution>
 				</executions>

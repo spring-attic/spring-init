@@ -492,6 +492,7 @@
 							<basePackage>org.springframework.boot.actuate.autoconfigure</basePackage>
 							<force>true</force>
 							<closedWorld>true</closedWorld>
+							<nativeImageDirectory>src/main/resources/META-INF/native-image/${project.groupId}/${project.artifactId}</nativeImageDirectory>
 						</configuration>
 					</execution>
 				</executions>

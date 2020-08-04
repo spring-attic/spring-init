@@ -16,12 +16,18 @@
 package org.springframework.init.tools;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Properties;
 import java.util.Set;
 
-import org.springframework.util.ClassUtils;
-
 import com.squareup.javapoet.JavaFile;
+
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.DefaultPropertiesPersister;
 
 /**
  * @author Dave Syer
@@ -45,20 +51,76 @@ public class InitializerApplication {
 				// It's a class:
 				Class<?> type = ClassUtils.resolveClassName(start, null);
 				files = processor.process(type);
-			} else {
+			}
+			else {
 				// Assume it's a package:
 				files = processor.process(start);
 			}
 			for (JavaFile file : files) {
 				try {
 					file.writeTo(dir);
-				} catch (IOException e) {
+				}
+				catch (IOException e) {
 					throw new IllegalStateException("Cannot write in: " + dir);
 				}
 			}
-		} finally {
+			if (!System.getProperty("spring.init.build-time-location", "").equals("")) {
+				String location = System.getProperty("spring.init.build-time-location");
+				Set<String> buildTimes = processor.getBuildTimes();
+				updateNativeImageProperties(buildTimes, location);
+			}
+		}
+		finally {
 			closedWorld = false;
 		}
+	}
+
+	static void updateNativeImageProperties(Set<String> buildTimes, String location) {
+
+		if (!buildTimes.isEmpty()) {
+
+			try {
+				File meta = new File(location);
+				meta.mkdirs();
+				File nat = new File(meta, "native-image.properties");
+				Properties props = nat.exists() ? PropertiesLoaderUtils.loadProperties(new FileSystemResource(nat))
+						: new Properties();
+				String natargs = props.getProperty("args", props.getProperty("Args", ""));
+				Set<String> toAppend = new HashSet<>();
+				for (String type : buildTimes) {
+					if (!natargs.contains(type)) {
+						toAppend.add(type);
+					}
+				}
+				if (toAppend.isEmpty()) {
+					return;
+				}
+				StringBuilder builder = new StringBuilder(natargs);
+				if (builder.length() > 0) {
+					builder.append(" \\\n");
+				}
+				builder.append("--initialize-at-build-time=");
+				int count = 0;
+				for (String type : toAppend) {
+					builder.append(type);
+					if (++count < toAppend.size()) {
+						builder.append(",");
+					}
+				}
+				if (props.containsKey("args")) {
+					props.setProperty("args", builder.toString());
+				}
+				else {
+					props.setProperty("Args", builder.toString());
+				}
+				new DefaultPropertiesPersister().store(props, new FileOutputStream(nat), "Native Image Properties");
+			}
+			catch (IOException e) {
+				throw new IllegalStateException("Could not create native-image.properties", e);
+			}
+
+		}
+
 	}
 
 }
