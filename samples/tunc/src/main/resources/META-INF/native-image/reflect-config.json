@@ -9,8 +9,7 @@
     "allDeclaredMethods": true
   },
   {
-    "name": "app.main.SampleApplicationInitializer",
-    "allDeclaredConstructors": true
+    "name": "app.main.SampleApplicationInitializer"
   },
   {
     "name": "org.springframework.boot.autoconfigure.web.ServerProperties",

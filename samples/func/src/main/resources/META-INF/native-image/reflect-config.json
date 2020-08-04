@@ -7,7 +7,6 @@
     "allDeclaredMethods": true
   },
   {
-    "name": "app.main.SampleApplicationInitializer",
-    "allDeclaredConstructors": true
+    "name": "app.main.SampleApplicationInitializer"
   }
 ]
