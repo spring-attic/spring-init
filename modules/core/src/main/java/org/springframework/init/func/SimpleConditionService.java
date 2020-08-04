@@ -20,6 +20,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
 import org.springframework.lang.Nullable;
 
@@ -28,6 +31,8 @@ import org.springframework.lang.Nullable;
  *
  */
 public class SimpleConditionService implements ConditionService {
+
+	private static Log logger = LogFactory.getLog(SimpleConditionService.class);
 
 	private Map<String, Boolean> typeMatches = new HashMap<>();
 
@@ -60,7 +65,9 @@ public class SimpleConditionService implements ConditionService {
 
 	@Override
 	public boolean matches(Class<?> type, ConfigurationPhase phase) {
-		System.err.println(type.getName() + ": " + typeMatches.get(type.getName()));
+		if (logger.isDebugEnabled()) {
+			logger.debug(type.getName() + ": " + typeMatches.get(type.getName()));
+		}
 		if (typeMatches.containsKey(type.getName())) {
 			return typeMatches.get(type.getName());
 		}
@@ -77,7 +84,9 @@ public class SimpleConditionService implements ConditionService {
 
 	@Override
 	public boolean matches(Class<?> factory, Class<?> type) {
-		System.err.println(factory.getName() + "#" + type.getName() + ": " + methodMatches.get(type.getName()));
+		if (logger.isDebugEnabled()) {
+			logger.debug(factory.getName() + "#" + type.getName() + ": " + methodMatches.get(type.getName()));
+		}
 		if (methodMatches.containsKey(factory.getName())
 				&& methodMatches.get(factory.getName()).containsKey(type.getName())) {
 			return methodMatches.get(factory.getName()).get(type.getName());
@@ -106,7 +115,8 @@ public class SimpleConditionService implements ConditionService {
 	public SimpleConditionService match(String factory, String type, boolean matches) {
 		if (matches) {
 			methodMatches.computeIfAbsent(factory, key -> new HashMap<>()).put(type, true);
-		} else {
+		}
+		else {
 			methodMatches.computeIfAbsent(factory, key -> new HashMap<>()).put(type, false);
 		}
 		return this;

@@ -132,13 +132,13 @@ You can debug the APT processor by running on the command line and attaching a d
 Benchmark startup time (seconds) with annotations, with Spring Init (slim), and with manual configuration:
 
 ```
-class                              method  sample  beans    classes   heap   memory  median  mean   range
-com.example.bench.SlimBenchmarkIT  annos   demo    99.000   5007.000  8.383  50.720  0.793   0.803  0.010
-com.example.bench.SlimBenchmarkIT  annos   actr    185.000  5263.000  9.883  53.772  0.916   0.928  0.017
-com.example.bench.SlimBenchmarkIT  manual  demo    53.000   4717.000  6.982  47.325  0.673   0.684  0.011
-com.example.bench.SlimBenchmarkIT  manual  actr    96.000   4925.000  7.784  49.113  0.751   0.765  0.014
-com.example.bench.SlimBenchmarkIT  slim    demo    97.000   5011.000  8.086  50.202  0.779   0.795  0.026
-com.example.bench.SlimBenchmarkIT  slim    actr    139.000  5247.000  9.219  52.513  0.870   0.885  0.026
+class                              method  sample  beans    classes   heap    memory  median  mean   range
+com.example.bench.SlimBenchmarkIT  annos   demo    99.000   5022.000  8.418   50.813  0.802   0.817  0.015
+com.example.bench.SlimBenchmarkIT  annos   actr    185.000  5282.000  9.901   53.876  0.927   0.937  0.020
+com.example.bench.SlimBenchmarkIT  manual  demo    53.000   4729.000  6.996   47.400  0.681   0.696  0.026
+com.example.bench.SlimBenchmarkIT  manual  actr    100.000  4917.000  7.764   49.082  0.731   0.753  0.027
+com.example.bench.SlimBenchmarkIT  slim    demo    96.000   5020.000  8.113   50.275  0.785   0.797  0.013
+com.example.bench.SlimBenchmarkIT  slim    actr    182.000  5416.000  10.081  54.230  0.912   0.920  0.008
 ```
 
 Spring Init is slightly faster but not much different memorywise than the straight annotation-based version with Spring Boot 2.4. It is a much better story in native images, but that requires some manual work still (see "func" and "tunc" samples).

@@ -11,14 +11,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import com.squareup.javapoet.JavaFile;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.util.ClassUtils;
-
-import com.squareup.javapoet.JavaFile;
 
 public class InitializerClassProcessor {
 
@@ -93,7 +93,8 @@ public class InitializerClassProcessor {
 					}
 				}
 			}
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new IllegalStateException("Cannot locate resources in package: " + packageName, e);
 		}
 	}
@@ -120,13 +121,6 @@ public class InitializerClassProcessor {
 				logger.info("Found @Configuration in " + type);
 				specs.addInitializer(type);
 			}
-			if (utils.hasAnnotation(type, SpringClassNames.SPRING_BOOT_CONFIGURATION.toString())) {
-				logger.info("Found @SpringBootConfiguration in " + type);
-				infras.addProvider(type);
-				if (InitializerApplication.closedWorld) {
-					new ConditionServiceGenerator().process(type, result);
-				}
-			}
 		}
 		// Hoover up any imports that didn't already get turned into initializers
 		for (Class<?> importer : imports.getImports().keySet()) {
@@ -147,13 +141,25 @@ public class InitializerClassProcessor {
 				try {
 					initializer.getInitializer();
 					initializers.put(initializer.getConfigurationType(), initializer);
-				} catch (Throwable e) {
-					// TODO: this is a sign that something is missing from the classpath, and it
+				}
+				catch (Throwable e) {
+					// TODO: this is a sign that something is missing from the classpath,
+					// and it
 					// might blow up at runtime.
 					logger.info("Skipping: " + initializer.getClassName(), e);
 				}
 			}
 			count = initializers.size() - total;
+		}
+		for (Class<?> type : types) {
+			if (utils.hasAnnotation(type, SpringClassNames.SPRING_BOOT_CONFIGURATION.toString())) {
+				logger.info("Found @SpringBootConfiguration in " + type);
+				if (InitializerApplication.closedWorld) {
+					logger.info("Adding ConditionService for " + type);
+					new ConditionServiceGenerator().process(type, result);
+				}
+				infras.addProvider(type);
+			}
 		}
 		for (InitializerSpec initializer : initializers.values()) {
 			logger.info("Writing Initializer " + initializer.getPackage() + "." + initializer.getInitializer().name);

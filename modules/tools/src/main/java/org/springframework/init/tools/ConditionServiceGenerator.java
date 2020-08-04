@@ -21,6 +21,14 @@ import java.util.Set;
 
 import javax.lang.model.element.Modifier;
 
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.CodeBlock.Builder;
+import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeSpec;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.web.reactive.context.ReactiveWebServerApplicationContext;
@@ -38,14 +46,6 @@ import org.springframework.init.func.SimpleConditionService;
 import org.springframework.init.func.TypeService;
 import org.springframework.util.ClassUtils;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.CodeBlock.Builder;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.TypeSpec;
-
 /**
  * @author Dave Syer
  *
@@ -60,6 +60,7 @@ public class ConditionServiceGenerator {
 
 	public void process(Class<?> application, Set<JavaFile> files) {
 		if (ClassUtils.isPresent(application.getName().replace("$", "_") + "Initializer", null)) {
+			System.err.println("********************: " + application.getName().replace("$", "_") + "Initializer");
 			files.add(JavaFile.builder(ClassUtils.getPackageName(application), generate(application)).build());
 		}
 	}
@@ -87,8 +88,10 @@ public class ConditionServiceGenerator {
 		}
 		builder.superclass(SimpleConditionService.class);
 		builder.addModifiers(Modifier.PUBLIC);
-		builder.addMethod(MethodSpec.constructorBuilder().addParameter(GenericApplicationContext.class, "context").addModifiers(Modifier.PUBLIC)
-				.addStatement("super(new $T(context), TYPES, METHODS)", AnnotationMetadataConditionService.class).build());
+		builder.addMethod(MethodSpec.constructorBuilder().addParameter(GenericApplicationContext.class, "context")
+				.addModifiers(Modifier.PUBLIC)
+				.addStatement("super(new $T(context), TYPES, METHODS)", AnnotationMetadataConditionService.class)
+				.build());
 		return builder.build();
 	}
 
@@ -100,8 +103,9 @@ public class ConditionServiceGenerator {
 	}
 
 	private FieldSpec typeMatcher() {
-		FieldSpec.Builder builder = FieldSpec.builder(new ParameterizedTypeReference<Map<String, Map<String, Boolean>>>() {
-		}.getType(), "METHODS", Modifier.PRIVATE, Modifier.STATIC);
+		FieldSpec.Builder builder = FieldSpec
+				.builder(new ParameterizedTypeReference<Map<String, Map<String, Boolean>>>() {
+				}.getType(), "METHODS", Modifier.PRIVATE, Modifier.STATIC);
 		builder.initializer("new $T<>()", HashMap.class);
 		return builder.build();
 	}
