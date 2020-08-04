@@ -142,3 +142,11 @@ com.example.bench.SlimBenchmarkIT  slim    actr    182.000  5416.000  10.081  54
 ```
 
 Spring Init is slightly faster but not much different memorywise than the straight annotation-based version with Spring Boot 2.4. It is a much better story in native images, but that requires some manual work still (see "func" and "tunc" samples).
+
+You can generate a condition service, and get to practically no reflection at runtime - you need a `META-INF/services` entry for the infrastructure provider, generated with `closedWorld=true`. The app is a bit faster and uses a bit less memory:
+
+```
+class                              method sample  beans    classes   heap   memory  median  mean  range
+com.example.bench.SlimBenchmarkIT  slim   actr    182.000  5347.000  9.501  52.914  0.849  0.860  0.018
+com.example.bench.SlimBenchmarkIT  manual actr    100.000  4839.000  7.479  48.081  0.700  0.711  0.012
+```
