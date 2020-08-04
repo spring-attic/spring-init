@@ -248,6 +248,7 @@
 						<inherited>false</inherited>
 						<configuration>
 							<basePackage>org.springframework.boot.test</basePackage>
+							<force>true</force>
 						</configuration>
 					</execution>
 				</executions>

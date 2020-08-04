@@ -208,6 +208,7 @@
 						<inherited>false</inherited>
 						<configuration>
 							<basePackage>org.springframework.security.config</basePackage>
+							<force>true</force>
 						</configuration>
 					</execution>
 				</executions>

@@ -79,6 +79,7 @@ function generate() {
 						<inherited>false</inherited>
 						<configuration>
 							<basePackage>${basePackage}</basePackage>
+							<force>true</force>
 						</configuration>
 					</execution>
 				</executions>

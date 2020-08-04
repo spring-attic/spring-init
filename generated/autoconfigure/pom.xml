@@ -704,6 +704,7 @@
 						<inherited>false</inherited>
 						<configuration>
 							<basePackage>org.springframework.boot.autoconfigure</basePackage>
+							<force>true</force>
 						</configuration>
 					</execution>
 				</executions>

@@ -28,9 +28,9 @@
 
 	<modules>
 		<module>core</module>
-		<module>library</module>
 		<module>tools</module>
 		<module>maven-plugin</module>
+		<module>library</module>
 	</modules>
 
 	<properties>

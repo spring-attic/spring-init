@@ -27,10 +27,10 @@
 	</licenses>
 
 	<modules>
+		<module>security</module>
 		<module>autoconfigure</module>
 		<module>actuator</module>
 		<module>test</module>
-		<module>security</module>
 	</modules>
 
 	<properties>
