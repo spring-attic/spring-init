@@ -15,13 +15,13 @@
  */
 package org.springframework.init.tools;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.init.tools.bean.ConditionalBeanApplication;
-import org.springframework.init.tools.cond.ConditionalApplication;
-
 import com.squareup.javapoet.JavaFile;
+import org.junit.jupiter.api.Test;
+
+import org.springframework.init.tools.bean.ConditionalBeanApplication;
+import org.springframework.init.tools.manual.ManualApplication;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Dave Syer
@@ -31,7 +31,7 @@ public class ConditionProcessorTests {
 
 	@Test
 	void testConditional() throws Exception {
-		JavaFile file = new ConditionServiceGenerator().process(ConditionalApplication.class);
+		JavaFile file = new ConditionServiceGenerator().process(ManualApplication.class);
 		// System.err.println(file);
 		assertThat(file.toString()).contains("TYPES.put(");
 	}
@@ -39,7 +39,7 @@ public class ConditionProcessorTests {
 	@Test
 	void testConditionalBean() throws Exception {
 		JavaFile file = new ConditionServiceGenerator().process(ConditionalBeanApplication.class);
-		System.err.println(file);
+		// System.err.println(file);
 		assertThat(file.toString()).contains("METHODS.put(");
 	}
 

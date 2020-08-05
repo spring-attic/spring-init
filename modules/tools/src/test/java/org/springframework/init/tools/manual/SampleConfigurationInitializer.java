@@ -1,4 +1,4 @@
-package org.springframework.init.tools.cond;
+package org.springframework.init.tools.manual;
 
 import java.lang.Override;
 import org.springframework.context.ApplicationContextInitializer;

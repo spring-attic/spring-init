@@ -15,22 +15,35 @@
  */
 package org.springframework.init.tools;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.Set;
 
+import com.squareup.javapoet.JavaFile;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.init.tools.cond.ConditionalApplication;
+import org.springframework.init.tools.manual.ManualApplication;
 import org.springframework.util.ClassUtils;
 
-import com.squareup.javapoet.JavaFile;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ScanningProcessorTests {
 
 	@Test
 	public void simpleConditional() {
-		Set<JavaFile> files = new InitializerClassProcessor().process(ClassUtils.getPackageName(ConditionalApplication.class));
+		Set<JavaFile> files = new InitializerClassProcessor()
+				.process(ClassUtils.getPackageName(ConditionalApplication.class));
+		// System.err.println(files);
 		assertThat(files).hasSize(3);
+		assertThat(files.toString()).contains("public class SampleConfigurationInitializer");
+	}
+
+	@Test
+	public void manualConditional() {
+		Set<JavaFile> files = new InitializerClassProcessor()
+				.process(ClassUtils.getPackageName(ManualApplication.class));
+		// System.err.println(files);
+		assertThat(files).hasSize(1);
+		assertThat(files.toString()).doesNotContain("public class SampleConfigurationInitializer");
 	}
 
 	@Test
@@ -94,9 +107,8 @@ public class ScanningProcessorTests {
 	public void notVisibleComponent() {
 		Set<JavaFile> files = new InitializerClassProcessor().process("app.vsble");
 		assertThat(files).hasSize(4);
-		System.err.println(files);
-		assertThat(files.toString())
-				.contains("types.getType(\"app.vsble.sub.Runner\")");
+		// System.err.println(files);
+		assertThat(files.toString()).contains("types.getType(\"app.vsble.sub.Runner\")");
 		assertThat(files.toString()).contains(
 				"context.getBean(SampleApplication.class).bar(context.getBean(Foo.class)), def -> def.setInitMethodName(\"start\")");
 	}
@@ -108,8 +120,7 @@ public class ScanningProcessorTests {
 		System.err.println(files);
 		assertThat(files.toString()).contains("new SampleConfigurationInitializer().initialize(context)");
 		assertThat(files.toString()).contains("context.getBean(SampleConfiguration.class).foo()");
-		assertThat(files.toString()).contains(
-				"AutoConfigurationPackages.register(context, \"app.scan.sub\")");
+		assertThat(files.toString()).contains("AutoConfigurationPackages.register(context, \"app.scan.sub\")");
 	}
 
 	@Test

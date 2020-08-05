@@ -167,7 +167,9 @@ public class InitializerClassProcessor {
 		}
 		for (InitializerSpec initializer : initializers.values()) {
 			logger.info("Writing Initializer " + initializer.getPackage() + "." + initializer.getInitializer().name);
-			result.add(JavaFile.builder(initializer.getPackage(), initializer.getInitializer()).build());
+			if (!ClassUtils.isPresent(initializer.getClassName().toString(), null)) {
+				result.add(JavaFile.builder(initializer.getPackage(), initializer.getInitializer()).build());
+			}
 		}
 		for (InfrastructureProviderSpec provider : infras.getProviders()) {
 			logger.info("Writing InfrastructureProvider " + provider.getPackage() + "." + provider.getProvider().name);

@@ -1,4 +1,4 @@
-package org.springframework.init.tools.cond;
+package org.springframework.init.tools.manual;
 
 import java.lang.Override;
 import org.springframework.boot.autoconfigure.AutoConfigurationImportSelector;
@@ -9,16 +9,16 @@ import org.springframework.init.func.ConditionService;
 import org.springframework.init.func.ImportRegistrars;
 import org.springframework.init.func.InfrastructureUtils;
 
-public class ConditionalApplicationInitializer implements ApplicationContextInitializer<GenericApplicationContext> {
+public class ManualApplicationInitializer implements ApplicationContextInitializer<GenericApplicationContext> {
   @Override
   public void initialize(GenericApplicationContext context) {
-    if (context.getBeanFactory().getBeanNamesForType(ConditionalApplication.class).length==0) {
+    if (context.getBeanFactory().getBeanNamesForType(ManualApplication.class).length==0) {
       ConditionService conditions = InfrastructureUtils.getBean(context.getBeanFactory(), ConditionService.class);
       if (conditions.includes(SampleConfiguration.class)) {
         new SampleConfigurationInitializer().initialize(context);
       }
-      context.registerBean(ConditionalApplication.class, () -> new ConditionalApplication());
-      InfrastructureUtils.getBean(context.getBeanFactory(), ImportRegistrars.class).add(ConditionalApplication.class, AutoConfigurationImportSelector.class);
+      context.registerBean(ManualApplication.class, () -> new ManualApplication());
+      InfrastructureUtils.getBean(context.getBeanFactory(), ImportRegistrars.class).add(ManualApplication.class, AutoConfigurationImportSelector.class);
       AutoConfigurationPackages.register(context, "org.springframework.init.tools.cond");
     }
   }
