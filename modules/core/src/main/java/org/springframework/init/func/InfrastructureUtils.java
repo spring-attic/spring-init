@@ -54,9 +54,14 @@ public class InfrastructureUtils {
 
 	public static <T> T getBean(SingletonBeanRegistry beans, Class<T> type) {
 		GenericApplicationContext context = (GenericApplicationContext) beans.getSingleton(CONTEXT_NAME);
-		if (!context.isActive() && context.getBeanFactory().containsSingleton(type.getName())) {
+		if (context != null && !context.isActive() && context.getBeanFactory().containsSingleton(type.getName())) {
 			@SuppressWarnings("unchecked")
 			T result = (T) context.getBeanFactory().getSingleton(type.getName());
+			return result;
+		}
+		if (beans.containsSingleton(type.getName())) {
+			@SuppressWarnings("unchecked")
+			T result = (T) beans.getSingleton(type.getName());
 			return result;
 		}
 		return context.getBean(type);
@@ -152,5 +157,9 @@ public class InfrastructureUtils {
 
 		return target;
 
+	}
+	
+	public static void registerPropertyBinder(GenericApplicationContext infra, Class<?> type, PropertiesBinder<?> binder) {
+		InfrastructureUtils.getBean(infra.getBeanFactory(), PropertiesBinders.class).register(type, binder);
 	}
 }

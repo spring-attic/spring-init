@@ -20,10 +20,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ServiceLoader;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.Ordered;
+import org.springframework.core.env.Environment;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -61,22 +64,50 @@ public class InfrastructureInitializer implements ApplicationContextInitializer<
 				ApplicationContextInitializer<GenericApplicationContext> generic = (ApplicationContextInitializer<GenericApplicationContext>) initializer;
 				generic.initialize(infra);
 			}
-			ServiceLoader<InfrastructureProvider> loader = ServiceLoader.load(InfrastructureProvider.class, ClassUtils.getDefaultClassLoader());
+			ServiceLoader<InfrastructureProvider> loader = ServiceLoader.load(InfrastructureProvider.class,
+					ClassUtils.getDefaultClassLoader());
 			InfrastructureUtils.install(context.getBeanFactory(), infra);
+			PropertiesBinders binders = new PropertiesBinders();
+			infra.getBeanFactory().registerSingleton(PropertiesBinders.class.getName(), binders);
 			for (InfrastructureProvider provider : loader) {
 				InfrastructureUtils.invokeAwareMethods(provider, context.getEnvironment(), context, context);
-				for(ApplicationContextInitializer<GenericApplicationContext> initializer :provider.getInitializers(context)) {
+				for (ApplicationContextInitializer<GenericApplicationContext> initializer : provider
+						.getInitializers(context)) {
 					initializer.initialize(infra);
 				}
 			}
 			infra.refresh();
 			InfrastructureUtils.install(beanFactory, infra);
+			context.registerBean(ConfigurationPropertiesBindingPostProcessor.BEAN_NAME,
+					ConfigurationPropertiesBindingPostProcessor.class,
+					() -> new EnhancedConfigurationPropertiesBindingPostProcessor(binders, context.getEnvironment()));
 		}
 	}
 
 	@Override
 	public int getOrder() {
 		return order;
+	}
+
+	static class EnhancedConfigurationPropertiesBindingPostProcessor
+			extends ConfigurationPropertiesBindingPostProcessor {
+
+		private PropertiesBinders binder;
+		private Environment environment;
+
+		public EnhancedConfigurationPropertiesBindingPostProcessor(PropertiesBinders binder, Environment environment) {
+			this.binder = binder;
+			this.environment = environment;
+		}
+
+		@Override
+		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+			if (binder.isBindable(bean.getClass())) {
+				return binder.bind(bean, environment);
+			}
+			return super.postProcessBeforeInitialization(bean, beanName);
+		}
+
 	}
 
 }

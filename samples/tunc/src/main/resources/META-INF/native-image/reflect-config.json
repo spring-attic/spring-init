@@ -10,13 +10,5 @@
   },
   {
     "name": "app.main.SampleApplicationInitializer"
-  },
-  {
-    "name": "org.springframework.boot.autoconfigure.web.ServerProperties",
-    "allDeclaredMethods": true
-  },
-  {
-    "name": "org.springframework.boot.autoconfigure.web.ServerProperties$Servlet",
-    "allDeclaredMethods": true
   }
 ]
