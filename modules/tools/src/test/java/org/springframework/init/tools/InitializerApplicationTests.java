@@ -38,6 +38,7 @@ class InitializerApplicationTests {
 	@Test
 	void propertiesFileCreated() throws Exception {
 		File file = new File("target/native-image/native-image.properties");
+		file.getParentFile().mkdirs();
 		if (file.exists()) {
 			file.delete();
 		}
@@ -51,6 +52,7 @@ class InitializerApplicationTests {
 	@Test
 	void propertiesFileNotAppended() throws Exception {
 		File file = new File("target/native-image/native-image.properties");
+		file.getParentFile().mkdirs();
 		if (file.exists()) {
 			file.delete();
 		}
@@ -69,6 +71,7 @@ class InitializerApplicationTests {
 	@Test
 	void propertiesFileAppended() throws Exception {
 		File file = new File("target/native-image/native-image.properties");
+		file.getParentFile().mkdirs();
 		if (file.exists()) {
 			file.delete();
 		}
