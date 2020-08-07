@@ -1,12 +1,5 @@
 [
   {
-    "name": "org.springframework.boot.SpringApplication",
-    "fields" : [
-      { "name" : "primarySources" }
-    ],
-    "allDeclaredMethods": true
-  },
-  {
     "name": "app.main.SampleApplicationInitializer"
   }
 ]
