@@ -105,13 +105,6 @@
 							<goal>spring-graalvm-remove-apache-tomcat-reflection</goal>
 						</goals>
 					</execution>
-					<execution>
-						<id>optimize</id>
-						<phase>package</phase>
-						<goals>
-							<goal>spring-graalvm-optimize-apache-tomcat</goal>
-						</goals>
-					</execution>
 				</executions>
 			</plugin>
 

@@ -161,6 +161,7 @@ public class InitializerClassProcessor {
 				if (InitializerApplication.closedWorld) {
 					logger.info("Adding ConditionService for " + type);
 					new ConditionServiceGenerator().process(type, result);
+					new TypeServiceGenerator().process(type, result);
 				}
 				infras.addProvider(type);
 			}

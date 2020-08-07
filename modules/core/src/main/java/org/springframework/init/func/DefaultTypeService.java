@@ -15,6 +15,10 @@
  */
 package org.springframework.init.func;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
@@ -26,17 +30,34 @@ public class DefaultTypeService implements TypeService {
 
 	private ClassLoader classLoader;
 
+	private Map<String, Class<?>> types = new HashMap<>();
+
+	public DefaultTypeService(Map<String, Class<?>> types) {
+		this(types, null);
+	}
+
 	public DefaultTypeService(@Nullable ClassLoader classLoader) {
+		this(Collections.emptyMap(), classLoader);
+	}
+
+	public DefaultTypeService(Map<String, Class<?>> types, @Nullable ClassLoader classLoader) {
+		this.types.putAll(types);
 		this.classLoader = classLoader;
 	}
 
 	@Override
 	public boolean isPresent(String name) {
+		if (types.containsKey(name)) {
+			return true;
+		}
 		return ClassUtils.isPresent(name, classLoader);
 	}
 
 	@Override
 	public Class<?> getType(String name) {
+		if (types.containsKey(name)) {
+			return types.get(name);
+		}
 		return isPresent(name) ? ClassUtils.resolveClassName(name, classLoader) : null;
 	}
 

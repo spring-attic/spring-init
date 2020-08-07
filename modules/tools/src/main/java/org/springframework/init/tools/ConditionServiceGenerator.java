@@ -60,7 +60,6 @@ public class ConditionServiceGenerator {
 
 	public void process(Class<?> application, Set<JavaFile> files) {
 		if (ClassUtils.isPresent(application.getName().replace("$", "_") + "Initializer", null)) {
-			System.err.println("********************: " + application.getName().replace("$", "_") + "Initializer");
 			files.add(JavaFile.builder(ClassUtils.getPackageName(application), generate(application)).build());
 		}
 	}

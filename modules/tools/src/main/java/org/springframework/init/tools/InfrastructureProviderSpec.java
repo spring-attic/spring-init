@@ -79,17 +79,29 @@ public class InfrastructureProviderSpec {
 
 	private void addInitializers(MethodSpec.Builder builder, Class<?> type) {
 		ClassName conditions = getConditionServiceName(type);
+		ClassName types = getTypeServiceName(type);
 		boolean hasConditions = false;
+		boolean hasTypes = false;
 		if (ClassUtils.isPresent(conditions.toString(), null)) {
 			builder.addStatement("$T conditions = context -> context.registerBean($T.class, () -> new $T(main))",
 					new ParameterizedTypeReference<ApplicationContextInitializer<GenericApplicationContext>>() {
 					}.getType(), SpringClassNames.CONDITION_SERVICE, conditions);
 			hasConditions = true;
 		}
+		if (ClassUtils.isPresent(types.toString(), null)) {
+			builder.addStatement("$T types = context -> context.registerBean($T.class, () -> new $T())",
+					new ParameterizedTypeReference<ApplicationContextInitializer<GenericApplicationContext>>() {
+					}.getType(), SpringClassNames.TYPE_SERVICE, types);
+			hasTypes = true;
+		}
 		builder.addCode("return $T.asList(", Arrays.class);
-		builder.addCode("context -> context.registerBean($T.class, () -> new $T())", getInitializerName(type), getInitializerName(type));
+		builder.addCode("context -> context.registerBean($T.class, () -> new $T())", getInitializerName(type),
+				getInitializerName(type));
 		if (hasConditions) {
 			builder.addCode(",\nconditions", SpringClassNames.CONDITION_SERVICE, conditions);
+		}
+		if (hasTypes) {
+			builder.addCode(",\ntypes", SpringClassNames.TYPE_SERVICE, types);
 		}
 		builder.addCode(");\n");
 	}
@@ -100,6 +112,10 @@ public class InfrastructureProviderSpec {
 
 	private ClassName getConditionServiceName(Class<?> type) {
 		return ClassName.get(ClassUtils.getPackageName(type), "GeneratedConditionService");
+	}
+
+	private ClassName getTypeServiceName(Class<?> type) {
+		return ClassName.get(ClassUtils.getPackageName(type), "GeneratedTypeService");
 	}
 
 	private ClassName getClassName() {
