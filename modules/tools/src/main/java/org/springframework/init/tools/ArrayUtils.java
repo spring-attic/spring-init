@@ -21,6 +21,16 @@ package org.springframework.init.tools;
  */
 public abstract class ArrayUtils {
 
+	public static Object[] merge(Object[] args, Object... type ) {
+		if (type.length==0) {
+			return args;
+		}
+		Object[] result = new Object[args.length + type.length];
+		System.arraycopy(type, 0, result, 0, type.length);
+		System.arraycopy(args, 0, result, type.length, args.length);
+		return result;
+	}
+
 	public static Object[] merge(Object type, Object... args) {
 		Object[] result = new Object[args.length + 1];
 		result[0] = type;

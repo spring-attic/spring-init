@@ -39,6 +39,17 @@ public class SampleApplication {
 		};
 	}
 
+	@Bean
+	public CommandLineRunner another(ConfigurableListableBeanFactory beans) {
+		return args -> {
+			System.err.println("Class count: " + ManagementFactory.getClassLoadingMXBean()
+					.getTotalLoadedClassCount());
+			System.err.println("Bean count: " + beans.getBeanDefinitionNames().length);
+			System.err.println(
+					"Bean names: " + Arrays.asList(beans.getBeanDefinitionNames()));
+		};
+	}
+
 	public static void main(String[] args) {
 		SpringApplication.run(SampleApplication.class, args);
 	}

@@ -43,7 +43,7 @@ public class ClosedWorldProcessorTests {
 	@Test
 	public void scanSubPackage() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("scan.sub"));
-		assertThat(files).hasSizeGreaterThan(2);
+		assertThat(files).hasSizeGreaterThan(1);
 		// System.err.println(files);
 		assertThat(StringUtils.countOccurrencesOf(files.toString(), "defer(")).isGreaterThan(1);
 		assertThat(files.toString()).contains("new SampleConfigurationInitializer().initialize(context)");

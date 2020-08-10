@@ -36,14 +36,32 @@ import org.springframework.core.io.ResourceLoader;
 public class InfrastructureUtils {
 
 	private static final String CONTEXT_NAME = GenericApplicationContext.class.getName();
+	
+	static class ContextHolder {
+
+		private GenericApplicationContext context;
+
+		public ContextHolder(GenericApplicationContext context) {
+			this.context = context;
+		}
+
+		public GenericApplicationContext getContext() {
+			return this.context;
+		}
+		
+	}
 
 	public static GenericApplicationContext getContext(SingletonBeanRegistry beans) {
-		GenericApplicationContext context = (GenericApplicationContext) beans.getSingleton(CONTEXT_NAME);
+		Object singleton = beans.getSingleton(CONTEXT_NAME);
+		if (singleton instanceof ContextHolder) {
+			return ((ContextHolder)singleton).getContext();
+		}
+		GenericApplicationContext context = (GenericApplicationContext) singleton;
 		return context;
 	}
 
 	public static <T> T getBean(SingletonBeanRegistry beans, String name, Class<T> type) {
-		GenericApplicationContext context = (GenericApplicationContext) beans.getSingleton(CONTEXT_NAME);
+		GenericApplicationContext context = getContext(beans);
 		if (!context.isActive() && context.getBeanFactory().containsSingleton(name)) {
 			@SuppressWarnings("unchecked")
 			T result = (T) context.getBeanFactory().getSingleton(name);
@@ -53,7 +71,7 @@ public class InfrastructureUtils {
 	}
 
 	public static <T> T getBean(SingletonBeanRegistry beans, Class<T> type) {
-		GenericApplicationContext context = (GenericApplicationContext) beans.getSingleton(CONTEXT_NAME);
+		GenericApplicationContext context = getContext(beans);
 		if (context != null && !context.isActive() && context.getBeanFactory().containsSingleton(type.getName())) {
 			@SuppressWarnings("unchecked")
 			T result = (T) context.getBeanFactory().getSingleton(type.getName());
@@ -68,8 +86,9 @@ public class InfrastructureUtils {
 	}
 
 	public static void install(SingletonBeanRegistry beans, GenericApplicationContext context) {
-		if (!beans.containsSingleton(CONTEXT_NAME)) {
+		if (!isInstalled(beans)) {
 			beans.registerSingleton(CONTEXT_NAME, context);
+			context.getBeanFactory().registerSingleton(CONTEXT_NAME, new ContextHolder(context));
 		}
 	}
 
@@ -112,13 +131,6 @@ public class InfrastructureUtils {
 	public static boolean containsBean(SingletonBeanRegistry beans, Class<?> type) {
 		return getContext(beans).getBeanFactory().containsSingleton(type.getName())
 				|| getContext(beans).getBeanNamesForType(type, false, false).length > 0;
-	}
-
-	public static GenericApplicationContext preInstall(SingletonBeanRegistry beans) {
-		GenericApplicationContext context = new GenericApplicationContext();
-		install(beans, context);
-		// Not refreshed or initialized...
-		return context;
 	}
 
 	public static <T> T invokeAwareMethods(T target, Environment environment, ResourceLoader resourceLoader,

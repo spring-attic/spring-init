@@ -18,6 +18,8 @@ package org.springframework.init.tools;
 import java.util.Set;
 
 import com.squareup.javapoet.JavaFile;
+
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.init.tools.cond.ConditionalApplication;
@@ -38,6 +40,7 @@ public class ScanningProcessorTests {
 	}
 
 	@Test
+	@Disabled("Attempt to ignore manually supplied initializer")
 	public void manualConditional() {
 		Set<JavaFile> files = new InitializerClassProcessor()
 				.process(ClassUtils.getPackageName(ManualApplication.class));
