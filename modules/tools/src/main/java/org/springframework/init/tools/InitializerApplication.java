@@ -22,12 +22,12 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
-import com.squareup.javapoet.JavaFile;
-
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.DefaultPropertiesPersister;
+
+import com.squareup.javapoet.JavaFile;
 
 /**
  * @author Dave Syer
@@ -58,6 +58,13 @@ public class InitializerApplication {
 			}
 			for (JavaFile file : files) {
 				try {
+					String name = file.packageName + "." + file.typeSpec.name;
+					if (ClassUtils.isPresent(name, null)) {
+						if (!new File(dir, ClassUtils.convertClassNameToResourcePath(name) + ".java").exists()) {
+							// If it's on the classpath but we didn't generate it, we don't want to write it again
+							continue;
+						}
+					}
 					file.writeTo(dir);
 				}
 				catch (IOException e) {
