@@ -104,7 +104,7 @@ public class InitializerApplication {
 				}
 				StringBuilder builder = new StringBuilder(natargs);
 				if (builder.length() > 0) {
-					builder.append(" \\\n");
+					builder.append(" ");
 				}
 				builder.append("--initialize-at-build-time=");
 				int count = 0;

@@ -85,7 +85,8 @@ class InitializerApplicationTests {
 		assertThat(props).containsKey("Args");
 		String args = props.getProperty("Args");
 		assertThat(args).startsWith("--initialize-at-build-time");
-		assertThat(args).contains("foo.Bar \\\n");
+		// assertThat(args).contains("foo.Bar \\\n");
+		assertThat(args).contains("foo.Bar --");
 		assertThat(args).satisfies(
 				value -> assertThat(StringUtils.countOccurrencesOf(value, "--initialize-at-build-time")).isEqualTo(2));
 	}
