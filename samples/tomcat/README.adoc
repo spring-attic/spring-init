@@ -1,0 +1,9 @@
+== Tomcat Sample
+
+With Java 8: the image size=54M, RSS=57M (exlcuding Jackson as well to squeeze out at extra 1MB).
+
+== Building a Native Image
+
+```
+./mvn spring-boot:build-image
+```

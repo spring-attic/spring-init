@@ -6,29 +6,6 @@ With Java 8: the image size=35M, RSS=36M (exlcuding Jackson as well to squeeze o
 
 == Building a Native Image
 
-Download https://github.com/oracle/graal/releases[GraalVM] and install it (add the bin dir to you path and set the `JAVA_HOME` to point to GraalVM). You can also use VSCode devcontainers to run this project in a container that has the GraalVM tooling.
-
-Then build an image:
-
 ```
-$ ./compile.sh
-```
-
-Then run it:
-
-```
-$ ./target/func
-  .   ____          _            __ _ _
- /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
-( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
- \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
-  '  |____| .__|_| |_|_| |_\__, | / / / /
- =========|_|==============|___/=/_/_/_/
- :: Spring Boot ::                        
-
-Aug 07, 2018 11:25:13 AM org.springframework.boot.StartupInfoLogger logStarting
-...
-Message: ${app.value}
-Bar: app.main.Bar@7fa22dfc0da8
-Foo: Foo [value=foo]
+./mvn spring-boot:build-image
 ```
