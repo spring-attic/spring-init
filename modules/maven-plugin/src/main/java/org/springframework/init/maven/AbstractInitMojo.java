@@ -15,15 +15,6 @@
  */
 package org.springframework.init.maven;
 
-import static org.twdata.maven.mojoexecutor.MojoExecutor.artifactId;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.configuration;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.executeMojo;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.executionEnvironment;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.goal;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.groupId;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.plugin;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.version;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -34,8 +25,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.squareup.javapoet.ClassName;
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.BuildPluginManager;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -46,11 +40,19 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.classworlds.realm.ClassRealm;
 import org.codehaus.plexus.util.Scanner;
 import org.sonatype.plexus.build.incremental.BuildContext;
+
 import org.springframework.boot.loader.tools.MainClassFinder;
 import org.springframework.init.tools.InitializerApplication;
 import org.springframework.util.ClassUtils;
 
-import com.squareup.javapoet.ClassName;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.artifactId;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.configuration;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.executeMojo;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.executionEnvironment;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.goal;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.groupId;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.plugin;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.version;
 
 /**
  * @author dsyer
@@ -96,8 +98,8 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 	private boolean skip;
 
 	/**
-	 * Set the closed world flag - configuration can not be changed with classpath
-	 * changes or environment properties.
+	 * Set the closed world flag - configuration can not be changed with classpath changes
+	 * or environment properties.
 	 * 
 	 * @since 1.3.2
 	 */
@@ -105,8 +107,8 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 	private boolean closedWorld;
 
 	/**
-	 * The name of the main class. If not specified the first compiled class found
-	 * that contains a 'main' method will be used.
+	 * The name of the main class. If not specified the first compiled class found that
+	 * contains a 'main' method will be used.
 	 * 
 	 * @since 1.0.0
 	 */
@@ -114,8 +116,8 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 	private String mainClass;
 
 	/**
-	 * The name of the main class. If not specified the first compiled class found
-	 * that contains a 'main' method will be used.
+	 * The name of the main class. If not specified the first compiled class found that
+	 * contains a 'main' method will be used.
 	 * 
 	 * @since 1.0.0
 	 */
@@ -147,13 +149,32 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 									version(compilerVersion)),
 							goal("testCompile"), configuration(),
 							executionEnvironment(project, session, pluginManager));
-				} else {
+				}
+				else {
 					executeMojo(
 							plugin(groupId("org.apache.maven.plugins"), artifactId("maven-compiler-plugin"),
 									version(compilerVersion)),
 							goal("compile"), configuration(), executionEnvironment(project, session, pluginManager));
 				}
+				if (i == 2) {
+					if (this.nativeImageDirectory != null) {
+						System.setProperty("spring.init.build-time-location",
+								FileUtils.getFile(this.nativeImageDirectory, "META-INF", "native-image",
+										project.getGroupId(), project.getArtifactId()).getAbsolutePath());
+						getLog().info("Generating native-image config files");
+					}
+				}
 				generate(getStart());
+			}
+		}
+		if (this.nativeImageDirectory != null) {
+			Resource resource = new Resource();
+			resource.setDirectory(this.nativeImageDirectory.getAbsolutePath());
+			if (getClass() == GenerateTestsMojo.class) {
+				project.addResource(resource);
+			}
+			else {
+				project.addTestResource(resource);
 			}
 		}
 		postProcess(project);
@@ -174,12 +195,9 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 			if (closedWorld) {
 				getLog().info("Closed world");
 				System.setProperty("spring.init.closed-world", "true");
-			} else {
-				getLog().info("Open world");
 			}
-			if (this.nativeImageDirectory != null) {
-				System.setProperty("spring.init.build-time-location", this.nativeImageDirectory.getAbsolutePath());
-				getLog().info("Generating native-image config files");
+			else {
+				getLog().info("Open world");
 			}
 			original = ClassUtils.overrideThreadContextClassLoader(loader);
 			Class<?> type = loader.loadClass(SPRING_INIT_APPLICATION_CLASS_NAME);
@@ -187,7 +205,8 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 			type.getMethod("main", String[].class).invoke(null,
 					new Object[] { new String[] { start, getOutputDirectory().getAbsolutePath() } });
 			buildContext.refresh(getOutputDirectory());
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			throw new MojoExecutionException("Cannot generate initializer class: " + SPRING_INIT_APPLICATION_CLASS_NAME,
 					e);
 		}
@@ -209,10 +228,12 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 				try {
 					mainClass = MainClassFinder.findSingleMainClass(getMainClassesDirectory(),
 							SPRING_BOOT_APPLICATION_CLASS_NAME);
-				} catch (IOException ex) {
+				}
+				catch (IOException ex) {
 					throw new MojoExecutionException(ex.getMessage(), ex);
 				}
-			} else {
+			}
+			else {
 				return this.basePackage;
 			}
 		}
@@ -232,7 +253,8 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 			addTools(urls);
 			getLog().debug("Classpath: " + urls);
 			return urls.toArray(new URL[0]);
-		} catch (IOException ex) {
+		}
+		catch (IOException ex) {
 			throw new MojoExecutionException("Unable to build classpath", ex);
 		}
 	}
@@ -259,7 +281,8 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 		urls.addAll(this.getClassesDirectories().stream().map(file -> {
 			try {
 				return file.toURI().toURL();
-			} catch (MalformedURLException e) {
+			}
+			catch (MalformedURLException e) {
 				throw new IllegalStateException(e);
 			}
 		}).collect(Collectors.toList()));

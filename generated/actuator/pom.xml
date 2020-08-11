@@ -478,19 +478,6 @@
 	<build>
 		<plugins>
 			<plugin>
-				<artifactId>maven-clean-plugin</artifactId>
-				<configuration>
-					<filesets>
-						<fileset>
-							<directory>src/main/resources</directory>
-							<includes>
-								<include>META-INF/**/*</include>
-							</includes>
-						</fileset>
-					</filesets>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>org.springframework.experimental</groupId>
 				<artifactId>spring-init-maven-plugin</artifactId>
 				<executions>
@@ -505,7 +492,7 @@
 							<basePackage>org.springframework.boot.actuate.autoconfigure</basePackage>
 							<force>true</force>
 							<closedWorld>true</closedWorld>
-							<nativeImageDirectory>src/main/resources/META-INF/native-image/${project.groupId}/${project.artifactId}</nativeImageDirectory>
+							<nativeImageDirectory>${project.build.directory}/generated-resources/init</nativeImageDirectory>
 						</configuration>
 					</execution>
 				</executions>
