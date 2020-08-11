@@ -7,13 +7,5 @@
 			}
 		],
 		"allDeclaredMethods": true
-	},
-	{
-		"name": "org.springframework.init.func.SlimConfigurationClassPostProcessor",
-		"methods": [
-			{
-				"name": "setMetadataReaderFactory"
-			}
-		]
 	}
 ]
