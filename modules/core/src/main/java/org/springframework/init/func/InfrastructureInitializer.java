@@ -81,6 +81,7 @@ public class InfrastructureInitializer implements ApplicationContextInitializer<
 			context.registerBean(ConfigurationPropertiesBindingPostProcessor.BEAN_NAME,
 					ConfigurationPropertiesBindingPostProcessor.class,
 					() -> new EnhancedConfigurationPropertiesBindingPostProcessor(binders, context.getEnvironment()));
+			ConfigurationPropertiesBindingPostProcessor.register(context);
 		}
 	}
 
@@ -93,6 +94,7 @@ public class InfrastructureInitializer implements ApplicationContextInitializer<
 			extends ConfigurationPropertiesBindingPostProcessor {
 
 		private PropertiesBinders binder;
+
 		private Environment environment;
 
 		public EnhancedConfigurationPropertiesBindingPostProcessor(PropertiesBinders binder, Environment environment) {
