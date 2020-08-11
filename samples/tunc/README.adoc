@@ -2,7 +2,7 @@
 
 This sample runs with no annotation processing and no .class files shipped for condition processing. Hence it runs as a netive image with `spring.native.mode=functional`.
 
-With Java 8: the image size=37M, RSS=38M. Compare with `spring.native.mode=default`: size=54M, RSS=58M.
+With Java 8: the image size=35M, RSS=36M (exlcuding Jackson as well to squeeze out at extra 1MB). Compare with `spring.native.mode=default`: size=54M, RSS=58M.
 
 == Building a Native Image
 

@@ -4,7 +4,7 @@ This sample runs with no annotation processing and no .class files shipped for c
 
 With Java 11: the image size=48M, RSS=60M. Compare with `spring.native.mode=default`: size=65.5M, RSS=105M (webflux-netty sample).
 
-With Java 8: the image size=37M, RSS=38M. Compare with `spring.native.mode=default`: size=65M, RSS=56M.
+With Java 8: the image size=36M, RSS=37M (having additionally excluded Jackson to squeeze out an extra 1MB). Compare with `spring.native.mode=default`: size=65M, RSS=56M.
 
 == Building a Native Image
 
