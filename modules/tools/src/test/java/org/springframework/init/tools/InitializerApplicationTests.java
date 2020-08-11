@@ -24,6 +24,11 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.init.tools.cond.ConditionalApplication;
+import org.springframework.init.tools.manual.ManualApplication;
+import org.springframework.init.tools.manual.ManualApplicationInitializer;
+import org.springframework.init.tools.manual.SampleConfigurationInitializer;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.DefaultPropertiesPersister;
 import org.springframework.util.StringUtils;
 
@@ -34,6 +39,33 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  */
 class InitializerApplicationTests {
+
+	@Test
+	void filesCreated() throws Exception {
+		File file = new File("target/test");
+		if (file.exists()) {
+			file.delete();
+		}
+		InitializerApplication.main(new String[] { ConditionalApplication.class.getName(), "target/test" });
+		assertThat(new File(file,
+				ClassUtils.convertClassNameToResourcePath(ConditionalApplication.class.getName() + "Initializer")
+						+ ".java")).exists();
+	}
+
+	@Test
+	void filesNotCreated() throws Exception {
+		File file = new File("target/test");
+		if (file.exists()) {
+			file.delete();
+		}
+		InitializerApplication.main(new String[] { ManualApplication.class.getName(), "target/test" });
+		assertThat(new File(file,
+				ClassUtils.convertClassNameToResourcePath(ManualApplicationInitializer.class.getName()) + ".java"))
+						.doesNotExist();
+		assertThat(new File(file,
+				ClassUtils.convertClassNameToResourcePath(SampleConfigurationInitializer.class.getName()) + ".java"))
+						.doesNotExist();
+	}
 
 	@Test
 	void propertiesFileCreated() throws Exception {
