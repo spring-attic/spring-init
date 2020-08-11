@@ -52,6 +52,12 @@ public class InfrastructureInitializer implements ApplicationContextInitializer<
 		this.initializers.addAll(Arrays.asList(initializers));
 	}
 
+	public <T> InfrastructureInitializer binding(Class<T> type, PropertiesBinder<T> binder) {
+		this.initializers.add(infra -> InfrastructureUtils.getBean(infra.getBeanFactory(), PropertiesBinders.class)
+				.register(type, binder));
+		return this;
+	}
+
 	@Override
 	public void initialize(GenericApplicationContext context) {
 		ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();

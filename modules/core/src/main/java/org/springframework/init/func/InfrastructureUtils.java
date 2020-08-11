@@ -36,7 +36,7 @@ import org.springframework.core.io.ResourceLoader;
 public class InfrastructureUtils {
 
 	private static final String CONTEXT_NAME = GenericApplicationContext.class.getName();
-	
+
 	static class ContextHolder {
 
 		private GenericApplicationContext context;
@@ -48,13 +48,13 @@ public class InfrastructureUtils {
 		public GenericApplicationContext getContext() {
 			return this.context;
 		}
-		
+
 	}
 
 	public static GenericApplicationContext getContext(SingletonBeanRegistry beans) {
 		Object singleton = beans.getSingleton(CONTEXT_NAME);
 		if (singleton instanceof ContextHolder) {
-			return ((ContextHolder)singleton).getContext();
+			return ((ContextHolder) singleton).getContext();
 		}
 		GenericApplicationContext context = (GenericApplicationContext) singleton;
 		return context;
@@ -102,7 +102,8 @@ public class InfrastructureUtils {
 			if (main.isActive()) {
 				T bean = main.getAutowireCapableBeanFactory().createBean(type);
 				context.getBeanFactory().registerSingleton(name, bean);
-			} else {
+			}
+			else {
 				// Can't use beans to do this because it probably isn't active yet
 				T bean = context.getAutowireCapableBeanFactory().createBean(type);
 				invokeAwareMethods(bean, context.getEnvironment(), context, context);
@@ -139,8 +140,7 @@ public class InfrastructureUtils {
 		if (target instanceof Aware) {
 			if (target instanceof BeanClassLoaderAware) {
 				ClassLoader classLoader = (registry instanceof ConfigurableBeanFactory
-						? ((ConfigurableBeanFactory) registry).getBeanClassLoader()
-						: resourceLoader.getClassLoader());
+						? ((ConfigurableBeanFactory) registry).getBeanClassLoader() : resourceLoader.getClassLoader());
 				if (classLoader != null) {
 					((BeanClassLoaderAware) target).setBeanClassLoader(classLoader);
 				}
@@ -162,7 +162,8 @@ public class InfrastructureUtils {
 		if (target instanceof InitializingBean) {
 			try {
 				((InitializingBean) target).afterPropertiesSet();
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				throw new IllegalStateException("Cannot initialize: " + target.getClass(), e);
 			}
 		}
@@ -170,8 +171,5 @@ public class InfrastructureUtils {
 		return target;
 
 	}
-	
-	public static void registerPropertyBinder(GenericApplicationContext infra, Class<?> type, PropertiesBinder<?> binder) {
-		InfrastructureUtils.getBean(infra.getBeanFactory(), PropertiesBinders.class).register(type, binder);
-	}
+
 }
