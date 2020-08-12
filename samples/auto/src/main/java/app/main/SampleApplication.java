@@ -1,11 +1,9 @@
 package app.main;
 
-import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
-import static org.springframework.web.reactive.function.server.RouterFunctions.route;
-import static org.springframework.web.reactive.function.server.ServerResponse.ok;
-
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
+
+import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -15,7 +13,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.reactive.function.server.RouterFunction;
 
-import reactor.core.publisher.Mono;
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
+import static org.springframework.web.reactive.function.server.RouterFunctions.route;
+import static org.springframework.web.reactive.function.server.ServerResponse.ok;
 
 @SpringBootApplication(proxyBeanMethods = false)
 public class SampleApplication {
@@ -31,26 +31,14 @@ public class SampleApplication {
 	@Bean
 	public CommandLineRunner runner(ConfigurableListableBeanFactory beans) {
 		return args -> {
-			System.err.println("Class count: " + ManagementFactory.getClassLoadingMXBean()
-					.getTotalLoadedClassCount());
+			System.err.println("Class count: " + ManagementFactory.getClassLoadingMXBean().getTotalLoadedClassCount());
 			System.err.println("Bean count: " + beans.getBeanDefinitionNames().length);
-			System.err.println(
-					"Bean names: " + Arrays.asList(beans.getBeanDefinitionNames()));
-		};
-	}
-
-	@Bean
-	public CommandLineRunner another(ConfigurableListableBeanFactory beans) {
-		return args -> {
-			System.err.println("Class count: " + ManagementFactory.getClassLoadingMXBean()
-					.getTotalLoadedClassCount());
-			System.err.println("Bean count: " + beans.getBeanDefinitionNames().length);
-			System.err.println(
-					"Bean names: " + Arrays.asList(beans.getBeanDefinitionNames()));
+			System.err.println("Bean names: " + Arrays.asList(beans.getBeanDefinitionNames()));
 		};
 	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(SampleApplication.class, args);
 	}
+
 }
