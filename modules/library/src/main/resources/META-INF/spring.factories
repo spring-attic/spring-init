@@ -1,2 +1,5 @@
 org.springframework.context.ApplicationContextInitializer=\
 org.springframework.cloud.function.context.config.ContextFunctionCatalogDisabler
+
+org.springframework.init.func.TypeConditionMapper=\
+org.springframework.init.library.LibraryTypeConditionMapper

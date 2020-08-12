@@ -16,6 +16,7 @@
 package org.springframework.init.tools;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,6 +37,7 @@ import org.springframework.boot.web.servlet.context.ServletWebServerApplicationC
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.init.func.AnnotationMetadataConditionService;
 import org.springframework.init.func.ConditionService;
 import org.springframework.init.func.DefaultTypeService;
@@ -43,6 +45,9 @@ import org.springframework.init.func.FunctionalInstallerListener;
 import org.springframework.init.func.ImportRegistrars;
 import org.springframework.init.func.InfrastructureUtils;
 import org.springframework.init.func.SimpleConditionService;
+import org.springframework.init.func.TypeCondition;
+import org.springframework.init.func.TypeConditionMapper;
+import org.springframework.init.func.TypeConditionService;
 import org.springframework.init.func.TypeService;
 import org.springframework.util.ClassUtils;
 
@@ -79,17 +84,25 @@ public class ConditionServiceGenerator {
 				SimpleConditionService.class);
 		builder.addField(typeMatcher());
 		builder.addField(methodMatcher());
+		builder.addField(mapperMatcher());
 		if (!conditions.getTypeMatches().isEmpty()) {
 			builder.addStaticBlock(typeMatchers(conditions.getTypeMatches()));
 		}
 		if (!conditions.getMethodMatches().isEmpty()) {
 			builder.addStaticBlock(methodMatchers(conditions.getMethodMatches()));
 		}
-		builder.superclass(SimpleConditionService.class);
+		List<String> mappers = SpringFactoriesLoader.loadFactoryNames(TypeConditionMapper.class, null);
+		if (!mappers.isEmpty()) {
+			builder.addStaticBlock(mapperMatchers(mappers));
+		}
+		builder.superclass(TypeConditionService.class);
 		builder.addModifiers(Modifier.PUBLIC);
 		builder.addMethod(MethodSpec.constructorBuilder().addParameter(GenericApplicationContext.class, "context")
 				.addModifiers(Modifier.PUBLIC)
-				.addStatement("super(new $T(context), TYPES, METHODS)", AnnotationMetadataConditionService.class)
+				.addStatement(
+						"super($T.getBean(context.getBeanFactory(), $T.class), context.getEnvironment(), new $T(new $T(context), TYPES, METHODS), MAPPERS)", //
+						InfrastructureUtils.class, TypeService.class, SimpleConditionService.class,
+						AnnotationMetadataConditionService.class)
 				.build());
 		return builder.build();
 	}
@@ -97,6 +110,13 @@ public class ConditionServiceGenerator {
 	private FieldSpec methodMatcher() {
 		FieldSpec.Builder builder = FieldSpec.builder(new ParameterizedTypeReference<Map<String, Boolean>>() {
 		}.getType(), "TYPES", Modifier.PRIVATE, Modifier.STATIC);
+		builder.initializer("new $T<>()", HashMap.class);
+		return builder.build();
+	}
+
+	private FieldSpec mapperMatcher() {
+		FieldSpec.Builder builder = FieldSpec.builder(new ParameterizedTypeReference<Map<String, TypeCondition>>() {
+		}.getType(), "MAPPERS", Modifier.PRIVATE, Modifier.STATIC);
 		builder.initializer("new $T<>()", HashMap.class);
 		return builder.build();
 	}
@@ -125,6 +145,17 @@ public class ConditionServiceGenerator {
 		Builder code = CodeBlock.builder();
 		for (String type : matches.keySet()) {
 			code.addStatement("TYPES.put($S, $L)", type, matches.get(type));
+		}
+		return code.build();
+	}
+
+	private CodeBlock mapperMatchers(List<String> mappers) {
+		Builder code = CodeBlock.builder();
+		for (String mapper : mappers) {
+			if (ClassUtils.isPresent(mapper, null)) {
+				Class<?> type = ClassUtils.resolveClassName(mapper, null);
+				code.addStatement("MAPPERS.putAll(new $T().get())", type);
+			}
 		}
 		return code.build();
 	}
