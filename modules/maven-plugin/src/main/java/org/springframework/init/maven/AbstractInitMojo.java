@@ -171,10 +171,10 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 			Resource resource = new Resource();
 			resource.setDirectory(this.nativeImageDirectory.getAbsolutePath());
 			if (getClass() == GenerateTestsMojo.class) {
-				project.addResource(resource);
+				project.addTestResource(resource);
 			}
 			else {
-				project.addTestResource(resource);
+				project.addResource(resource);
 			}
 		}
 		postProcess(project);
