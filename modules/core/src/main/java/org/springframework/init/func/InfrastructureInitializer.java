@@ -63,6 +63,9 @@ public class InfrastructureInitializer implements ApplicationContextInitializer<
 		ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
 		if (!InfrastructureUtils.isInstalled(beanFactory)) {
 			GenericApplicationContext infra = new GenericApplicationContext();
+			InfrastructureUtils.install(context.getBeanFactory(), infra);
+			PropertiesBinders binders = new PropertiesBinders();
+			infra.getBeanFactory().registerSingleton(PropertiesBinders.class.getName(), binders);
 			infra.getBeanFactory().registerSingleton(TypeService.class.getName(),
 					new DefaultTypeService(context.getClassLoader()));
 			for (ApplicationContextInitializer<?> initializer : initializers) {
@@ -72,9 +75,6 @@ public class InfrastructureInitializer implements ApplicationContextInitializer<
 			}
 			ServiceLoader<InfrastructureProvider> loader = ServiceLoader.load(InfrastructureProvider.class,
 					ClassUtils.getDefaultClassLoader());
-			InfrastructureUtils.install(context.getBeanFactory(), infra);
-			PropertiesBinders binders = new PropertiesBinders();
-			infra.getBeanFactory().registerSingleton(PropertiesBinders.class.getName(), binders);
 			for (InfrastructureProvider provider : loader) {
 				InfrastructureUtils.invokeAwareMethods(provider, context.getEnvironment(), context, context);
 				for (ApplicationContextInitializer<GenericApplicationContext> initializer : provider
