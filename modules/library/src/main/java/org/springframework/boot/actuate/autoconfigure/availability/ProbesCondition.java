@@ -29,6 +29,13 @@ public class ProbesCondition implements TypeCondition {
 
 	private static final String DEPRECATED_ENABLED_PROPERTY = "management.health.probes.enabled";
 
+	@Override
+	public boolean matches(TypeService types, Environment environment) {
+		return getMatchOutcome(environment).isMatch();
+	}
+
+	// TODO: Add method matchers
+
 	private ConditionOutcome getMatchOutcome(Environment environment) {
 		ConditionMessage.Builder message = ConditionMessage.forCondition("Probes availability");
 		ConditionOutcome outcome = onProperty(environment, message, ENABLED_PROPERTY);
@@ -53,11 +60,6 @@ public class ProbesCondition implements TypeCondition {
 			return new ConditionOutcome(match, message.because("'" + propertyName + "' set to '" + enabled + "'"));
 		}
 		return null;
-	}
-
-	@Override
-	public boolean matches(TypeService types, Environment environment) {
-		return getMatchOutcome(environment).isMatch();
 	}
 
 }

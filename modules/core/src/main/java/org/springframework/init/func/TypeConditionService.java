@@ -72,7 +72,6 @@ public class TypeConditionService implements ConditionService {
 		}
 		ConditionService fallback = getFallback();
 		boolean matches = fallback == null ? false : fallback.matches(type, phase);
-		match(type, matches);
 		return matches;
 	}
 
@@ -83,6 +82,9 @@ public class TypeConditionService implements ConditionService {
 
 	@Override
 	public boolean matches(Class<?> factory, Class<?> type) {
+		if (typeMatches.containsKey(factory.getName())) {
+			return typeMatches.get(factory.getName()).matches(type.getName(), types, environment);
+		}
 		ConditionService fallback = getFallback();
 		boolean matches = fallback == null ? false : fallback.matches(factory, type);
 		return matches;
@@ -96,15 +98,6 @@ public class TypeConditionService implements ConditionService {
 	public boolean includes(Class<?> type) {
 		ConditionService fallback = getFallback();
 		return fallback == null ? true : fallback.includes(type);
-	}
-
-	public TypeConditionService match(Class<?> type, boolean matches) {
-		typeMatches.put(type.getName(), (types, environment) -> matches);
-		return this;
-	}
-
-	public Map<String, TypeCondition> getTypeMatches() {
-		return typeMatches;
 	}
 
 }

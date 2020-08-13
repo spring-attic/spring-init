@@ -25,4 +25,9 @@ public interface TypeCondition {
 
 	boolean matches(TypeService types, Environment environment);
 
+	// TODO: need a BeanFactory or something too
+	default boolean matches(String resultType, TypeService types, Environment environment) {
+		return true;
+	}
+
 }

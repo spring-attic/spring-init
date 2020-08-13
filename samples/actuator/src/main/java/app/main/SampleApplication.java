@@ -17,9 +17,7 @@ import org.springframework.boot.actuate.autoconfigure.health.HealthEndpointAutoC
 import org.springframework.boot.actuate.autoconfigure.info.InfoEndpointAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.web.reactive.FunctionalReactiveActuatorEndpointAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.web.server.ManagementContextAutoConfiguration;
-import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.autoconfigure.availability.ApplicationAvailabilityAutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.HttpHandlerAutoConfiguration;
@@ -66,7 +64,6 @@ public class SampleApplication {
 }
 
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnClass(Endpoint.class)
 @Import({ EndpointAutoConfiguration.class, ApplicationAvailabilityAutoConfiguration.class,
 		AvailabilityProbesAutoConfiguration.class, HealthContributorAutoConfiguration.class,
 		HealthEndpointAutoConfiguration.class, InfoEndpointAutoConfiguration.class,
