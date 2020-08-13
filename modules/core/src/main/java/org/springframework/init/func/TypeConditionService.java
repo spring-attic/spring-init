@@ -51,7 +51,7 @@ public class TypeConditionService implements ConditionService {
 
 	public TypeConditionService(GenericApplicationContext context, ConditionService service,
 			Map<String, TypeCondition> typeMatches) {
-		this.context = new ConditionEvaluator.ConditionContextImpl(context, context.getEnvironment(), context);
+		this.context = new DefaultConditionContext(context, context.getEnvironment(), context);
 		this.fallback = service;
 		this.typeMatches.putAll(typeMatches);
 	}

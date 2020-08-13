@@ -19,25 +19,17 @@ package org.springframework.init.func;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Condition;
-import org.springframework.context.annotation.ConditionContext;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.ConfigurationCondition;
 import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.Environment;
-import org.springframework.core.env.EnvironmentCapable;
-import org.springframework.core.env.StandardEnvironment;
-import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -54,7 +46,7 @@ class ConditionEvaluator {
 	 */
 	private static final String ON_CLASS_CONDITION = "org.springframework.boot.autoconfigure.condition.OnClassCondition";
 
-	private final ConditionContextImpl context;
+	private final DefaultConditionContext context;
 
 	private GenericApplicationContext infrastructure;
 
@@ -64,7 +56,7 @@ class ConditionEvaluator {
 	public ConditionEvaluator(GenericApplicationContext infrastructure, @Nullable BeanDefinitionRegistry registry,
 			@Nullable Environment environment, @Nullable ResourceLoader resourceLoader) {
 		this.infrastructure = infrastructure;
-		this.context = new ConditionContextImpl(registry, environment, resourceLoader);
+		this.context = new DefaultConditionContext(registry, environment, resourceLoader);
 	}
 
 	/**
@@ -156,105 +148,6 @@ class ConditionEvaluator {
 
 	private Condition getCondition(String conditionClassName, @Nullable ClassLoader classloader) {
 		return (Condition) InfrastructureUtils.getOrCreate(infrastructure, conditionClassName);
-	}
-
-	/**
-	 * Implementation of a {@link ConditionContext}.
-	 */
-	static class ConditionContextImpl implements ConditionContext {
-
-		@Nullable
-		private final BeanDefinitionRegistry registry;
-
-		@Nullable
-		private final ConfigurableListableBeanFactory beanFactory;
-
-		private final Environment environment;
-
-		private final ResourceLoader resourceLoader;
-
-		@Nullable
-		private final ClassLoader classLoader;
-
-		public ConditionContextImpl(@Nullable BeanDefinitionRegistry registry, @Nullable Environment environment,
-				@Nullable ResourceLoader resourceLoader) {
-
-			this.registry = registry;
-			this.beanFactory = deduceBeanFactory(registry);
-			this.environment = (environment != null ? environment : deduceEnvironment(registry));
-			this.resourceLoader = (resourceLoader != null ? resourceLoader : deduceResourceLoader(registry));
-			this.classLoader = deduceClassLoader(resourceLoader, this.beanFactory);
-		}
-
-		@Nullable
-		private ConfigurableListableBeanFactory deduceBeanFactory(@Nullable BeanDefinitionRegistry source) {
-			if (source instanceof ConfigurableListableBeanFactory) {
-				return (ConfigurableListableBeanFactory) source;
-			}
-			if (source instanceof ConfigurableApplicationContext) {
-				return (((ConfigurableApplicationContext) source).getBeanFactory());
-			}
-			return null;
-		}
-
-		private Environment deduceEnvironment(@Nullable BeanDefinitionRegistry source) {
-			if (source instanceof EnvironmentCapable) {
-				return ((EnvironmentCapable) source).getEnvironment();
-			}
-			return new StandardEnvironment();
-		}
-
-		private ResourceLoader deduceResourceLoader(@Nullable BeanDefinitionRegistry source) {
-			if (source instanceof ResourceLoader) {
-				return (ResourceLoader) source;
-			}
-			return new DefaultResourceLoader();
-		}
-
-		@Nullable
-		private ClassLoader deduceClassLoader(@Nullable ResourceLoader resourceLoader,
-				@Nullable ConfigurableListableBeanFactory beanFactory) {
-
-			if (resourceLoader != null) {
-				ClassLoader classLoader = resourceLoader.getClassLoader();
-				if (classLoader != null) {
-					return classLoader;
-				}
-			}
-			if (beanFactory != null) {
-				return beanFactory.getBeanClassLoader();
-			}
-			return ClassUtils.getDefaultClassLoader();
-		}
-
-		@Override
-		public BeanDefinitionRegistry getRegistry() {
-			Assert.state(this.registry != null, "No BeanDefinitionRegistry available");
-			return this.registry;
-		}
-
-		@Override
-		@Nullable
-		public ConfigurableListableBeanFactory getBeanFactory() {
-			return this.beanFactory;
-		}
-
-		@Override
-		public Environment getEnvironment() {
-			return this.environment;
-		}
-
-		@Override
-		public ResourceLoader getResourceLoader() {
-			return this.resourceLoader;
-		}
-
-		@Override
-		@Nullable
-		public ClassLoader getClassLoader() {
-			return this.classLoader;
-		}
-
 	}
 
 }
