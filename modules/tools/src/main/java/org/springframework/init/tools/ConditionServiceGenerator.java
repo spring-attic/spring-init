@@ -99,10 +99,8 @@ public class ConditionServiceGenerator {
 		builder.addModifiers(Modifier.PUBLIC);
 		builder.addMethod(MethodSpec.constructorBuilder().addParameter(GenericApplicationContext.class, "context")
 				.addModifiers(Modifier.PUBLIC)
-				.addStatement(
-						"super($T.getBean(context.getBeanFactory(), $T.class), context.getEnvironment(), new $T(new $T(context), TYPES, METHODS), MAPPERS)", //
-						InfrastructureUtils.class, TypeService.class, SimpleConditionService.class,
-						AnnotationMetadataConditionService.class)
+				.addStatement("super(context, new $T(new $T(context), TYPES, METHODS), MAPPERS)", //
+						SimpleConditionService.class, AnnotationMetadataConditionService.class)
 				.build());
 		return builder.build();
 	}

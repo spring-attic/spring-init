@@ -24,7 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
-import org.springframework.core.env.Environment;
+import org.springframework.context.support.GenericApplicationContext;
 
 /**
  * @author Dave Syer
@@ -38,22 +38,19 @@ public class TypeConditionService implements ConditionService {
 
 	private ConditionService fallback;
 
-	private TypeService types;
+	private GenericApplicationContext context;
 
-	private Environment environment;
-
-	public TypeConditionService(TypeService types, Environment environment, ConditionService service) {
-		this(types, environment, service, Collections.emptyMap());
+	public TypeConditionService(GenericApplicationContext context, ConditionService service) {
+		this(context, service, Collections.emptyMap());
 	}
 
-	public TypeConditionService(TypeService types, Environment environment) {
-		this(types, environment, null, Collections.emptyMap());
+	public TypeConditionService(GenericApplicationContext context) {
+		this(context, null, Collections.emptyMap());
 	}
 
-	public TypeConditionService(TypeService types, Environment environment, ConditionService service,
+	public TypeConditionService(GenericApplicationContext context, ConditionService service,
 			Map<String, TypeCondition> typeMatches) {
-		this.types = types;
-		this.environment = environment;
+		this.context = context;
 		this.fallback = service;
 		this.typeMatches.putAll(typeMatches);
 	}
@@ -68,7 +65,7 @@ public class TypeConditionService implements ConditionService {
 			logger.debug(type.getName() + ": " + typeMatches.get(type.getName()));
 		}
 		if (typeMatches.containsKey(type.getName())) {
-			return typeMatches.get(type.getName()).matches(types, environment);
+			return typeMatches.get(type.getName()).matches(context);
 		}
 		ConditionService fallback = getFallback();
 		boolean matches = fallback == null ? false : fallback.matches(type, phase);
@@ -83,7 +80,7 @@ public class TypeConditionService implements ConditionService {
 	@Override
 	public boolean matches(Class<?> factory, Class<?> type) {
 		if (typeMatches.containsKey(factory.getName())) {
-			return typeMatches.get(factory.getName()).matches(type.getName(), types, environment);
+			return typeMatches.get(factory.getName()).matches(type.getName(), context);
 		}
 		ConditionService fallback = getFallback();
 		boolean matches = fallback == null ? false : fallback.matches(factory, type);

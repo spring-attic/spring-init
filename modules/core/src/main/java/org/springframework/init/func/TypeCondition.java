@@ -15,7 +15,7 @@
  */
 package org.springframework.init.func;
 
-import org.springframework.core.env.Environment;
+import org.springframework.context.support.GenericApplicationContext;
 
 /**
  * @author Dave Syer
@@ -23,10 +23,10 @@ import org.springframework.core.env.Environment;
  */
 public interface TypeCondition {
 
-	boolean matches(TypeService types, Environment environment);
+	boolean matches(GenericApplicationContext context);
 
 	// TODO: need a BeanFactory or something too
-	default boolean matches(String resultType, TypeService types, Environment environment) {
+	default boolean matches(String resultType, GenericApplicationContext context) {
 		return true;
 	}
 

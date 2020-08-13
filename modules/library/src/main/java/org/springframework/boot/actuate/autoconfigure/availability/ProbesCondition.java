@@ -16,12 +16,14 @@
 
 package org.springframework.boot.actuate.autoconfigure.availability;
 
+import org.springframework.boot.actuate.availability.LivenessStateHealthIndicator;
+import org.springframework.boot.actuate.availability.ReadinessStateHealthIndicator;
 import org.springframework.boot.autoconfigure.condition.ConditionMessage;
 import org.springframework.boot.autoconfigure.condition.ConditionOutcome;
 import org.springframework.boot.cloud.CloudPlatform;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.init.func.TypeCondition;
-import org.springframework.init.func.TypeService;
 
 public class ProbesCondition implements TypeCondition {
 
@@ -30,11 +32,23 @@ public class ProbesCondition implements TypeCondition {
 	private static final String DEPRECATED_ENABLED_PROPERTY = "management.health.probes.enabled";
 
 	@Override
-	public boolean matches(TypeService types, Environment environment) {
-		return getMatchOutcome(environment).isMatch();
+	public boolean matches(GenericApplicationContext context) {
+		ConditionOutcome outcome = getMatchOutcome(context.getEnvironment());
+		return outcome.isMatch();
 	}
 
-	// TODO: Add method matchers
+	@Override
+	public boolean matches(String resultType, GenericApplicationContext context) {
+		if (LivenessStateHealthIndicator.class.getName().equals(resultType)) {
+			return context.getBeanFactory().getBeanNamesForType(LivenessStateHealthIndicator.class, true,
+					false).length == 0;
+		}
+		if (ReadinessStateHealthIndicator.class.getName().equals(resultType)) {
+			return context.getBeanFactory().getBeanNamesForType(ReadinessStateHealthIndicator.class, true,
+					false).length == 0;
+		}
+		return TypeCondition.super.matches(resultType, context);
+	}
 
 	private ConditionOutcome getMatchOutcome(Environment environment) {
 		ConditionMessage.Builder message = ConditionMessage.forCondition("Probes availability");
