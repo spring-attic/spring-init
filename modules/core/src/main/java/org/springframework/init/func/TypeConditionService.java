@@ -23,6 +23,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.context.annotation.ConditionContext;
 import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
 import org.springframework.context.support.GenericApplicationContext;
 
@@ -38,7 +39,7 @@ public class TypeConditionService implements ConditionService {
 
 	private ConditionService fallback;
 
-	private GenericApplicationContext context;
+	private ConditionContext context;
 
 	public TypeConditionService(GenericApplicationContext context, ConditionService service) {
 		this(context, service, Collections.emptyMap());
@@ -50,7 +51,7 @@ public class TypeConditionService implements ConditionService {
 
 	public TypeConditionService(GenericApplicationContext context, ConditionService service,
 			Map<String, TypeCondition> typeMatches) {
-		this.context = context;
+		this.context = new ConditionEvaluator.ConditionContextImpl(context, context.getEnvironment(), context);
 		this.fallback = service;
 		this.typeMatches.putAll(typeMatches);
 	}

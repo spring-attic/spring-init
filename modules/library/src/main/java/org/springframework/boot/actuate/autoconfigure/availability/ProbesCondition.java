@@ -21,7 +21,7 @@ import org.springframework.boot.actuate.availability.ReadinessStateHealthIndicat
 import org.springframework.boot.autoconfigure.condition.ConditionMessage;
 import org.springframework.boot.autoconfigure.condition.ConditionOutcome;
 import org.springframework.boot.cloud.CloudPlatform;
-import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.context.annotation.ConditionContext;
 import org.springframework.core.env.Environment;
 import org.springframework.init.func.TypeCondition;
 
@@ -32,13 +32,13 @@ public class ProbesCondition implements TypeCondition {
 	private static final String DEPRECATED_ENABLED_PROPERTY = "management.health.probes.enabled";
 
 	@Override
-	public boolean matches(GenericApplicationContext context) {
+	public boolean matches(ConditionContext context) {
 		ConditionOutcome outcome = getMatchOutcome(context.getEnvironment());
 		return outcome.isMatch();
 	}
 
 	@Override
-	public boolean matches(String resultType, GenericApplicationContext context) {
+	public boolean matches(String resultType, ConditionContext context) {
 		if (LivenessStateHealthIndicator.class.getName().equals(resultType)) {
 			return context.getBeanFactory().getBeanNamesForType(LivenessStateHealthIndicator.class, true,
 					false).length == 0;

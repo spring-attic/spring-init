@@ -15,7 +15,7 @@
  */
 package org.springframework.init.func;
 
-import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.context.annotation.ConditionContext;
 
 /**
  * @author Dave Syer
@@ -23,10 +23,9 @@ import org.springframework.context.support.GenericApplicationContext;
  */
 public interface TypeCondition {
 
-	boolean matches(GenericApplicationContext context);
+	boolean matches(ConditionContext context);
 
-	// TODO: need a BeanFactory or something too
-	default boolean matches(String resultType, GenericApplicationContext context) {
+	default boolean matches(String resultType, ConditionContext context) {
 		return true;
 	}
 

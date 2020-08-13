@@ -68,11 +68,10 @@ class ConditionEvaluator {
 	}
 
 	/**
-	 * Determine if an item should be skipped based on {@code @Conditional}
-	 * annotations. The {@link ConfigurationPhase} will be deduced from the type of
-	 * item (i.e. a {@code @Configuration} class will be
+	 * Determine if an item should be skipped based on {@code @Conditional} annotations.
+	 * The {@link ConfigurationPhase} will be deduced from the type of item (i.e. a
+	 * {@code @Configuration} class will be
 	 * {@link ConfigurationPhase#PARSE_CONFIGURATION})
-	 * 
 	 * @param metadata the meta data
 	 * @return if the item should be skipped
 	 */
@@ -81,11 +80,9 @@ class ConditionEvaluator {
 	}
 
 	/**
-	 * Determine if an item should be skipped based on {@code @Conditional}
-	 * annotations.
-	 * 
+	 * Determine if an item should be skipped based on {@code @Conditional} annotations.
 	 * @param metadata the meta data
-	 * @param phase    the phase of the call
+	 * @param phase the phase of the call
 	 * @return if the item should be skipped
 	 */
 	public boolean shouldSkip(@Nullable AnnotatedTypeMetadata metadata, @Nullable ConfigurationPhase phase) {
@@ -148,7 +145,8 @@ class ConditionEvaluator {
 				}
 				if (isClassCondition) {
 					result.add(0, value);
-				} else {
+				}
+				else {
 					result.add(value);
 				}
 			}
@@ -163,7 +161,7 @@ class ConditionEvaluator {
 	/**
 	 * Implementation of a {@link ConditionContext}.
 	 */
-	private static class ConditionContextImpl implements ConditionContext {
+	static class ConditionContextImpl implements ConditionContext {
 
 		@Nullable
 		private final BeanDefinitionRegistry registry;
