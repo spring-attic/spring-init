@@ -41,7 +41,7 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
 public class SampleApplication {
 
 	@Value("${app.value}")
-	private String value;
+	private String value = "Hi";
 
 	@Bean
 	public RouterFunction<?> userEndpoints() {
