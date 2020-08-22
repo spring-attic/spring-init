@@ -1,4 +1,4 @@
-This project implements an APT plugin that converts `@Configuration` to functional bean registrations, which are known to be faster and also more amenable to AOT compilation (native image building).
+This project implements a code generator (activated by a build plugin) that converts `@Configuration` to functional bean registrations, which are known to be faster and also more amenable to AOT compilation (native image building).
 
 Takes this:
 
@@ -46,26 +46,26 @@ You then need a Spring application bootstrap utility that recognizes the `Applic
 
 ```
 
-and set the APT processor up as a compiler plugin:
+and set the code generator up as a compiler plugin:
 
 ```
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<annotationProcessorPaths>
-						<path>
-							<groupId>org.springframework.experimental</groupId>
-							<artifactId>spring-init-processor</artifactId>
-							<version>${init.version}</version>
-						</path>
-					</annotationProcessorPaths>
-				</configuration>
+				<groupId>org.springframework.experimental</groupId>
+				<artifactId>spring-init-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>sources</id>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 
 ```
 
-To use functional versions of Spring Boot autoconfiguration you need to include additional dependencies, for example (with `generated.version=2.1.1.BUILD-SNAPSHOT` for Spring Boot 2.1.1):
+To use functional versions of Spring Boot autoconfiguration you need to include additional dependencies, for example (with `generated.version=2.4.0-SNAPSHOT` for Spring Boot 2.4.0):
 
 ```
 		<dependency>
@@ -75,7 +75,7 @@ To use functional versions of Spring Boot autoconfiguration you need to include 
 		</dependency>
 ```
 
-The convention is that the artifact ID is the same as the Spring Boot dependency, but the group ID is different and the classifier is "func" (to make the jar file names unique). There is also a `spring-init-library` with some scraps of support for Spring Cloud.
+The convention is that the artifact ID is the same as the Spring Boot dependency with a `-func` suffix, but the group ID is different. There is also a `spring-init-library` with some scraps of support for Spring Cloud.
 
 You can use `@Import` or `@ImportAutoConfiguration` (more idiomatically) to include existing autoconfigurations in your app. Example (a simple, non-web application):
 
@@ -94,7 +94,7 @@ public class SampleApplication {
 }
 ```
 
-Look at the samples for code to copy. If you are using Eclipse you will need the M2E APT plugin.
+Look at the samples for code to copy. If you are using Eclipse you will need the M2E tooling.
 
 Build and run:
 
@@ -107,7 +107,7 @@ $ java -jar samples/application/target/*.jar
  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
   '  |____| .__|_| |_|_| |_\__, | / / / /
  =========|_|==============|___/=/_/_/_/
- :: Spring Boot ::  (v2.1.0.RELEASE)
+ :: Spring Boot ::  (v2.4.0-SNAPSHOT)
 
 ...
 Bar: com.acme.Bar@7c3ebc6b
@@ -119,13 +119,7 @@ The command line runner output comes out on stdout after the Spring Boot app has
 
 Before you build, run the `update.sh` script in the "generated" directory. It will clone Spring Boot and all the source code needed to generate initializers from Spring Boot autoconfigurations.
 
-You can then build and run everything from the command line, or from an IDE. If you are using [Eclipse](https://github.com/jbosstools/m2e-apt/issues/64), you need to disable the Maven project nature for the "processor" project (or work with it in a different workspace). It only has 2 dependencies, so it's quite easy to manually set up the classpath for that project (then you have to build it on the command line before you refresh the sample apps).
-
-You can debug the APT processor by running on the command line and attaching a debugger, e.g:
-
-```
-(cd modules/tests-lib/; MAVEN_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000" mvn clean compile)
-```
+You can then build and run everything from the command line, or from an IDE.
 
 ## Benchmarks
 
@@ -141,9 +135,9 @@ com.example.bench.SlimBenchmarkIT  slim    demo    96.000   5020.000  8.113   50
 com.example.bench.SlimBenchmarkIT  slim    actr    182.000  5416.000  10.081  54.230  0.912   0.920  0.008
 ```
 
-Spring Init is slightly faster but not much different memorywise than the straight annotation-based version with Spring Boot 2.4. It is a much better story in native images, but that requires some manual work still (see "func" and "tunc" samples).
+Spring Init is slightly faster but not much different memorywise than the straight annotation-based version with Spring Boot 2.4. It is a much better story in native images, but that is work in progress still (see "func" and "tunc" samples).
 
-You can generate a condition service, and get to practically no reflection at runtime - you need a `META-INF/services` entry for the infrastructure provider, generated with `closedWorld=true`. The app is a bit faster and uses a bit less memory:
+You can generate a condition service, and get to practically no reflection at runtime - you need a `META-INF/services` entry for the infrastructure provider, generated with `closedWorld=true`. The "func" and "tunc" samples both use this approach. The app is a bit faster and uses a bit less memory:
 
 ```
 class                              method sample  beans    classes   heap   memory  median  mean  range
