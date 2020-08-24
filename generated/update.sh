@@ -46,6 +46,7 @@ function generate() {
     version=$1; shift;
 	func_version=$1; shift
 	opts=$1; shift
+	echo Generating: ${artifactId}:${func_version}
     if ! [ -e $pom ]; then
         cat > $pom <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -101,8 +102,9 @@ EOF
 		sed '/^\t<version/,$ d' $pom > $tmpfile
     cat >> $tmpfile <<EOF
 	<version>${func_version}</version>
-EOF		
+EOF
 		sed '1,/^\t<version/ d' $pom >> $tmpfile
+		mv $tmpfile $pom
     fi
 
     # Delete the dependencies
