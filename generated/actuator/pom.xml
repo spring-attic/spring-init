@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>spring-boot-actuator-autoconfigure-func</artifactId>
-	<version>2.4.0-SNAPSHOT</version>
+	<version>2.4.0-M2</version>
 
 	<parent>
     	<groupId>org.springframework.experimental</groupId>
@@ -15,46 +15,29 @@
 
 	<dependencies>
     <dependency>
-      <groupId>org.springframework.experimental</groupId>
-      <artifactId>spring-boot-autoconfigure-func</artifactId>
-      <version>2.4.0-SNAPSHOT</version>
-          <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.experimental</groupId>
-      <artifactId>spring-security-config-func</artifactId>
-      <version>5.4.0-SNAPSHOT</version>
-          <optional>true</optional>
-    </dependency>
-    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-actuator</artifactId>
-      <version>2.4.0-SNAPSHOT</version>
-      <optional>true</optional>
+      <version>2.4.0-M2</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot</artifactId>
-      <version>2.4.0-SNAPSHOT</version>
-      <optional>true</optional>
+      <version>2.4.0-M2</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-autoconfigure</artifactId>
-      <version>2.4.0-SNAPSHOT</version>
-      <optional>true</optional>
+      <version>2.4.0-M2</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.11.1</version>
-	  <scope>provided</scope>
+      <version>2.11.2</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-jsr310</artifactId>
-      <version>2.11.1</version>
-	  <scope>provided</scope>
+      <version>2.11.2</version>
     </dependency>
         <dependency>
           <groupId>ch.qos.logback</groupId>
@@ -208,7 +191,7 @@
         </dependency>
         <dependency>
           <groupId>io.projectreactor.netty</groupId>
-          <artifactId>reactor-netty</artifactId>
+          <artifactId>reactor-netty-http</artifactId>
           <optional>true</optional>
         </dependency>
         <dependency>
@@ -347,6 +330,11 @@
           <optional>true</optional>
         </dependency>
         <dependency>
+          <groupId>org.neo4j.driver</groupId>
+          <artifactId>neo4j-java-driver</artifactId>
+          <optional>true</optional>
+        </dependency>
+        <dependency>
           <groupId>org.springframework</groupId>
           <artifactId>spring-jdbc</artifactId>
           <optional>true</optional>
@@ -398,11 +386,6 @@
         </dependency>
         <dependency>
           <groupId>org.springframework.data</groupId>
-          <artifactId>spring-data-neo4j</artifactId>
-          <optional>true</optional>
-        </dependency>
-        <dependency>
-          <groupId>org.springframework.data</groupId>
           <artifactId>spring-data-redis</artifactId>
           <optional>true</optional>
         </dependency>
@@ -449,7 +432,8 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-actuator-autoconfigure</artifactId>
-			<version>2.4.0-SNAPSHOT</version>
+			<version>2.4.0-M2</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>

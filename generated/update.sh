@@ -1,5 +1,11 @@
 #!/bin/bash
 
+BOOT_FUNC_VERSION=2.4.0-SNAPSHOT
+BOOT_LABEL=2.4.0-M2
+SECURITY_FUNC_VERSION=5.4.0-SNAPSHOT
+SECURITY_LABEL=5.4.0-RC1
+INIT_VERSION=0.0.1-SNAPSHOT
+
 function init() {
 
     module=$1; shift
@@ -38,6 +44,7 @@ function generate() {
     groupId=$1; shift;
     artifactId=$1; shift;
     version=$1; shift;
+	func_version=$1; shift
 	opts=$1; shift
     if ! [ -e $pom ]; then
         cat > $pom <<EOF
@@ -48,12 +55,12 @@ function generate() {
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>${artifactId}-func</artifactId>
-	<version>${version}</version>
+	<version>${func_version}</version>
 
 	<parent>
     	<groupId>org.springframework.experimental</groupId>
 		<artifactId>spring-init-generated</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>${INIT_VERSION}</version>
 	</parent>
 
 	<dependencies>
@@ -61,7 +68,7 @@ function generate() {
 
 	<properties>
 		<java.version>1.8</java.version>
-		<slim.version>0.0.1-SNAPSHOT</slim.version>
+		<slim.version>${INIT_VERSION}</slim.version>
 	</properties>
 
 	<build>
@@ -89,6 +96,13 @@ function generate() {
 
 </project>
 EOF
+	else
+		tmpfile=.pom.xml
+		sed '/^\t<version/,$ d' $pom > $tmpfile
+    cat >> $tmpfile <<EOF
+	<version>${func_version}</version>
+EOF		
+		sed '1,/^\t<version/ d' $pom >> $tmpfile
     fi
 
     # Delete the dependencies
@@ -104,7 +118,7 @@ EOF
 		<dependency>
 			<groupId>${groupId}</groupId>
 			<artifactId>spring-security-config-func</artifactId>
-			<version>5.4.0-SNAPSHOT</version>
+			<version>${SECURITY_FUNC_VERSION}</version>
 			<scope>provided</scope>
 		</dependency>
 EOF
@@ -114,7 +128,7 @@ EOF
 		<dependency>
 			<groupId>${groupId}</groupId>
 			<artifactId>spring-security-config-func</artifactId>
-			<version>5.4.0-SNAPSHOT</version>
+			<version>${SECURITY_FUNC_VERSION}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -162,38 +176,46 @@ if ! [ -e $cache ]; then
 fi
 
 # If ref is a branch not a tag, remember to reset to origin, not just checkout
-(cd $cache; git fetch --tags && git checkout master && git reset --hard origin/master)
+if echo $BOOT_LABEL | grep -q SNAPSHOT; then
+	(cd $cache; git fetch --tags && git checkout master && git reset --hard origin/master)
+else
+	(cd $cache; git fetch --tags && git checkout v$BOOT_LABEL)
+fi
 (cd $cache; ./gradlew publishMavenPublicationToMavenLocal -x test)
 
 src=$cache/spring-boot-project/spring-boot-autoconfigure
 tgt=`dirname $0`/autoconfigure
 init $tgt $src
 (cd $cache; mkdir -p build && optionals spring-boot-autoconfigure > build/opts-autoconfigure)
-generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml org.springframework.boot.autoconfigure  org.springframework.boot spring-boot-autoconfigure 2.4.0-SNAPSHOT $cache/build/opts-autoconfigure
+generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml org.springframework.boot.autoconfigure  org.springframework.boot spring-boot-autoconfigure $BOOT_LABEL $BOOT_FUNC_VERSION $cache/build/opts-autoconfigure
 
 src=$cache/spring-boot-project/spring-boot-actuator-autoconfigure
 tgt=`dirname $0`/actuator
 init $tgt $src
 (cd $cache; mkdir -p build && optionals spring-boot-actuator-autoconfigure > build/opts-actuator-autoconfigure)
-generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml org.springframework.boot.actuate.autoconfigure org.springframework.boot spring-boot-actuator-autoconfigure 2.4.0-SNAPSHOT $cache/build/opts-actuator-autoconfigure
+generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml org.springframework.boot.actuate.autoconfigure org.springframework.boot spring-boot-actuator-autoconfigure $BOOT_LABEL $BOOT_FUNC_VERSION $cache/build/opts-actuator-autoconfigure
 
 src=$cache/spring-boot-project/spring-boot-test-autoconfigure
 tgt=`dirname $0`/test
 init $tgt $src
 (cd $cache; mkdir -p build && optionals spring-boot-test-autoconfigure > build/opts-test-autoconfigure)
-generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml org.springframework.boot.test org.springframework.boot spring-boot-test-autoconfigure 2.4.0-SNAPSHOT $cache/build/opts-test-autoconfigure
+generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml org.springframework.boot.test org.springframework.boot spring-boot-test-autoconfigure $BOOT_LABEL $BOOT_FUNC_VERSION $cache/build/opts-test-autoconfigure
 
 cache=`dirname $0`/sources/spring-security
 if ! [ -e $cache ]; then
     git clone https://github.com/spring-projects/spring-security $cache
 fi
 
-(cd $cache; git fetch --tags && git checkout master && git reset --hard origin/master)
+if echo $SECURITY_LABEL | grep -q SNAPSHOT; then
+	(cd $cache; git fetch --tags && git checkout master && git reset --hard origin/master)
+else
+	(cd $cache; git fetch --tags && git checkout $SECURITY_LABEL)
+fi
 (cd $cache/config; ../gradlew install -x test)
 
 src=$cache/config
 tgt=`dirname $0`/security
 init $tgt $src
-generate $src/build/poms/pom-default.xml $tgt/pom.xml org.springframework.security.config org.springframework.security spring-security-config 5.4.0-SNAPSHOT
+generate $src/build/poms/pom-default.xml $tgt/pom.xml org.springframework.security.config org.springframework.security spring-security-config $SECURITY_LABEL $SECURITY_FUNC_VERSION
 
 

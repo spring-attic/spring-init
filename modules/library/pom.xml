@@ -13,7 +13,7 @@
 	</parent>
 
 	<properties>
-		<generated.version>2.4.0-SNAPSHOT</generated.version>
+		<generated.version>2.4.0-M2</generated.version>
 	</properties>
 
 	<dependencies>
