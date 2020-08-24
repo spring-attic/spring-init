@@ -49,9 +49,9 @@
 
 	<properties>
 		<java.version>1.8</java.version>
-		<generated.version>2.4.0-M2</generated.version>
-		<generated-security.version>5.4.0-RC1</generated-security.version>
-		<spring-security.version>5.4.0-RC1</spring-security.version>
+		<generated.version>2.4.0-SNAPSHOT</generated.version>
+		<generated-security.version>5.4.0-SNAPSHOT</generated-security.version>
+		<spring-security.version>5.4.0-SNAPSHOT</spring-security.version>
 		<start-class>app.main.SampleApplication</start-class>
 	</properties>
 

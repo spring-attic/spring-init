@@ -27,7 +27,7 @@
 		<webjars-jquery.version>2.2.4</webjars-jquery.version>
 		<wro4j.version>1.8.0</wro4j.version>
 		<slim.version>0.0.1-SNAPSHOT</slim.version>
-		<generated.version>2.4.0-M2</generated.version>
+		<generated.version>2.4.0-SNAPSHOT</generated.version>
 
 		<jacoco.version>0.8.2</jacoco.version>
 		<jmh.version>1.21</jmh.version>
