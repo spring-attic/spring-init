@@ -65,6 +65,17 @@ public class SimpleProcessorTests {
 	}
 
 	@Test
+	public void resourceXmlImport() {
+		InitializerClassProcessor processor = new InitializerClassProcessor();
+		Set<JavaFile> files = processor.process(app("resource"));
+		assertThat(files).hasSize(4);
+		// System.err.println(files);
+		assertThat(files.toString()).contains("!context.getEnvironment().getProperty(");
+		assertThat(files.toString()).contains("new XmlInitializer(\"bar-config.xml\")");
+		assertThat(files.toString()).contains("spring.xml.ignore");
+	}
+
+	@Test
 	public void conditionalOnComponent() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("condition.component"));
 		assertThat(files).hasSize(6);

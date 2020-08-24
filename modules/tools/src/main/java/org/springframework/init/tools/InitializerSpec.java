@@ -446,9 +446,12 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 	private void addResources(CodeBlock.Builder builder) {
 		Set<String> locations = resources.getResources().get(configurationType);
 		if (locations != null) {
+			builder.beginControlFlow("if (!context.getEnvironment().getProperty($S, Boolean.class, false))",
+					"spring.xml.ignore");
 			for (String location : locations) {
 				builder.addStatement("new $T($S).initialize(context)", SpringClassNames.XML_INITIALIZER, location);
 			}
+			builder.endControlFlow();
 		}
 	}
 
@@ -537,7 +540,8 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 				}
 				logger.info("Generating source for bean method, type involved is private: "
 						+ beanMethod.getDeclaringClass() + "." + beanMethod);
-				builder.addStatement("context.registerBean($S, types.getType($S))", beanMethod.getName(), returnTypeElement.getName());
+				builder.addStatement("context.registerBean($S, types.getType($S))", beanMethod.getName(),
+						returnTypeElement.getName());
 
 			} else {
 
@@ -546,8 +550,9 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 				}
 				ParameterSpecs params = autowireParamsForMethod(beanMethod);
 
-				builder.addStatement("context.registerBean($S, $T.class, "
-						+ supplier(type, beanMethod, params.format) + customizer(type, beanMethod, params) + ")",
+				builder.addStatement(
+						"context.registerBean($S, $T.class, " + supplier(type, beanMethod, params.format)
+								+ customizer(type, beanMethod, params) + ")",
 						ArrayUtils.merge(params.args, beanMethod.getName(), returnTypeElement, type));
 			}
 
