@@ -11,7 +11,6 @@ import org.springframework.util.PathMatcher;
 import org.springframework.validation.Validator;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.servlet.FlashMapManager;
-import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
@@ -78,10 +77,6 @@ public class RouterFunctionAutoConfiguration_EnableWebMvcConfigurationInitialize
 					.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).httpRequestHandlerAdapter());
 			context.registerBean("simpleControllerHandlerAdapter", SimpleControllerHandlerAdapter.class, () -> context
 					.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).simpleControllerHandlerAdapter());
-			context.registerBean("handlerExceptionResolver", HandlerExceptionResolver.class,
-					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class)
-							.handlerExceptionResolver(BeanFactoryAnnotationUtils.qualifiedBeanOfType(context,
-									ContentNegotiationManager.class, "mvcContentNegotiationManager")));
 			context.registerBean("mvcViewResolver", ViewResolver.class,
 					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class)
 							.mvcViewResolver(BeanFactoryAnnotationUtils.qualifiedBeanOfType(context,

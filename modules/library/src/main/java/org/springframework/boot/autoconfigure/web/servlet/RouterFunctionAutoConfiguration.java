@@ -57,7 +57,6 @@ import org.springframework.web.filter.FormContentFilter;
 import org.springframework.web.filter.HiddenHttpMethodFilter;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.FlashMapManager;
-import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
@@ -204,12 +203,6 @@ public class RouterFunctionAutoConfiguration {
 		@Bean
 		public HttpRequestHandlerAdapter httpRequestHandlerAdapter() {
 			return delegate.httpRequestHandlerAdapter();
-		}
-
-		@Bean
-		public HandlerExceptionResolver handlerExceptionResolver(
-				@Qualifier("mvcContentNegotiationManager") ContentNegotiationManager contentNegotiationManager) {
-			return delegate.handlerExceptionResolver(contentNegotiationManager);
 		}
 
 		@Bean
