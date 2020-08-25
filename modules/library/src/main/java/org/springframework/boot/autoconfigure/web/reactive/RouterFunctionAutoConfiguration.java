@@ -43,6 +43,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.validation.Validator;
 import org.springframework.web.filter.reactive.HiddenHttpMethodFilter;
 import org.springframework.web.reactive.DispatcherHandler;
+import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.reactive.function.server.RouterFunction;
@@ -176,6 +177,11 @@ public class RouterFunctionAutoConfiguration {
 			return delegate.webFluxValidator();
 		}
 
+		@Bean
+		public HandlerMapping resourceHandlerMapping(ResourceUrlProvider resourceUrlProvider) {
+			return  delegate.resourceHandlerMapping(resourceUrlProvider);
+		}
+		
 	}
 
 	@Configuration(proxyBeanMethods = false)

@@ -21,11 +21,11 @@ public class RouterFunctionAutoConfigurationInitializer
 		if (RouterFunctionAutoConfigurationInitializer.enabled) {
 			ConditionService conditions = InfrastructureUtils.getBean(context.getBeanFactory(), ConditionService.class);
 			if (conditions.matches(WebMvcAutoConfiguration.class)) {
-				if (context.getBeanFactory().getBeanNamesForType(WebMvcAutoConfiguration.class).length == 0) {
-					context.registerBean(WebMvcAutoConfiguration.class, () -> new WebMvcAutoConfiguration());
-					if (conditions.matches(WebMvcAutoConfiguration.class, OrderedHiddenHttpMethodFilter.class)) {
+				if (context.getBeanFactory().getBeanNamesForType(RouterFunctionAutoConfiguration.class).length == 0) {
+					context.registerBean(RouterFunctionAutoConfiguration.class, () -> new RouterFunctionAutoConfiguration());
+					if (conditions.matches(RouterFunctionAutoConfiguration.class, OrderedHiddenHttpMethodFilter.class)) {
 						context.registerBean("hiddenHttpMethodFilter", OrderedHiddenHttpMethodFilter.class,
-								() -> context.getBean(WebMvcAutoConfiguration.class).hiddenHttpMethodFilter());
+								() -> context.getBean(RouterFunctionAutoConfiguration.class).hiddenHttpMethodFilter());
 					}
 					if (context.getBeanFactory().getBeanNamesForType(ResourceProperties.class).length == 0) {
 						context.registerBean(ResourceProperties.class, () -> new ResourceProperties());

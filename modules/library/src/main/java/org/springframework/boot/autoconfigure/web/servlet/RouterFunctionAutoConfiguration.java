@@ -18,7 +18,9 @@ package org.springframework.boot.autoconfigure.web.servlet;
 import java.util.List;
 
 import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -38,6 +40,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.servlet.filter.OrderedFormContentFilter;
 import org.springframework.boot.web.servlet.filter.OrderedHiddenHttpMethodFilter;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,6 +52,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.PathMatcher;
 import org.springframework.validation.Validator;
 import org.springframework.web.accept.ContentNegotiationManager;
+import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.filter.FormContentFilter;
 import org.springframework.web.filter.HiddenHttpMethodFilter;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -64,6 +68,7 @@ import org.springframework.web.servlet.function.support.HandlerFunctionAdapter;
 import org.springframework.web.servlet.function.support.RouterFunctionMapping;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
+import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -77,7 +82,7 @@ import org.springframework.web.util.UrlPathHelper;
 @AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE + 10)
 @AutoConfigureAfter({ DispatcherServletAutoConfiguration.class, TaskExecutionAutoConfiguration.class,
 		ValidationAutoConfiguration.class })
-@EnableConfigurationProperties({ResourceProperties.class, WebMvcProperties.class})
+@EnableConfigurationProperties({ ResourceProperties.class, WebMvcProperties.class })
 public class RouterFunctionAutoConfiguration {
 
 	private static final String[] SERVLET_LOCATIONS = { "/" };
@@ -95,7 +100,7 @@ public class RouterFunctionAutoConfiguration {
 	public OrderedFormContentFilter formContentFilter() {
 		return new OrderedFormContentFilter();
 	}
-	
+
 	static String[] getResourceLocations(String[] staticLocations) {
 		String[] locations = new String[staticLocations.length + SERVLET_LOCATIONS.length];
 		System.arraycopy(staticLocations, 0, locations, 0, staticLocations.length);
@@ -104,20 +109,32 @@ public class RouterFunctionAutoConfiguration {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	public static class EnableFunctionalConfiguration implements ResourceLoaderAware {
-		
+	public static class EnableFunctionalConfiguration implements ResourceLoaderAware, ApplicationContextAware, ServletContextAware {
+
 		private WebMvcAutoConfiguration.EnableWebMvcConfiguration delegate;
 		@Nullable
 		private List<Object> interceptors;
 
 		public EnableFunctionalConfiguration(ResourceProperties resourceProperties,
-				ObjectProvider<WebMvcProperties> mvcPropertiesProvider, ObjectProvider<WebMvcRegistrations> mvcRegistrationsProvider, ListableBeanFactory beanFactory) {
-			delegate = new WebMvcAutoConfiguration.EnableWebMvcConfiguration(resourceProperties, mvcPropertiesProvider, mvcRegistrationsProvider, beanFactory);
+				ObjectProvider<WebMvcProperties> mvcPropertiesProvider,
+				ObjectProvider<WebMvcRegistrations> mvcRegistrationsProvider, ListableBeanFactory beanFactory) {
+			delegate = new WebMvcAutoConfiguration.EnableWebMvcConfiguration(resourceProperties, mvcPropertiesProvider,
+					mvcRegistrationsProvider, beanFactory);
 		}
 
 		@Override
 		public void setResourceLoader(ResourceLoader resourceLoader) {
 			delegate.setResourceLoader(resourceLoader);
+		}
+
+		@Override
+		public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+			delegate.setApplicationContext(applicationContext);
+		}
+		
+		@Override
+		public void setServletContext(ServletContext servletContext) {
+			delegate.setServletContext(servletContext);
 		}
 
 		@Bean
@@ -152,19 +169,19 @@ public class RouterFunctionAutoConfiguration {
 		public UrlPathHelper mvcUrlPathHelper() {
 			return delegate.mvcUrlPathHelper();
 		}
-		
+
 		@Bean
 		public PathMatcher mvcPathMatcher() {
 			return delegate.mvcPathMatcher();
 		}
-		
+
 		@Bean
 		public RouterFunctionMapping routerFunctionMapping(
 				@Qualifier("mvcConversionService") FormattingConversionService conversionService,
 				@Qualifier("mvcResourceUrlProvider") ResourceUrlProvider resourceUrlProvider) {
 			return delegate.routerFunctionMapping(conversionService, resourceUrlProvider);
 		}
-		
+
 		@Bean
 		@Nullable
 		public HandlerMapping resourceHandlerMapping(
@@ -173,28 +190,28 @@ public class RouterFunctionAutoConfiguration {
 				@Qualifier("mvcResourceUrlProvider") ResourceUrlProvider resourceUrlProvider) {
 			return delegate.resourceHandlerMapping(contentNegotiationManager, conversionService, resourceUrlProvider);
 		}
-		
+
 		@Bean
 		public ResourceUrlProvider mvcResourceUrlProvider() {
 			return delegate.mvcResourceUrlProvider();
 		}
-		
+
 		@Bean
 		public HandlerFunctionAdapter handlerFunctionAdapter() {
 			return delegate.handlerFunctionAdapter();
 		}
-		
+
 		@Bean
 		public HttpRequestHandlerAdapter httpRequestHandlerAdapter() {
 			return delegate.httpRequestHandlerAdapter();
 		}
-		
+
 		@Bean
 		public HandlerExceptionResolver handlerExceptionResolver(
 				@Qualifier("mvcContentNegotiationManager") ContentNegotiationManager contentNegotiationManager) {
 			return delegate.handlerExceptionResolver(contentNegotiationManager);
 		}
-		
+
 		@Bean
 		public ViewResolver mvcViewResolver(
 				@Qualifier("mvcContentNegotiationManager") ContentNegotiationManager contentNegotiationManager) {
@@ -220,6 +237,11 @@ public class RouterFunctionAutoConfiguration {
 		@Bean
 		public RequestToViewNameTranslator viewNameTranslator() {
 			return delegate.viewNameTranslator();
+		}
+
+		@Bean
+		public SimpleControllerHandlerAdapter simpleControllerHandlerAdapter() {
+			return delegate.simpleControllerHandlerAdapter();
 		}
 
 	}

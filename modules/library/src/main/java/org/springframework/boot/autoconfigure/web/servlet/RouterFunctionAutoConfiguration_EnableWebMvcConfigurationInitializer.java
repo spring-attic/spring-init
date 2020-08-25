@@ -21,6 +21,7 @@ import org.springframework.web.servlet.function.support.HandlerFunctionAdapter;
 import org.springframework.web.servlet.function.support.RouterFunctionMapping;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
+import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -29,39 +30,39 @@ public class RouterFunctionAutoConfiguration_EnableWebMvcConfigurationInitialize
 	@Override
 	public void initialize(GenericApplicationContext context) {
 		if (context.getBeanFactory()
-				.getBeanNamesForType(WebMvcAutoConfiguration.EnableWebMvcConfiguration.class).length == 0) {
-			context.registerBean(WebMvcAutoConfiguration.EnableWebMvcConfiguration.class,
-					() -> new WebMvcAutoConfiguration.EnableWebMvcConfiguration(
+				.getBeanNamesForType(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).length == 0) {
+			context.registerBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class,
+					() -> new RouterFunctionAutoConfiguration.EnableFunctionalConfiguration(
 							context.getBean(ResourceProperties.class), context.getBeanProvider(WebMvcProperties.class),
 							context.getBeanProvider(WebMvcRegistrations.class), context.getBeanFactory()));
 			context.registerBean("welcomePageHandlerMapping", WelcomePageHandlerMapping.class,
-					() -> context.getBean(WebMvcAutoConfiguration.EnableWebMvcConfiguration.class)
+					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class)
 							.welcomePageHandlerMapping(context, context.getBean(FormattingConversionService.class),
 									context.getBean(ResourceUrlProvider.class)));
 			ConditionService conditions = InfrastructureUtils.getBean(context.getBeanFactory(), ConditionService.class);
-			if (conditions.matches(WebMvcAutoConfiguration.EnableWebMvcConfiguration.class, LocaleResolver.class)) {
+			if (conditions.matches(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class, LocaleResolver.class)) {
 				context.registerBean("localeResolver", LocaleResolver.class, () -> context
-						.getBean(WebMvcAutoConfiguration.EnableWebMvcConfiguration.class).localeResolver());
+						.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).localeResolver());
 			}
 			context.registerBean("mvcConversionService", FormattingConversionService.class, () -> context
-					.getBean(WebMvcAutoConfiguration.EnableWebMvcConfiguration.class).mvcConversionService());
+					.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).mvcConversionService());
 			context.registerBean("mvcValidator", Validator.class,
-					() -> context.getBean(WebMvcAutoConfiguration.EnableWebMvcConfiguration.class).mvcValidator());
+					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).mvcValidator());
 			context.registerBean("mvcContentNegotiationManager", ContentNegotiationManager.class, () -> context
-					.getBean(WebMvcAutoConfiguration.EnableWebMvcConfiguration.class).mvcContentNegotiationManager());
+					.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).mvcContentNegotiationManager());
 			context.registerBean("mvcUrlPathHelper", UrlPathHelper.class,
-					() -> context.getBean(WebMvcAutoConfiguration.EnableWebMvcConfiguration.class).mvcUrlPathHelper());
+					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).mvcUrlPathHelper());
 			context.registerBean("mvcPathMatcher", PathMatcher.class,
-					() -> context.getBean(WebMvcAutoConfiguration.EnableWebMvcConfiguration.class).mvcPathMatcher());
+					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).mvcPathMatcher());
 			context.registerBean("routerFunctionMapping", RouterFunctionMapping.class,
-					() -> context.getBean(WebMvcAutoConfiguration.EnableWebMvcConfiguration.class)
+					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class)
 							.routerFunctionMapping(
 									BeanFactoryAnnotationUtils.qualifiedBeanOfType(context,
 											FormattingConversionService.class, "mvcConversionService"),
 									BeanFactoryAnnotationUtils.qualifiedBeanOfType(context, ResourceUrlProvider.class,
 											"mvcResourceUrlProvider")));
 			context.registerBean("resourceHandlerMapping", HandlerMapping.class,
-					() -> context.getBean(WebMvcAutoConfiguration.EnableWebMvcConfiguration.class)
+					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class)
 							.resourceHandlerMapping(
 									BeanFactoryAnnotationUtils.qualifiedBeanOfType(context,
 											ContentNegotiationManager.class, "mvcContentNegotiationManager"),
@@ -70,27 +71,29 @@ public class RouterFunctionAutoConfiguration_EnableWebMvcConfigurationInitialize
 									BeanFactoryAnnotationUtils.qualifiedBeanOfType(context, ResourceUrlProvider.class,
 											"mvcResourceUrlProvider")));
 			context.registerBean("mvcResourceUrlProvider", ResourceUrlProvider.class, () -> context
-					.getBean(WebMvcAutoConfiguration.EnableWebMvcConfiguration.class).mvcResourceUrlProvider());
+					.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).mvcResourceUrlProvider());
 			context.registerBean("handlerFunctionAdapter", HandlerFunctionAdapter.class, () -> context
-					.getBean(WebMvcAutoConfiguration.EnableWebMvcConfiguration.class).handlerFunctionAdapter());
+					.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).handlerFunctionAdapter());
 			context.registerBean("httpRequestHandlerAdapter", HttpRequestHandlerAdapter.class, () -> context
-					.getBean(WebMvcAutoConfiguration.EnableWebMvcConfiguration.class).httpRequestHandlerAdapter());
+					.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).httpRequestHandlerAdapter());
+			context.registerBean("simpleControllerHandlerAdapter", SimpleControllerHandlerAdapter.class, () -> context
+					.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).simpleControllerHandlerAdapter());
 			context.registerBean("handlerExceptionResolver", HandlerExceptionResolver.class,
-					() -> context.getBean(WebMvcAutoConfiguration.EnableWebMvcConfiguration.class)
+					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class)
 							.handlerExceptionResolver(BeanFactoryAnnotationUtils.qualifiedBeanOfType(context,
 									ContentNegotiationManager.class, "mvcContentNegotiationManager")));
 			context.registerBean("mvcViewResolver", ViewResolver.class,
-					() -> context.getBean(WebMvcAutoConfiguration.EnableWebMvcConfiguration.class)
+					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class)
 							.mvcViewResolver(BeanFactoryAnnotationUtils.qualifiedBeanOfType(context,
 									ContentNegotiationManager.class, "mvcContentNegotiationManager")));
 			context.registerBean("mvcHandlerMappingIntrospector", HandlerMappingIntrospector.class, () -> context
-					.getBean(WebMvcAutoConfiguration.EnableWebMvcConfiguration.class).mvcHandlerMappingIntrospector());
+					.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).mvcHandlerMappingIntrospector());
 			context.registerBean("themeResolver", ThemeResolver.class,
-					() -> context.getBean(WebMvcAutoConfiguration.EnableWebMvcConfiguration.class).themeResolver());
+					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).themeResolver());
 			context.registerBean("flashMapManager", FlashMapManager.class,
-					() -> context.getBean(WebMvcAutoConfiguration.EnableWebMvcConfiguration.class).flashMapManager());
+					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).flashMapManager());
 			context.registerBean("viewNameTranslator", RequestToViewNameTranslator.class, () -> context
-					.getBean(WebMvcAutoConfiguration.EnableWebMvcConfiguration.class).viewNameTranslator());
+					.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).viewNameTranslator());
 		}
 	}
 }
