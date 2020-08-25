@@ -35,7 +35,7 @@ public class SampleApplication {
 
 	public static void main(String[] args) {
 		SpringApplication app = new SpringApplicationBuilder(SampleApplication.class)
-				.initializers(new InfrastructureInitializer().binding(ServerProperties.class, SampleApplication::bind))
+				.initializers(InfrastructureInitializer.priority().binding(ServerProperties.class, SampleApplication::bind))
 				.build();
 		app.run(args);
 	}

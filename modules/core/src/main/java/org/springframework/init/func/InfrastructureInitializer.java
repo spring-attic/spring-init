@@ -39,12 +39,16 @@ public class InfrastructureInitializer implements ApplicationContextInitializer<
 
 	private int order = Ordered.HIGHEST_PRECEDENCE + 5;
 
+	public static InfrastructureInitializer priority() {
+		return new InfrastructureInitializer(Ordered.HIGHEST_PRECEDENCE, new ApplicationContextInitializer<?>[0]);
+	}
+
 	public InfrastructureInitializer() {
-		this(new ApplicationContextInitializer<?>[0]);
+		this(Ordered.HIGHEST_PRECEDENCE + 5, new ApplicationContextInitializer<?>[0]);
 	}
 
 	public InfrastructureInitializer(ApplicationContextInitializer<?>... initializers) {
-		this(Ordered.HIGHEST_PRECEDENCE, initializers);
+		this(Ordered.HIGHEST_PRECEDENCE + 5, initializers);
 	}
 
 	public InfrastructureInitializer(int order, ApplicationContextInitializer<?>... initializers) {
