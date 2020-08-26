@@ -464,6 +464,7 @@
 			<plugin>
 				<groupId>org.springframework.experimental</groupId>
 				<artifactId>spring-init-maven-plugin</artifactId>
+				<version>${slim.version}</version>
 				<executions>
 					<execution>
 						<id>sources</id>

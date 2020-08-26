@@ -93,6 +93,14 @@ public class InfrastructureInitializer implements ApplicationContextInitializer<
 					() -> new EnhancedConfigurationPropertiesBindingPostProcessor(binders, context.getEnvironment()));
 			ConfigurationPropertiesBindingPostProcessor.register(context);
 		}
+		ServiceLoader<ConfigurationSource> loader = ServiceLoader.load(ConfigurationSource.class,
+				ClassUtils.getDefaultClassLoader());
+		for (ConfigurationSource provider : loader) {
+			InfrastructureUtils.invokeAwareMethods(provider, context.getEnvironment(), context, context);
+			for (ApplicationContextInitializer<GenericApplicationContext> initializer : provider.getInitializers()) {
+				initializer.initialize(context);
+			}
+		}
 	}
 
 	@Override

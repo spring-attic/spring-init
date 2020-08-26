@@ -93,7 +93,6 @@ public class FunctionalInstallerPostProcessor implements BeanDefinitionRegistryP
 			if (InfrastructureUtils.containsBean(beans, ConfigurationSource.class)) {
 				ConfigurationSource sources = InfrastructureUtils.getBean(beans, ConfigurationSource.class);
 				register(registry, sources.getInitializers());
-				return;
 			}
 		}
 		Set<Imported> seen = new LinkedHashSet<>();

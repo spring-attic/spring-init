@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://maven.apache.org/POM/4.0.0"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.springframework.experimental</groupId>
@@ -10,7 +11,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.4.0-M2</version>
-		<relativePath/>
+		<relativePath />
 	</parent>
 	<name>petclinic</name>
 
@@ -26,7 +27,7 @@
 		<webjars-jquery-ui.version>1.11.4</webjars-jquery-ui.version>
 		<webjars-jquery.version>2.2.4</webjars-jquery.version>
 		<wro4j.version>1.8.0</wro4j.version>
-		<slim.version>0.0.1-SNAPSHOT</slim.version>
+		<spring-init.version>${project.version}</spring-init.version>
 		<generated.version>2.4.0-SNAPSHOT</generated.version>
 
 		<jacoco.version>0.8.2</jacoco.version>
@@ -166,12 +167,12 @@
 			<dependency>
 				<groupId>org.springframework.experimental</groupId>
 				<artifactId>spring-init-core</artifactId>
-				<version>${slim.version}</version>
+				<version>${spring-init.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.experimental</groupId>
 				<artifactId>spring-init-library</artifactId>
-				<version>${slim.version}</version>
+				<version>${spring-init.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -182,6 +183,7 @@
 			<plugin>
 				<groupId>org.springframework.experimental</groupId>
 				<artifactId>spring-init-maven-plugin</artifactId>
+				<version>${spring-init.version}</version>
 				<executions>
 					<execution>
 						<id>sources</id>
@@ -208,7 +210,8 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<executions>
 					<execution>
-						<!-- Spring Boot Actuator displays build-related information if a META-INF/build-info.properties file is present -->
+						<!-- Spring Boot Actuator displays build-related information if a META-INF/build-info.properties 
+							file is present -->
 						<goals>
 							<goal>build-info</goal>
 						</goals>
@@ -266,7 +269,8 @@
 
 
 
-			<!-- Spring Boot Actuator displays build-related information if a git.properties file is present at the classpath -->
+			<!-- Spring Boot Actuator displays build-related information if a git.properties 
+				file is present at the classpath -->
 			<plugin>
 				<groupId>pl.project13.maven</groupId>
 				<artifactId>git-commit-id-plugin</artifactId>

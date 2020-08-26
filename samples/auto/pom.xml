@@ -25,12 +25,12 @@
 		<dependency>
 			<groupId>org.springframework.experimental</groupId>
 			<artifactId>spring-init-core</artifactId>
-			<version>${project.version}</version>
+			<version>${spring-init.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.experimental</groupId>
 			<artifactId>spring-init-library</artifactId>
-			<version>${project.version}</version>
+			<version>${spring-init.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -60,6 +60,7 @@
 	<properties>
 		<java.version>1.8</java.version>
 		<generated.version>2.4.0-SNAPSHOT</generated.version>
+		<spring-init.version>${project.version}</spring-init.version>
 		<start-class>app.main.SampleApplication</start-class>
 	</properties>
 
@@ -69,6 +70,7 @@
 			<plugin>
 				<groupId>org.springframework.experimental</groupId>
 				<artifactId>spring-init-maven-plugin</artifactId>
+				<version>${spring-init.version}</version>
 				<executions>
 					<execution>
 						<id>sources</id>

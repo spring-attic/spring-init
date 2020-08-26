@@ -91,9 +91,9 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 				return;
 			}
 			GenericApplicationContext generic = (GenericApplicationContext) context;
-			ConditionService conditions = initialize(generic);
-			functional(generic, conditions);
-			apply(generic, initialized.getSpringApplication(), conditions);
+			FunctionalInstallerListener.initialize(generic);
+			functional(generic);
+			apply(generic, initialized.getSpringApplication());
 		} else if (event instanceof ApplicationEnvironmentPreparedEvent) {
 			ApplicationEnvironmentPreparedEvent prepared = (ApplicationEnvironmentPreparedEvent) event;
 			if (!isEnabled(prepared.getEnvironment())) {
@@ -177,14 +177,14 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 		return environment.getProperty("spring.functional.enabled", Boolean.class, true);
 	}
 
-	private void functional(GenericApplicationContext context, ConditionService conditions) {
+	private void functional(GenericApplicationContext context) {
 		// TODO: it would be better not to have to do this
 		context.registerBean(AnnotationConfigUtils.CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME,
 				SlimConfigurationClassPostProcessor.class, () -> new SlimConfigurationClassPostProcessor());
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 	}
 
-	public static ConditionService initialize(GenericApplicationContext context) {
+	public static void initialize(GenericApplicationContext context) {
 		if (!InfrastructureUtils.containsBean(context.getBeanFactory(), ImportRegistrars.class.getName())) {
 			GenericApplicationContext infrastructure = InfrastructureUtils.getContext(context.getBeanFactory());
 			if (!InfrastructureUtils.containsBean(context.getBeanFactory(), MetadataReaderFactory.class)) {
@@ -206,7 +206,6 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 			context.getBeanFactory().registerSingleton(FunctionalInstallerPostProcessor.class.getName(),
 					new FunctionalInstallerPostProcessor(context));
 		}
-		return InfrastructureUtils.getBean(context.getBeanFactory(), ConditionService.class);
 	}
 
 	private void apply(GenericApplicationContext context) {
@@ -223,7 +222,7 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 		}
 	}
 
-	private void apply(GenericApplicationContext context, SpringApplication application, ConditionService conditions) {
+	private void apply(GenericApplicationContext context, SpringApplication application) {
 		findInitializers(context, application);
 		apply(context);
 	}
