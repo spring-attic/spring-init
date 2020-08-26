@@ -6,7 +6,7 @@
 
 	<groupId>org.springframework.experimental</groupId>
 	<artifactId>spring-init-fails</artifactId>
-	<version>0.0.1-RC2</version>
+	<version>0.0.1-SNAPSHOT</version>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
