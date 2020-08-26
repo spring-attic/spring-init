@@ -5,7 +5,7 @@
 
 	<groupId>org.springframework.experimental</groupId>
 	<artifactId>spring-init-benchmarks</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1-RC2</version>
 	<packaging>jar</packaging>
 
 	<name>spring-init-benchmarks</name>
@@ -27,7 +27,7 @@
 		<maven-core.version>3.3.9</maven-core.version>
 		<thin.version>1.0.25.RELEASE</thin.version>
 		<generated.version>2.4.0-SNAPSHOT</generated.version>
-		<slim.version>0.0.1-SNAPSHOT</slim.version>
+		<slim.version>0.0.1-RC2</slim.version>
 		<benchmarksEnabled>false</benchmarksEnabled>
 	</properties>
 
