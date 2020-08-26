@@ -6,6 +6,7 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.validation.Validator;
+import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
@@ -44,6 +45,9 @@ public class RouterFunctionAutoConfiguration_EnableWebFluxConfigurationInitializ
 			context.registerBean("resourceHandlerMapping", HandlerMapping.class,
 					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class)
 							.resourceHandlerMapping(context.getBean(ResourceUrlProvider.class)));
+			context.registerBean("webBindingInitializer", WebBindingInitializer.class,
+					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class)
+							.webBindingInitializer(context.getBean(FormattingConversionService.class), context.getBean(Validator.class)));
 			context.registerBean("resourceUrlProvider", ResourceUrlProvider.class, () -> context
 					.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).resourceUrlProvider());
 			context.registerBean("serverCodecConfigurer", ServerCodecConfigurer.class, () -> context

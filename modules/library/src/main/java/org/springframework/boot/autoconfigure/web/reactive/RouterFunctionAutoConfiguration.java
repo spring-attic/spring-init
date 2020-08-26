@@ -41,6 +41,8 @@ import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.lang.Nullable;
 import org.springframework.validation.Validator;
+import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
+import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.filter.reactive.HiddenHttpMethodFilter;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.HandlerMapping;
@@ -95,11 +97,24 @@ public class RouterFunctionAutoConfiguration {
 
 	}
 
+	public static class DelegateFunctionalConfiguration extends WebFluxAutoConfiguration.EnableWebFluxConfiguration {
+
+		public DelegateFunctionalConfiguration(WebFluxProperties webFluxProperties,
+				ObjectProvider<WebFluxRegistrations> webFluxRegistrations) {
+			super(webFluxProperties, webFluxRegistrations);
+		}
+
+		protected ConfigurableWebBindingInitializer getConfigurableWebBindingInitializer(
+				FormattingConversionService webFluxConversionService, Validator webFluxValidator) {
+			return super.getConfigurableWebBindingInitializer(webFluxConversionService, webFluxValidator);
+		}
+	}
+
 	@Configuration(proxyBeanMethods = false)
 	@EnableConfigurationProperties({ ResourceProperties.class, WebFluxProperties.class })
 	public static class EnableFunctionalConfiguration implements ApplicationContextAware {
 
-		private WebFluxAutoConfiguration.EnableWebFluxConfiguration delegate;
+		private DelegateFunctionalConfiguration delegate;
 
 		@Override
 		public void setApplicationContext(@Nullable ApplicationContext applicationContext) {
@@ -108,7 +123,7 @@ public class RouterFunctionAutoConfiguration {
 
 		public EnableFunctionalConfiguration(WebFluxProperties webFluxProperties,
 				ObjectProvider<WebFluxRegistrations> webFluxRegistrations) {
-			delegate = new WebFluxAutoConfiguration.EnableWebFluxConfiguration(webFluxProperties, webFluxRegistrations);
+			delegate = new DelegateFunctionalConfiguration(webFluxProperties, webFluxRegistrations);
 		}
 
 		@Bean
@@ -179,9 +194,15 @@ public class RouterFunctionAutoConfiguration {
 
 		@Bean
 		public HandlerMapping resourceHandlerMapping(ResourceUrlProvider resourceUrlProvider) {
-			return  delegate.resourceHandlerMapping(resourceUrlProvider);
+			return delegate.resourceHandlerMapping(resourceUrlProvider);
 		}
-		
+
+		@Bean
+		public WebBindingInitializer webBindingInitializer(FormattingConversionService webFluxConversionService,
+				Validator webFluxValidator) {
+			return delegate.getConfigurableWebBindingInitializer(webFluxConversionService, webFluxValidator);
+		}
+
 	}
 
 	@Configuration(proxyBeanMethods = false)
