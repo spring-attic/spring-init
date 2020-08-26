@@ -42,6 +42,7 @@ import org.springframework.context.annotation.DeferredImportSelector;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.context.annotation.ImportSelector;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.SpringProperties;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
@@ -57,6 +58,8 @@ public class FunctionalInstallerPostProcessor implements BeanDefinitionRegistryP
 	private Set<Imported> deferred = new LinkedHashSet<>();
 
 	private MetadataReaderFactory metadataReaderFactory;
+
+	private static final boolean shouldIgnoreXml = SpringProperties.getFlag("spring.xml.ignore");
 
 	private enum Phase {
 
@@ -170,17 +173,21 @@ public class FunctionalInstallerPostProcessor implements BeanDefinitionRegistryP
 												.getOrCreate(context, initializerType);
 										configs.put(clazz, initializer);
 									}
-								} else if (ImportBeanDefinitionRegistrar.class.isAssignableFrom(clazz)) {
+								}
+								else if (ImportBeanDefinitionRegistrar.class.isAssignableFrom(clazz)) {
 									added.add(new Imported(imported.getSource(), clazz));
-								} else {
+								}
+								else {
 									context.registerBean(clazz);
 								}
 							}
 						}
 					}
-				} else if (ImportBeanDefinitionRegistrar.class.isAssignableFrom(type)) {
+				}
+				else if (ImportBeanDefinitionRegistrar.class.isAssignableFrom(type)) {
 					importRegistrar(registry, imported);
-				} else {
+				}
+				else {
 					try {
 						if (getMetaData(type).isAnnotated(Configuration.class.getName())) {
 							// recurse?
@@ -189,20 +196,24 @@ public class FunctionalInstallerPostProcessor implements BeanDefinitionRegistryP
 							ApplicationContextInitializer<GenericApplicationContext> initializer = (ApplicationContextInitializer<GenericApplicationContext>) InfrastructureUtils
 									.getOrCreate(context, initializerType);
 							configs.put(type, initializer);
-						} else {
+						}
+						else {
 							context.registerBean(type);
 						}
-					} catch (ArrayStoreException e) {
+					}
+					catch (ArrayStoreException e) {
 						// ignore
 					}
 				}
-			} else if (imported.getResources() != null) {
+			}
+			else if (!shouldIgnoreXml && imported.getResources() != null) {
 				initializers.add(new XmlInitializer(imported.getResources()));
 			}
 		}
 		if (phase == Phase.USER) {
 			initializers.addAll(configs.values());
-		} else {
+		}
+		else {
 			for (Class<?> config : AutoConfigurations
 					.getClasses(AutoConfigurations.of(configs.keySet().toArray(new Class<?>[0])))) {
 				initializers.add(configs.get(config));
@@ -261,7 +272,8 @@ public class FunctionalInstallerPostProcessor implements BeanDefinitionRegistryP
 	private AnnotationMetadata getMetaData(Class<?> imported) {
 		try {
 			return this.metadataReaderFactory.getMetadataReader(imported.getName()).getAnnotationMetadata();
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new IllegalStateException("Cannot find metadata for " + imported, e);
 		}
 	}
