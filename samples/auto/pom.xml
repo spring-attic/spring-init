@@ -6,7 +6,7 @@
 
 	<groupId>org.springframework.experimental</groupId>
 	<artifactId>auto</artifactId>
-	<version>0.1.0-SNAPSHOT</version>
+	<version>0.1.0</version>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
