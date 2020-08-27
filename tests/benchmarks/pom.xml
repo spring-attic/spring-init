@@ -26,8 +26,7 @@
 		<jmh.version>1.21</jmh.version>
 		<maven-core.version>3.3.9</maven-core.version>
 		<thin.version>1.0.25.RELEASE</thin.version>
-		<generated.version>2.4.0-SNAPSHOT</generated.version>
-		<slim.version>0.0.1-SNAPSHOT</slim.version>
+		<spring-init.version>0.0.1-SNAPSHOT</spring-init.version>
 		<benchmarksEnabled>false</benchmarksEnabled>
 	</properties>
 
@@ -124,18 +123,10 @@
 		<dependencies>
 			<dependency>
 				<groupId>org.springframework.experimental</groupId>
-				<artifactId>spring-boot-autoconfigure-func</artifactId>
-				<version>${generated.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.experimental</groupId>
-				<artifactId>spring-boot-actuator-autoconfigure-func</artifactId>
-				<version>${generated.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.experimental</groupId>
-				<artifactId>spring-init-core</artifactId>
-				<version>${slim.version}</version>
+				<artifactId>spring-init-dependencies</artifactId>
+				<version>${spring-init.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven</groupId>
@@ -181,7 +172,7 @@
 			<plugin>
 				<groupId>org.springframework.experimental</groupId>
 				<artifactId>spring-init-maven-plugin</artifactId>
-				<version>${slim.version}</version>
+				<version>${spring-init.version}</version>
 				<executions>
 					<execution>
 						<id>sources</id>

@@ -28,7 +28,6 @@
 		<webjars-jquery.version>2.2.4</webjars-jquery.version>
 		<wro4j.version>1.8.0</wro4j.version>
 		<spring-init.version>${project.version}</spring-init.version>
-		<generated.version>2.4.0-SNAPSHOT</generated.version>
 
 		<jacoco.version>0.8.2</jacoco.version>
 		<jmh.version>1.21</jmh.version>
@@ -151,28 +150,10 @@
 		<dependencies>
 			<dependency>
 				<groupId>org.springframework.experimental</groupId>
-				<artifactId>spring-boot-autoconfigure-func</artifactId>
-				<version>${generated.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.experimental</groupId>
-				<artifactId>spring-boot-actuator-autoconfigure-func</artifactId>
-				<version>${generated.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.experimental</groupId>
-				<artifactId>spring-boot-test-autoconfigure-func</artifactId>
-				<version>${generated.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.experimental</groupId>
-				<artifactId>spring-init-core</artifactId>
+				<artifactId>spring-init-dependencies</artifactId>
 				<version>${spring-init.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.experimental</groupId>
-				<artifactId>spring-init-library</artifactId>
-				<version>${spring-init.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
