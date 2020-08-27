@@ -39,4 +39,9 @@ public class FunctionalApplicationTests {
 		assertThat(client.getForObject("/", String.class)).isEqualTo("Hello");
 	}
 
+
+	@Test
+	public void error() {
+		assertThat(client.getForObject("/missing", String.class)).contains("404");
+	}
 }
