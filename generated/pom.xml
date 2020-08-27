@@ -11,7 +11,7 @@
 
 	<groupId>org.springframework.experimental</groupId>
 	<artifactId>spring-init-generated</artifactId>
-	<version>0.1.0</version>
+	<version>0.1.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Parent Generated</name>
 	<url>https://spring.io</url>

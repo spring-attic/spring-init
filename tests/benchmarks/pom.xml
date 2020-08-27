@@ -5,7 +5,7 @@
 
 	<groupId>org.springframework.experimental</groupId>
 	<artifactId>spring-init-benchmarks</artifactId>
-	<version>0.1.0</version>
+	<version>0.1.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>spring-init-benchmarks</name>
@@ -26,7 +26,7 @@
 		<jmh.version>1.21</jmh.version>
 		<maven-core.version>3.3.9</maven-core.version>
 		<thin.version>1.0.25.RELEASE</thin.version>
-		<spring-init.version>0.1.0</spring-init.version>
+		<spring-init.version>0.1.1-SNAPSHOT</spring-init.version>
 		<benchmarksEnabled>false</benchmarksEnabled>
 	</properties>
 
@@ -39,11 +39,6 @@
 		<dependency>
 			<groupId>org.springframework.experimental</groupId>
 			<artifactId>spring-boot-actuator-autoconfigure-func</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.experimental</groupId>
-			<artifactId>spring-init-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

@@ -1,6 +1,6 @@
-This project implements a code generator (activated by a build plugin) that converts `@Configuration` to functional bean registrations, which are known to be faster and also more amenable to AOT compilation (native image building).
+This project implements a code generator (activated by a build plugin) that converts `@Configuration` to functional bean registrations, which are known to be faster and also more amenable to AOT compilation (native images).
 
-Takes this:
+It takes this:
 
 ```java
 @Configuration
@@ -38,10 +38,23 @@ public class SampleConfigurationInitializer
 You then need a Spring application bootstrap utility that recognizes the `ApplicationContextInitializer` and treats it in a special way.  This is provided in the modules of this project, so just add them as dependencies:
 
 ```
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.experimental</groupId>
+				<artifactId>spring-init-dependencies</artifactId>
+				<version>0.1.0</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+
 		<dependency>
 			<groupId>org.springframework.experimental</groupId>
 			<artifactId>spring-init-core</artifactId>
-			<version>${init.version}</version>
 		</dependency>
 
 ```
@@ -65,13 +78,12 @@ and set the code generator up as a compiler plugin:
 
 ```
 
-To use functional versions of Spring Boot autoconfiguration you need to include additional dependencies, for example (with `generated.version=2.4.0-SNAPSHOT` for Spring Boot 2.4.0):
+To use functional versions of Spring Boot autoconfiguration you can include additional dependencies which have been pre-compiled. The versions are managed by the `spring-init-dependencies` BOM (where each version of Spring Init only supports one version of Spring Boot - 0.1.0 is paired with 2.4.0-M2). An example of including the `func` dependencies in a project that uses `spring-boot-autoconfigure`:
 
 ```
 		<dependency>
 			<groupId>org.springframework.experimental</groupId>
 			<artifactId>spring-boot-autoconfigure-func</artifactId>
-			<version>${generated.version}</version>
 		</dependency>
 ```
 
@@ -107,7 +119,7 @@ $ java -jar samples/application/target/*.jar
  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
   '  |____| .__|_| |_|_| |_\__, | / / / /
  =========|_|==============|___/=/_/_/_/
- :: Spring Boot ::  (v2.4.0-SNAPSHOT)
+ :: Spring Boot ::  (v2.4.0-M2)
 
 ...
 Bar: com.acme.Bar@7c3ebc6b
