@@ -16,6 +16,7 @@
 package org.springframework.boot.autoconfigure.web.reactive;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -55,6 +56,9 @@ import org.springframework.web.reactive.function.server.support.RouterFunctionMa
 import org.springframework.web.reactive.function.server.support.ServerResponseResultHandler;
 import org.springframework.web.reactive.resource.ResourceUrlProvider;
 import org.springframework.web.reactive.result.SimpleHandlerAdapter;
+import org.springframework.web.reactive.result.method.annotation.ResponseBodyResultHandler;
+import org.springframework.web.reactive.result.method.annotation.ResponseEntityResultHandler;
+import org.springframework.web.reactive.result.view.ViewResolutionResultHandler;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.i18n.LocaleContextResolver;
 
@@ -180,6 +184,29 @@ public class RouterFunctionAutoConfiguration {
 		@Bean
 		public ServerResponseResultHandler serverResponseResultHandler(ServerCodecConfigurer serverCodecConfigurer) {
 			return delegate.serverResponseResultHandler(serverCodecConfigurer);
+		}
+
+		@Bean
+		public ResponseEntityResultHandler responseEntityResultHandler(
+				@Qualifier("webFluxAdapterRegistry") ReactiveAdapterRegistry reactiveAdapterRegistry,
+				ServerCodecConfigurer serverCodecConfigurer,
+				@Qualifier("webFluxContentTypeResolver") RequestedContentTypeResolver contentTypeResolver) {
+			return delegate.responseEntityResultHandler(reactiveAdapterRegistry, serverCodecConfigurer, contentTypeResolver);
+		}
+
+		@Bean
+		public ResponseBodyResultHandler responseBodyResultHandler(
+				@Qualifier("webFluxAdapterRegistry") ReactiveAdapterRegistry reactiveAdapterRegistry,
+				ServerCodecConfigurer serverCodecConfigurer,
+				@Qualifier("webFluxContentTypeResolver") RequestedContentTypeResolver contentTypeResolver) {
+			return delegate.responseBodyResultHandler(reactiveAdapterRegistry, serverCodecConfigurer, contentTypeResolver);
+		}
+
+		@Bean
+		public ViewResolutionResultHandler viewResolutionResultHandler(
+				@Qualifier("webFluxAdapterRegistry") ReactiveAdapterRegistry reactiveAdapterRegistry,
+				@Qualifier("webFluxContentTypeResolver") RequestedContentTypeResolver contentTypeResolver) {
+			return delegate.viewResolutionResultHandler(reactiveAdapterRegistry, contentTypeResolver);
 		}
 
 		@Bean

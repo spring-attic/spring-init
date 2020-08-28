@@ -1,5 +1,6 @@
 package org.springframework.boot.autoconfigure.web.reactive;
 
+import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -15,6 +16,9 @@ import org.springframework.web.reactive.function.server.support.RouterFunctionMa
 import org.springframework.web.reactive.function.server.support.ServerResponseResultHandler;
 import org.springframework.web.reactive.resource.ResourceUrlProvider;
 import org.springframework.web.reactive.result.SimpleHandlerAdapter;
+import org.springframework.web.reactive.result.method.annotation.ResponseBodyResultHandler;
+import org.springframework.web.reactive.result.method.annotation.ResponseEntityResultHandler;
+import org.springframework.web.reactive.result.view.ViewResolutionResultHandler;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.i18n.LocaleContextResolver;
 
@@ -28,17 +32,19 @@ public class RouterFunctionAutoConfiguration_EnableWebFluxConfigurationInitializ
 					() -> new RouterFunctionAutoConfiguration.EnableFunctionalConfiguration(
 							context.getBean(WebFluxProperties.class),
 							context.getBeanProvider(WebFluxRegistrations.class)));
-			context.registerBean("webFluxConversionService", FormattingConversionService.class, () -> context
-					.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).webFluxConversionService());
+			context.registerBean("webFluxConversionService", FormattingConversionService.class,
+					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class)
+							.webFluxConversionService());
 			context.registerBean("webFluxValidator", Validator.class, () -> context
 					.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).webFluxValidator());
-			context.registerBean("webHandler", DispatcherHandler.class,
-					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).webHandler());
+			context.registerBean("webHandler", DispatcherHandler.class, () -> context
+					.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).webHandler());
 			context.registerBean("responseStatusExceptionHandler", WebExceptionHandler.class,
 					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class)
 							.responseStatusExceptionHandler());
-			context.registerBean("webFluxContentTypeResolver", RequestedContentTypeResolver.class, () -> context
-					.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).webFluxContentTypeResolver());
+			context.registerBean("webFluxContentTypeResolver", RequestedContentTypeResolver.class,
+					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class)
+							.webFluxContentTypeResolver());
 			context.registerBean("routerFunctionMapping", RouterFunctionMapping.class,
 					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class)
 							.routerFunctionMapping(context.getBean(ServerCodecConfigurer.class)));
@@ -47,22 +53,50 @@ public class RouterFunctionAutoConfiguration_EnableWebFluxConfigurationInitializ
 							.resourceHandlerMapping(context.getBean(ResourceUrlProvider.class)));
 			context.registerBean("webBindingInitializer", WebBindingInitializer.class,
 					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class)
-							.webBindingInitializer(context.getBean(FormattingConversionService.class), context.getBean(Validator.class)));
-			context.registerBean("resourceUrlProvider", ResourceUrlProvider.class, () -> context
-					.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).resourceUrlProvider());
-			context.registerBean("serverCodecConfigurer", ServerCodecConfigurer.class, () -> context
-					.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).serverCodecConfigurer());
-			context.registerBean("localeContextResolver", LocaleContextResolver.class, () -> context
-					.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).localeContextResolver());
-			context.registerBean("webFluxAdapterRegistry", ReactiveAdapterRegistry.class, () -> context
-					.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).webFluxAdapterRegistry());
-			context.registerBean("handlerFunctionAdapter", HandlerFunctionAdapter.class, () -> context
-					.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).handlerFunctionAdapter());
-			context.registerBean("simpleHandlerAdapter", SimpleHandlerAdapter.class, () -> context
-					.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).simpleHandlerAdapter());
+							.webBindingInitializer(context.getBean(FormattingConversionService.class),
+									context.getBean(Validator.class)));
+			context.registerBean("resourceUrlProvider", ResourceUrlProvider.class,
+					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class)
+							.resourceUrlProvider());
+			context.registerBean("serverCodecConfigurer", ServerCodecConfigurer.class,
+					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class)
+							.serverCodecConfigurer());
+			context.registerBean("localeContextResolver", LocaleContextResolver.class,
+					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class)
+							.localeContextResolver());
+			context.registerBean("webFluxAdapterRegistry", ReactiveAdapterRegistry.class,
+					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class)
+							.webFluxAdapterRegistry());
+			context.registerBean("handlerFunctionAdapter", HandlerFunctionAdapter.class,
+					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class)
+							.handlerFunctionAdapter());
+			context.registerBean("simpleHandlerAdapter", SimpleHandlerAdapter.class,
+					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class)
+							.simpleHandlerAdapter());
 			context.registerBean("serverResponseResultHandler", ServerResponseResultHandler.class,
 					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class)
 							.serverResponseResultHandler(context.getBean(ServerCodecConfigurer.class)));
+			context.registerBean("responseEntityResultHandler", ResponseEntityResultHandler.class, () -> context
+					.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).responseEntityResultHandler(
+							BeanFactoryAnnotationUtils.qualifiedBeanOfType(context, ReactiveAdapterRegistry.class,
+									"webFluxAdapterRegistry"),
+							context.getBean(ServerCodecConfigurer.class),
+							BeanFactoryAnnotationUtils.qualifiedBeanOfType(context, RequestedContentTypeResolver.class,
+									"webFluxContentTypeResolver")));
+			context.registerBean("viewResolutionResultHandler", ViewResolutionResultHandler.class,
+					() -> context.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class)
+							.viewResolutionResultHandler(
+									BeanFactoryAnnotationUtils.qualifiedBeanOfType(context,
+											ReactiveAdapterRegistry.class, "webFluxAdapterRegistry"),
+									BeanFactoryAnnotationUtils.qualifiedBeanOfType(context,
+											RequestedContentTypeResolver.class, "webFluxContentTypeResolver")));
+			context.registerBean("responseBodyResultHandler", ResponseBodyResultHandler.class, () -> context
+					.getBean(RouterFunctionAutoConfiguration.EnableFunctionalConfiguration.class).responseBodyResultHandler(
+							BeanFactoryAnnotationUtils.qualifiedBeanOfType(context, ReactiveAdapterRegistry.class,
+									"webFluxAdapterRegistry"),
+							context.getBean(ServerCodecConfigurer.class),
+							BeanFactoryAnnotationUtils.qualifiedBeanOfType(context, RequestedContentTypeResolver.class,
+									"webFluxContentTypeResolver")));
 		}
 	}
 }
