@@ -1,4 +1,4 @@
-name: Java Deployment
+name: deploy
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
 
     steps:
       - uses: actions/checkout@v2
@@ -22,7 +23,9 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - name: Build with Maven
+        run: ./mvnw -B install
+      - name: Deploy
         env:
           BUILD_USER: ${{ secrets.BUILD_USER }}
           BUILD_PASSWORD: ${{ secrets.BUILD_PASSWORD }}
-        run: ./mvnw -B deploy -DaltReleaseDeploymentRepository=repo.spring.io::default::https://${BUILD_USER}:${BUILD_PASSWORD}@repo.spring.io/libs-milestone-local -DaltSnapshotDeploymentRepository=repo.spring.io::default::https://${BUILD_USER}:${BUILD_PASSWORD}@repo.spring.io/libs-snapshot-local
+        run: ./mvnw -B deploy -DskipTests -DaltReleaseDeploymentRepository=repo.spring.io::default::https://${BUILD_USER}:${BUILD_PASSWORD}@repo.spring.io/libs-milestone-local -DaltSnapshotDeploymentRepository=repo.spring.io::default::https://${BUILD_USER}:${BUILD_PASSWORD}@repo.spring.io/libs-snapshot-local
