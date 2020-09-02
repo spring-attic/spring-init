@@ -220,6 +220,24 @@ public class SimpleProcessorTests {
 		assertThat(files.toString()).contains(".registerBeanDefinitions(null, context)");
 	}
 
+	@Test
+	public void namedBean() {
+		Set<JavaFile> files = new InitializerClassProcessor().process(app("name"));
+		// System.err.println(files);
+		assertThat(files).hasSize(2);
+		assertThat(files.toString()).contains("context.registerBean(\"fooBean\"");
+		assertThat(files.toString()).contains("context.registerBean(\"barBean\"");
+	}
+
+	@Test
+	public void overrideBean() {
+		Set<JavaFile> files = new InitializerClassProcessor().process(app("override"));
+		// System.err.println(files);
+		assertThat(files).hasSize(2);
+		assertThat(files.toString()).containsOnlyOnce("context.registerBean(\"foo\"");
+		assertThat(files.toString()).containsOnlyOnce("context.registerBean(\"bar\"");
+	}
+
 	private Class<?> app(String pkg) {
 		return ClassUtils.resolveClassName("app." + pkg + ".SampleApplication", null);
 	}

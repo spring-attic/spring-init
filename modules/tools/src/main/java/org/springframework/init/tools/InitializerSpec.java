@@ -540,7 +540,8 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 				}
 				logger.info("Generating source for bean method, type involved is private: "
 						+ beanMethod.getDeclaringClass() + "." + beanMethod);
-				builder.addStatement("context.registerBean($S, types.getType($S))", beanMethod.getName(),
+				String beanName = utils.getBeanName(beanMethod);
+				builder.addStatement("context.registerBean($S, types.getType($S))", beanName,
 						returnTypeElement.getName());
 
 			} else {
@@ -550,10 +551,11 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 				}
 				ParameterSpecs params = autowireParamsForMethod(beanMethod);
 
+				String beanName = utils.getBeanName(beanMethod);
 				builder.addStatement(
 						"context.registerBean($S, $T.class, " + supplier(type, beanMethod, params.format)
 								+ customizer(type, beanMethod, params) + ")",
-						ArrayUtils.merge(params.args, beanMethod.getName(), returnTypeElement, type));
+						ArrayUtils.merge(params.args, beanName, returnTypeElement, type));
 			}
 
 			if (conditional) {
@@ -816,13 +818,17 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		List<Method> beanMethods = new ArrayList<>();
 		while (type != null) {
 			for (Method candidate : type.getDeclaredMethods()) {
-				if (isBeanMethod(candidate) && seen.add(candidate.getName())) {
+				if (isBeanMethod(candidate) && seen.add(key(candidate))) {
 					beanMethods.add(candidate);
 				}
 			}
 			type = utils.getSuperType(type);
 		}
 		return beanMethods;
+	}
+
+	private String key(Method method) {
+		return method.getName() + "(" + Arrays.asList(method.getParameterTypes()).stream().map(type -> type.getName()).collect(Collectors.joining(",")) + ")";
 	}
 
 	private Constructor<?> getConstructor(Class<?> type) {

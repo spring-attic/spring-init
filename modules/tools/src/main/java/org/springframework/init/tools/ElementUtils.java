@@ -37,6 +37,8 @@ import org.springframework.context.annotation.DeferredImportSelector;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.context.annotation.ImportSelector;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.init.func.ConditionService;
@@ -88,8 +90,7 @@ public class ElementUtils {
 						seen.add(annotation);
 						getAnnotations(annotation.annotationType(), type, set, seen);
 					}
-				}
-				catch (Throwable t) {
+				} catch (Throwable t) {
 					logger.warn("Problems working with annotation " + annotationTypename);
 				}
 			}
@@ -123,13 +124,11 @@ public class ElementUtils {
 								return annotation;
 							}
 						}
-					}
-					catch (Throwable t) {
+					} catch (Throwable t) {
 						logger.error("Problems working with annotation " + annotationTypename, t);
 					}
 				}
-			}
-			catch (ArrayStoreException e) {
+			} catch (ArrayStoreException e) {
 				// ignore
 			}
 		}
@@ -198,8 +197,7 @@ public class ElementUtils {
 					Object value = values.get(fieldname);
 					if (value instanceof Class<?>) {
 						collected.add((Class<?>) value);
-					}
-					else if (value instanceof Object[]) {
+					} else if (value instanceof Object[]) {
 						for (Object val : (Object[]) value) {
 							if (val instanceof Class<?>) {
 								collected.add((Class<?>) val);
@@ -221,8 +219,7 @@ public class ElementUtils {
 					Object value = values.get(fieldname);
 					if (value instanceof Annotation) {
 						collected.add((Annotation) value);
-					}
-					else if (value instanceof Object[]) {
+					} else if (value instanceof Object[]) {
 						for (Object val : (Object[]) value) {
 							if (val instanceof Annotation) {
 								collected.add((Annotation) val);
@@ -244,8 +241,7 @@ public class ElementUtils {
 					Object value = values.get(fieldname);
 					if (value instanceof String) {
 						collected.add((String) value);
-					}
-					else if (value instanceof Object[]) {
+					} else if (value instanceof Object[]) {
 						for (Object val : (Object[]) value) {
 							if (val instanceof String) {
 								collected.add((String) val);
@@ -412,6 +408,21 @@ public class ElementUtils {
 	public boolean isIncluded(Class<?> imported) {
 		ConditionService conditions = InfrastructureUtils.getBean(getMain().getBeanFactory(), ConditionService.class);
 		return conditions.matches(imported, ConfigurationPhase.PARSE_CONFIGURATION);
+	}
+
+	public String getBeanName(Method beanMethod) {
+		if (AnnotatedElementUtils.isAnnotated(beanMethod, SpringClassNames.BEAN.toString())) {
+			AnnotationAttributes attrs = AnnotatedElementUtils.getMergedAnnotationAttributes(beanMethod,
+					SpringClassNames.BEAN.toString());
+			if (attrs.containsKey("name")) {
+				String[] array = attrs.getStringArray("name");
+				if (array.length > 0) {
+					// TODO: aliases
+					return array[0];
+				}
+			}
+		}
+		return beanMethod.getName();
 	}
 
 }
