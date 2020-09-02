@@ -277,8 +277,6 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		} else if (utils.isImportBeanDefinitionRegistrar(imported)) {
 			boolean accessible = isAccessible(imported);
 			builder.beginControlFlow("try");
-			// TODO: Have another look at the BeanNameGenerator if
-			// https://jira.spring.io/browse/DATACMNS-1770 is fixed
 			if (accessible) {
 				builder.addStatement(
 						"$T.invokeAwareMethods(new $T(), context.getEnvironment(), context, context).registerBeanDefinitions($T.getBean(context.getBeanFactory(), $T.class).getMetadataReader($S).getAnnotationMetadata(), context, $T.getBean(context.getBeanFactory(), $T.class))",
