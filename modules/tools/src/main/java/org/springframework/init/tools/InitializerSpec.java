@@ -822,6 +822,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 					beanMethods.add(candidate);
 				}
 			}
+			// Ensure we include all inherited methods
 			type = utils.getSuperType(type);
 		}
 		return beanMethods;
