@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 public class SampleApplication extends SampleConfiguration {
 
 	@Bean
+	@Override
 	public Bar bar(Foo foo) {
 		return new Bar(new Foo("_" + foo.getValue()));
 	}
