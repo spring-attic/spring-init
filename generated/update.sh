@@ -115,26 +115,26 @@ EOF
     sed '/<\/dependencies/,$ d' $pom > $tmpfile
     sed -e '1,/<dependencies/ d;/<\/dependencies/,/<dependencies/ d;/<\/dependencies/,$ d' -e '/<dependency>/{:a;N;/<\/dependency>/!ba};/<scope>test/d'  $src | egrep -v '<scope>' >> $tmpfile
 	if ! [ -z ${opts} ] && [ -f ${opts} ]; then cat $opts >> $tmpfile; fi
-	if [ "${artifactId}" == "${spring-boot-autoconfigure}" ]; then
+	if [ "${artifactId}" == "spring-boot-autoconfigure" ]; then
     cat >> $tmpfile <<EOF
 		<dependency>
-			<groupId>${groupId}</groupId>
+			<groupId>org.springframework.experimental</groupId>
 			<artifactId>spring-security-config-func</artifactId>
 			<version>${SECURITY_FUNC_VERSION}</version>
 			<scope>provided</scope>
 		</dependency>
 EOF
 	fi
-	if [ "${artifactId}" == "${spring-boot-actuator-autoconfigure}" ]; then
+	if [ "${artifactId}" == "spring-boot-actuator-autoconfigure" ]; then
     cat >> $tmpfile <<EOF
 		<dependency>
-			<groupId>${groupId}</groupId>
+			<groupId>org.springframework.experimental</groupId>
 			<artifactId>spring-security-config-func</artifactId>
 			<version>${SECURITY_FUNC_VERSION}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>${groupId}</groupId>
+			<groupId>org.springframework.experimental</groupId>
 			<artifactId>spring-boot-autoconfigure-func</artifactId>
 			<version>${version}</version>
 			<scope>provided</scope>
