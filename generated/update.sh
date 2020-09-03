@@ -2,8 +2,6 @@
 
 BOOT_FUNC_VERSION=0.1.1-SNAPSHOT
 BOOT_LABEL=2.4.0-M2
-SECURITY_FUNC_VERSION=0.1.1-SNAPSHOT
-SECURITY_LABEL=5.4.0-RC1
 INIT_VERSION=0.1.1-SNAPSHOT
 
 function init() {
@@ -115,24 +113,8 @@ EOF
     sed '/<\/dependencies/,$ d' $pom > $tmpfile
     sed -e '1,/<dependencies/ d;/<\/dependencies/,/<dependencies/ d;/<\/dependencies/,$ d' -e '/<dependency>/{:a;N;/<\/dependency>/!ba};/<scope>test/d'  $src | egrep -v '<scope>' >> $tmpfile
 	if ! [ -z ${opts} ] && [ -f ${opts} ]; then cat $opts >> $tmpfile; fi
-	if [ "${artifactId}" == "spring-boot-autoconfigure" ]; then
-    cat >> $tmpfile <<EOF
-		<dependency>
-			<groupId>org.springframework.experimental</groupId>
-			<artifactId>spring-security-config-func</artifactId>
-			<version>${SECURITY_FUNC_VERSION}</version>
-			<scope>provided</scope>
-		</dependency>
-EOF
-	fi
 	if [ "${artifactId}" == "spring-boot-actuator-autoconfigure" ]; then
     cat >> $tmpfile <<EOF
-		<dependency>
-			<groupId>org.springframework.experimental</groupId>
-			<artifactId>spring-security-config-func</artifactId>
-			<version>${SECURITY_FUNC_VERSION}</version>
-			<scope>provided</scope>
-		</dependency>
 		<dependency>
 			<groupId>org.springframework.experimental</groupId>
 			<artifactId>spring-boot-autoconfigure-func</artifactId>
@@ -202,22 +184,3 @@ tgt=`dirname $0`/test
 init $tgt $src
 (cd $cache; mkdir -p build && optionals spring-boot-test-autoconfigure > build/opts-test-autoconfigure)
 generate $src/build/publications/maven/pom-default.xml $tgt/pom.xml org.springframework.boot.test org.springframework.boot spring-boot-test-autoconfigure $BOOT_LABEL $BOOT_FUNC_VERSION $cache/build/opts-test-autoconfigure
-
-cache=`dirname $0`/sources/spring-security
-if ! [ -e $cache ]; then
-    git clone https://github.com/spring-projects/spring-security $cache
-fi
-
-if echo $SECURITY_LABEL | grep -q SNAPSHOT; then
-	(cd $cache; git fetch --tags && git checkout master && git reset --hard origin/master)
-else
-	(cd $cache; git fetch --tags && git checkout $SECURITY_LABEL)
-fi
-(cd $cache/config; ../gradlew install -x test)
-
-src=$cache/config
-tgt=`dirname $0`/security
-init $tgt $src
-generate $src/build/poms/pom-default.xml $tgt/pom.xml org.springframework.security.config org.springframework.security spring-security-config $SECURITY_LABEL $SECURITY_FUNC_VERSION
-
-
