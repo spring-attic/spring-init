@@ -15,7 +15,9 @@
  */
 package org.springframework.init.func;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.ServiceLoader;
 
@@ -31,20 +33,25 @@ public class DefaultInitializerLocator implements InitializerLocator {
 
 	private Map<String, ApplicationContextInitializer<GenericApplicationContext>> map = new HashMap<>();
 
-	private ServiceLoader<InitializerLocator> loaders;
+	private Collection<InitializerLocator> loaders = new HashSet<>();
 
 	public DefaultInitializerLocator(GenericApplicationContext context) {
 		this.types = InfrastructureUtils.getBean(context.getBeanFactory(), TypeService.class);
 		this.context = context;
-		this.loaders = ServiceLoader.load(InitializerLocator.class,
-				ClassUtils.getDefaultClassLoader());
+		ServiceLoader.load(InitializerLocator.class, ClassUtils.getDefaultClassLoader())
+				.forEach(initializer -> this.loaders.add(initializer));
 	}
- 
+	
+	public DefaultInitializerLocator register(InitializerLocator locator) {
+		this.loaders.add(locator);
+		return this;
+	}
+
 	@Override
 	public ApplicationContextInitializer<GenericApplicationContext> getInitializer(String name) {
 		for (InitializerLocator locator : this.loaders) {
 			ApplicationContextInitializer<GenericApplicationContext> initializer = locator.getInitializer(name);
-			if (initializer!=null) {
+			if (initializer != null) {
 				return initializer;
 			}
 		}
@@ -58,7 +65,7 @@ public class DefaultInitializerLocator implements InitializerLocator {
 			@SuppressWarnings("unchecked")
 			ApplicationContextInitializer<GenericApplicationContext> initializer = (ApplicationContextInitializer<GenericApplicationContext>) InfrastructureUtils
 					.getOrCreate(context, initializerType);
-			map.put(name,  initializer);
+			map.put(name, initializer);
 			return initializer;
 		}
 		return null;
