@@ -75,11 +75,14 @@ public class FunctionalInstallerPostProcessor implements BeanDefinitionRegistryP
 
 	private ImportRegistrars registrar;
 
+	private InitializerLocator locator;
+
 	public FunctionalInstallerPostProcessor(GenericApplicationContext context) {
 		this.context = context;
 		ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
 		this.types = InfrastructureUtils.getBean(beanFactory, TypeService.class);
 		this.registrar = InfrastructureUtils.getBean(beanFactory, ImportRegistrars.class);
+		this.locator = InfrastructureUtils.getBean(beanFactory, InitializerLocator.class);
 		this.metadataReaderFactory = InfrastructureUtils.containsBean(beanFactory, MetadataReaderFactory.class)
 				? (MetadataReaderFactory) InfrastructureUtils.getBean(beanFactory, MetadataReaderFactory.class)
 				: new CachingMetadataReaderFactory(context.getClassLoader());
@@ -165,55 +168,44 @@ public class FunctionalInstallerPostProcessor implements BeanDefinitionRegistryP
 							Class<?> clazz = types.getType(select);
 							if (conditions.matches(clazz, ConfigurationPhase.PARSE_CONFIGURATION)) {
 								if (getMetaData(clazz).isAnnotated(Configuration.class.getName())) {
-									// recurse?
-									if (types.isPresent(select + "Initializer")) {
-										Class<?> initializerType = types.getType(select + "Initializer");
-										@SuppressWarnings("unchecked")
-										ApplicationContextInitializer<GenericApplicationContext> initializer = (ApplicationContextInitializer<GenericApplicationContext>) InfrastructureUtils
-												.getOrCreate(context, initializerType);
+									ApplicationContextInitializer<GenericApplicationContext> initializer = locator
+											.getInitializer(select);
+									if (initializer != null) {
 										configs.put(clazz, initializer);
 									}
-								}
-								else if (ImportBeanDefinitionRegistrar.class.isAssignableFrom(clazz)) {
+								} else if (ImportBeanDefinitionRegistrar.class.isAssignableFrom(clazz)) {
 									added.add(new Imported(imported.getSource(), clazz));
-								}
-								else {
+								} else {
 									context.registerBean(clazz);
 								}
 							}
 						}
 					}
-				}
-				else if (ImportBeanDefinitionRegistrar.class.isAssignableFrom(type)) {
+				} else if (ImportBeanDefinitionRegistrar.class.isAssignableFrom(type)) {
 					importRegistrar(registry, imported);
-				}
-				else {
+				} else {
 					try {
 						if (getMetaData(type).isAnnotated(Configuration.class.getName())) {
 							// recurse?
-							Class<?> initializerType = types.getType(type.getName() + "Initializer");
-							@SuppressWarnings("unchecked")
-							ApplicationContextInitializer<GenericApplicationContext> initializer = (ApplicationContextInitializer<GenericApplicationContext>) InfrastructureUtils
-									.getOrCreate(context, initializerType);
-							configs.put(type, initializer);
-						}
-						else {
+							ApplicationContextInitializer<GenericApplicationContext> initializer = locator
+									.getInitializer(type.getName());
+							if (initializer != null) {
+								configs.put(type, initializer);
+							}
+						} else {
 							context.registerBean(type);
 						}
-					}
-					catch (ArrayStoreException e) {
+					} catch (ArrayStoreException e) {
 						// ignore
 					}
 				}
-			}
-			else if (!shouldIgnoreXml && imported.getResources() != null) {
+			} else if (!shouldIgnoreXml && imported.getResources() != null) {
 				initializers.add(new XmlInitializer(imported.getResources()));
 			}
 		}
 		if (phase == Phase.USER) {
 			initializers.addAll(configs.values());
-		}
-		else {
+		} else {
 			for (Class<?> config : AutoConfigurations
 					.getClasses(AutoConfigurations.of(configs.keySet().toArray(new Class<?>[0])))) {
 				initializers.add(configs.get(config));
@@ -272,8 +264,7 @@ public class FunctionalInstallerPostProcessor implements BeanDefinitionRegistryP
 	private AnnotationMetadata getMetaData(Class<?> imported) {
 		try {
 			return this.metadataReaderFactory.getMetadataReader(imported.getName()).getAnnotationMetadata();
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new IllegalStateException("Cannot find metadata for " + imported, e);
 		}
 	}

@@ -145,15 +145,12 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 	}
 
 	private void findInitializers(GenericApplicationContext beans, SpringApplication application) {
-		TypeService types = InfrastructureUtils.getBean(beans.getBeanFactory(), TypeService.class);
 		for (Object source : application.getAllSources()) {
 			if (source instanceof Class<?>) {
 				Class<?> type = (Class<?>) source;
-				String cls = type.getName().replace("$", "_") + "Initializer";
-				if (types.isPresent(cls)) {
-					@SuppressWarnings("unchecked")
-					Class<? extends ApplicationContextInitializer<?>> initializer = (Class<? extends ApplicationContextInitializer<?>>) types
-							.getType(cls);
+				InitializerLocator locator = InfrastructureUtils.getBean(beans.getBeanFactory(), InitializerLocator.class);
+				ApplicationContextInitializer<GenericApplicationContext> initializer = locator.getInitializer(type.getName());
+				if (initializer != null) {
 					addInitializer(beans, initializer);
 					remove(application, source);
 				}
@@ -196,6 +193,10 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 				AnnotationMetadataConditionService conditions = new AnnotationMetadataConditionService(context);
 				infrastructure.getBeanFactory().registerSingleton(ConditionService.class.getName(), conditions);
 			}
+			if (!InfrastructureUtils.containsBean(context.getBeanFactory(), InitializerLocator.class)) {
+				DefaultInitializerLocator locator = new DefaultInitializerLocator(context);
+				infrastructure.getBeanFactory().registerSingleton(InitializerLocator.class.getName(), locator);
+			}
 			if (!InfrastructureUtils.containsBean(context.getBeanFactory(), BeanNameGenerator.class)) {
 				infrastructure.getBeanFactory().registerSingleton(BeanNameGenerator.class.getName(), DefaultBeanNameGenerator.INSTANCE);
 			}
@@ -228,16 +229,16 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 
 	@SuppressWarnings("unchecked")
 	private void addInitializer(GenericApplicationContext beans,
-			Class<? extends ApplicationContextInitializer<?>> type) {
-		if (type == null || this.added.contains(type)) {
+			ApplicationContextInitializer<GenericApplicationContext> initializer) {
+		Class<? extends ApplicationContextInitializer<?>> type = (Class<? extends ApplicationContextInitializer<?>>) initializer.getClass();
+		if (this.added.contains(type)) {
 			return;
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Adding initializer: " + type);
 		}
 		this.added.add(type);
-		initializers.add((ApplicationContextInitializer<GenericApplicationContext>) InfrastructureUtils
-				.getOrCreate(beans, type));
+		initializers.add(initializer);
 	}
 
 }
