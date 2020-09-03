@@ -35,6 +35,10 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.experimental</groupId>
+			<artifactId>spring-boot-autoconfigure-func</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.experimental</groupId>
 			<artifactId>spring-init-core</artifactId>
 		</dependency>
 		<dependency>
