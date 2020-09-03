@@ -1,4 +1,4 @@
-package app.enable;
+package app.generic;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringBootConfiguration;
@@ -6,11 +6,8 @@ import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAut
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.context.annotation.Import;
 
-import lib.enable.EnableBar;
-
 @SpringBootConfiguration
-@EnableBar
-@Import({ConfigurationPropertiesAutoConfiguration.class, PropertyPlaceholderAutoConfiguration.class})
+@Import({ SampleConfiguration.class, ConfigurationPropertiesAutoConfiguration.class, PropertyPlaceholderAutoConfiguration.class})
 public class SampleApplication {
 
 	public static void main(String[] args) {

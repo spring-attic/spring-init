@@ -103,8 +103,8 @@ public class SimpleProcessorTests {
 		assertThat(files).hasSize(5);
 		// System.err.println(files);
 		assertThat(files.toString()).contains("bar(context.getBean(Foo.class))");
-		assertThat(files.toString()).contains("runner(context.getBean(Bar.class))");
-		// TODO: need to use ObjectProvider to wire a Bar<Collection<Foo>> correctly
+		assertThat(files.toString()).contains("runner(ObjectUtils.available(context, ResolvableType.forType(new ParameterizedTypeReference<Bar<Foo>>(){}))))");
+		assertThat(files.toString()).contains("BeanRegistrar.generic(new ParameterizedTypeReference<Bar<Collection<Foo>>>() {}");
 	}
 
 	@Test

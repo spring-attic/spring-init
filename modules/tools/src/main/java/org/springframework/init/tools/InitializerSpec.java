@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -38,15 +39,8 @@ import java.util.stream.Stream;
 
 import javax.lang.model.element.Modifier;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
-import com.squareup.javapoet.TypeSpec.Builder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.ObjectProvider;
@@ -61,6 +55,13 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.ClassUtils;
+
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.TypeSpec.Builder;
 
 /**
  * @author Dave Syer
@@ -550,10 +551,18 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 				ParameterSpecs params = autowireParamsForMethod(beanMethod);
 
 				String beanName = utils.getBeanName(beanMethod);
-				builder.addStatement(
-						"context.registerBean($S, $T.class, " + supplier(type, beanMethod, params.format)
-								+ customizer(type, beanMethod, params) + ")",
-						ArrayUtils.merge(params.args, beanName, returnTypeElement, type));
+				ResolvableType resolvable = ResolvableType.forMethodReturnType(beanMethod);
+				if (resolvable.hasGenerics()) {
+					builder.addStatement("context.registerBeanDefinition($S, $T.generic(new $T<$T>() {}, "
+							+ supplier(type, beanMethod, params.format) + customizer(type, beanMethod, params) + "))",
+							ArrayUtils.merge(params.args, beanName, SpringClassNames.BEAN_REGISTRAR,
+									SpringClassNames.PARAMETERIZED_TYPE_REFERENCE, resolvable.getType(), type));
+				} else {
+					builder.addStatement(
+							"context.registerBean($S, $T.class, " + supplier(type, beanMethod, params.format)
+									+ customizer(type, beanMethod, params) + ")",
+							ArrayUtils.merge(params.args, beanName, returnTypeElement, type));
+				}
 			}
 
 			if (conditional) {
@@ -782,22 +791,45 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		} else {
 			StringBuilder code = new StringBuilder();
 			String qualifier = utils.getQualifier(param);
+			Type rawType = paramType;
+			ResolvableType resolvable = null;
 			if (paramType instanceof ParameterizedType) {
-				// We don't care any more
-				paramType = ((ParameterizedType) paramType).getRawType();
+				rawType = ((ParameterizedType) paramType).getRawType();
+				Type[] types = ((ParameterizedType) paramType).getActualTypeArguments();
+				if (Stream.of(types).noneMatch(type -> type instanceof TypeVariable)) {
+					resolvable = ResolvableType.forType(paramType);
+				} else {
+					// We don't care any more. Sigh. Spring Session.
+				}
 			}
 			if (utils.isLazy(param)) {
 				code.append("$T.lazy($T.class, () -> ");
 				result.types.add(SpringClassNames.OBJECT_UTILS);
-				result.types.add(TypeName.get(paramType));
+				result.types.add(TypeName.get(rawType));
 			}
 			if (qualifier != null) {
-				code.append("$T.qualifiedBeanOfType(context, $T.class, \"" + qualifier + "\")");
-				result.types.add(SpringClassNames.BEAN_FACTORY_ANNOTATION_UTILS);
-				result.types.add(TypeName.get(paramType));
+				if (resolvable == null) {
+					code.append("$T.qualifiedBeanOfType(context, $T.class, \"" + qualifier + "\")");
+					result.types.add(SpringClassNames.BEAN_FACTORY_ANNOTATION_UTILS);
+					result.types.add(TypeName.get(rawType));
+				} else {
+					code.append("$T.available(context, $T.forType(new $T<$T>(){}), \"" + qualifier + "\")");
+					result.types.add(SpringClassNames.OBJECT_UTILS);
+					result.types.add(SpringClassNames.RESOLVABLE_TYPE);
+					result.types.add(SpringClassNames.PARAMETERIZED_TYPE_REFERENCE);
+					result.types.add(TypeName.get(paramType));
+				}
 			} else {
-				code.append("context.getBean($T.class)");
-				result.types.add(TypeName.get(paramType));
+				if (resolvable == null) {
+					code.append("context.getBean($T.class)");
+					result.types.add(TypeName.get(rawType));
+				} else {
+					code.append("$T.available(context, $T.forType(new $T<$T>(){}))");
+					result.types.add(SpringClassNames.OBJECT_UTILS);
+					result.types.add(SpringClassNames.RESOLVABLE_TYPE);
+					result.types.add(SpringClassNames.PARAMETERIZED_TYPE_REFERENCE);
+					result.types.add(TypeName.get(paramType));
+				}
 			}
 			if (utils.isLazy(param)) {
 				code.append(")");
@@ -827,7 +859,8 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 	}
 
 	private String key(Method method) {
-		return method.getName() + "(" + Arrays.asList(method.getParameterTypes()).stream().map(type -> type.getName()).collect(Collectors.joining(",")) + ")";
+		return method.getName() + "(" + Arrays.asList(method.getParameterTypes()).stream().map(type -> type.getName())
+				.collect(Collectors.joining(",")) + ")";
 	}
 
 	private Constructor<?> getConstructor(Class<?> type) {

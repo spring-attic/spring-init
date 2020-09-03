@@ -31,6 +31,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
+import org.springframework.core.ResolvableType;
 
 /**
  * @author Dave Syer
@@ -42,6 +44,21 @@ public class ObjectUtils {
 		return (T) thing;
 	}
 
+	public static <T> T available(ListableBeanFactory beans,
+			ResolvableType type) {
+		return generic(beans.getBeanProvider(type).getIfAvailable());
+	}
+	
+	public static <T> T available(ListableBeanFactory beans,
+			ResolvableType type, String qualifier) {
+		for (String name : beans.getBeanNamesForType(type)) {
+			if (BeanFactoryAnnotationUtils.isQualifierMatch(qualifier::equals, name, beans)) {
+				return generic(beans.getBean(name));
+			}
+		}
+		throw new NoSuchBeanDefinitionException("Could not locate bean of type " + type + " qualified as '" + qualifier + "'");
+	}
+	
 	public static <T> ObjectProvider<Map<String, T>> map(ListableBeanFactory beans,
 			Class<T> type) {
 		return new ObjectProvider<Map<String, T>>() {

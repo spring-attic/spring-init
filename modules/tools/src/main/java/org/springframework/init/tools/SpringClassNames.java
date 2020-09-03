@@ -37,16 +37,18 @@ import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.ImportSelector;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.init.func.AnnotationMetadataConditionService;
+import org.springframework.init.func.BeanRegistrar;
 import org.springframework.init.func.ConditionService;
 import org.springframework.init.func.ImportRegistrars;
 import org.springframework.init.func.InfrastructureProvider;
 import org.springframework.init.func.InfrastructureUtils;
 import org.springframework.init.func.ObjectUtils;
-import org.springframework.init.func.AnnotationMetadataConditionService;
 import org.springframework.init.func.TypeService;
 import org.springframework.init.func.XmlInitializer;
 import org.springframework.lang.Nullable;
@@ -123,6 +125,8 @@ public class SpringClassNames {
 
 	public static final ClassName BEAN_NAME_GENERATOR = ClassName.get(BeanNameGenerator.class);
 
+	public static final ClassName BEAN_REGISTRAR = ClassName.get(BeanRegistrar.class);
+
 	public static final ClassName APPLICATION_EVENT_PUBLISHER = ClassName.get(ApplicationEventPublisher.class);
 
 	public static final ClassName WEB_APPLICATION_CONTEXT = ClassName.get("org.springframework.web.context",
@@ -174,5 +178,7 @@ public class SpringClassNames {
 	public static final ClassName CLASS_UTILS = ClassName.get(ClassUtils.class);
 
 	public static final ClassName FACTORY_BEAN = ClassName.get(FactoryBean.class);
+
+	public static final ClassName PARAMETERIZED_TYPE_REFERENCE = ClassName.get(ParameterizedTypeReference.class);
 
 }
