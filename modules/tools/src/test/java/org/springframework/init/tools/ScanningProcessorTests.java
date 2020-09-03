@@ -78,7 +78,7 @@ public class ScanningProcessorTests {
 		assertThat(files).hasSize(5);
 		assertThat(files.toString()).contains(
 				"runner(context.getBeanProvider(Bar.class).stream().collect(Collectors.toList()).toArray(new Bar[0]))");
-		assertThat(files.toString()).contains("bar(ObjectUtils.array(context, Foo.class))");
+		assertThat(files.toString()).contains("bar(BeanFactoryUtils.array(context, Foo.class))");
 	}
 
 	@Test
@@ -86,7 +86,7 @@ public class ScanningProcessorTests {
 		Set<JavaFile> files = new InitializerClassProcessor().process("app.provider.map");
 		assertThat(files).hasSize(5);
 		assertThat(files.toString()).contains("bar(context.getBeansOfType(Foo.class))");
-		assertThat(files.toString()).contains("runner(ObjectUtils.map(context, Bar.class))");
+		assertThat(files.toString()).contains("runner(BeanFactoryUtils.map(context, Bar.class))");
 	}
 
 	@Test

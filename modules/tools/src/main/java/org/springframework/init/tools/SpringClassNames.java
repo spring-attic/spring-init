@@ -43,12 +43,11 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.init.func.AnnotationMetadataConditionService;
-import org.springframework.init.func.BeanRegistrar;
+import org.springframework.init.func.BeanFactoryUtils;
 import org.springframework.init.func.ConditionService;
 import org.springframework.init.func.ImportRegistrars;
 import org.springframework.init.func.InfrastructureProvider;
 import org.springframework.init.func.InfrastructureUtils;
-import org.springframework.init.func.ObjectUtils;
 import org.springframework.init.func.TypeService;
 import org.springframework.init.func.XmlInitializer;
 import org.springframework.lang.Nullable;
@@ -99,7 +98,7 @@ public class SpringClassNames {
 
 	public static final ClassName NULLABLE = ClassName.get(Nullable.class);
 
-	public static final ClassName OBJECT_UTILS = ClassName.get(ObjectUtils.class);
+	public static final ClassName BEAN_FACTORY_UTILS = ClassName.get(BeanFactoryUtils.class);
 
 	public static final ClassName CONDITION_SERVICE = ClassName.get(ConditionService.class);
 
@@ -124,8 +123,6 @@ public class SpringClassNames {
 	public static final ClassName METADATA_READER_FACTORY = ClassName.get(MetadataReaderFactory.class);
 
 	public static final ClassName BEAN_NAME_GENERATOR = ClassName.get(BeanNameGenerator.class);
-
-	public static final ClassName BEAN_REGISTRAR = ClassName.get(BeanRegistrar.class);
 
 	public static final ClassName APPLICATION_EVENT_PUBLISHER = ClassName.get(ApplicationEventPublisher.class);
 

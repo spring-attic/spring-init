@@ -555,7 +555,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 				if (resolvable.hasGenerics()) {
 					builder.addStatement("context.registerBeanDefinition($S, $T.generic(new $T<$T>() {}, "
 							+ supplier(type, beanMethod, params.format) + customizer(type, beanMethod, params) + "))",
-							ArrayUtils.merge(params.args, beanName, SpringClassNames.BEAN_REGISTRAR,
+							ArrayUtils.merge(params.args, beanName, SpringClassNames.BEAN_FACTORY_UTILS,
 									SpringClassNames.PARAMETERIZED_TYPE_REFERENCE, resolvable.getType(), type));
 				} else {
 					builder.addStatement(
@@ -658,7 +658,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 					Type value = args[0];
 					if (utils.erasure(value).equals(Map.class.getName())) {
 						result.format = "$T.map(context, $T.class)";
-						result.types.add(SpringClassNames.OBJECT_UTILS);
+						result.types.add(SpringClassNames.BEAN_FACTORY_UTILS);
 						Type[] iterator = ((ParameterizedType) value).getActualTypeArguments();
 						value = iterator[1];
 						result.types.add(TypeName.get(value));
@@ -686,7 +686,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 						});
 					} else if (value instanceof Class && ((Class<?>) value).isArray()) {
 						result.format = "$T.array(context, $T.class)";
-						result.types.add(SpringClassNames.OBJECT_UTILS);
+						result.types.add(SpringClassNames.BEAN_FACTORY_UTILS);
 						value = ((Class<?>) value).getComponentType();
 						result.types.add(TypeName.get(value));
 					} else {
@@ -759,7 +759,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 				if (type instanceof ParameterizedType
 						&& ((ParameterizedType) type).getActualTypeArguments().length > 0) {
 					result.format = "$T.generic(context.getBeanProvider($T.forClassWithGenerics($T.class, $T.class)).stream().collect($T.toList()))";
-					result.types.add(SpringClassNames.OBJECT_UTILS);
+					result.types.add(SpringClassNames.BEAN_FACTORY_UTILS);
 					result.types.add(SpringClassNames.RESOLVABLE_TYPE);
 					result.types.add(ClassName.get(((ParameterizedType) type).getRawType()));
 					type = ((ParameterizedType) type).getActualTypeArguments()[0];
@@ -804,7 +804,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 			}
 			if (utils.isLazy(param)) {
 				code.append("$T.lazy($T.class, () -> ");
-				result.types.add(SpringClassNames.OBJECT_UTILS);
+				result.types.add(SpringClassNames.BEAN_FACTORY_UTILS);
 				result.types.add(TypeName.get(rawType));
 			}
 			if (qualifier != null) {
@@ -814,7 +814,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 					result.types.add(TypeName.get(rawType));
 				} else {
 					code.append("$T.available(context, $T.forType(new $T<$T>(){}), \"" + qualifier + "\")");
-					result.types.add(SpringClassNames.OBJECT_UTILS);
+					result.types.add(SpringClassNames.BEAN_FACTORY_UTILS);
 					result.types.add(SpringClassNames.RESOLVABLE_TYPE);
 					result.types.add(SpringClassNames.PARAMETERIZED_TYPE_REFERENCE);
 					result.types.add(TypeName.get(paramType));
@@ -825,7 +825,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 					result.types.add(TypeName.get(rawType));
 				} else {
 					code.append("$T.available(context, $T.forType(new $T<$T>(){}))");
-					result.types.add(SpringClassNames.OBJECT_UTILS);
+					result.types.add(SpringClassNames.BEAN_FACTORY_UTILS);
 					result.types.add(SpringClassNames.RESOLVABLE_TYPE);
 					result.types.add(SpringClassNames.PARAMETERIZED_TYPE_REFERENCE);
 					result.types.add(TypeName.get(paramType));

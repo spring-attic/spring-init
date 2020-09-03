@@ -32,13 +32,28 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
+import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 
 /**
  * @author Dave Syer
  *
  */
-public class ObjectUtils {
+public class BeanFactoryUtils {
+
+	public static <T> BeanDefinition generic(ParameterizedTypeReference<T> type, Supplier<T> supplier, BeanDefinitionCustomizer ...customizers) {
+		RootBeanDefinition bean = new RootBeanDefinition();
+		bean.setInstanceSupplier(supplier);
+		bean.setTargetType(ResolvableType.forType(type));
+		for (BeanDefinitionCustomizer customizer : customizers) {
+			customizer.customize(bean);
+		}
+		return bean;
+	}
+
 	@SuppressWarnings("unchecked")
 	public static <T> T generic(Object thing) {
 		return (T) thing;
