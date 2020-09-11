@@ -7,8 +7,8 @@ import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAut
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.servlet.RouterFunctionAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +23,7 @@ import static org.springframework.web.servlet.function.ServerResponse.ok;
 
 @SpringBootConfiguration
 @ImportAutoConfiguration({ PropertyPlaceholderAutoConfiguration.class, ConfigurationPropertiesAutoConfiguration.class,
-		ServletWebServerFactoryAutoConfiguration.class, RouterFunctionAutoConfiguration.class,
+		ServletWebServerFactoryAutoConfiguration.class, WebMvcAutoConfiguration.class,
 		DispatcherServletAutoConfiguration.class, ErrorMvcAutoConfiguration.class })
 @ComponentScan
 public class SampleApplication {
@@ -35,7 +35,8 @@ public class SampleApplication {
 
 	public static void main(String[] args) {
 		SpringApplication app = new SpringApplicationBuilder(SampleApplication.class)
-				.initializers(InfrastructureInitializer.priority().binding(ServerProperties.class, SampleApplication::bind))
+				.initializers(
+						InfrastructureInitializer.priority().binding(ServerProperties.class, SampleApplication::bind))
 				.build();
 		app.run(args);
 	}

@@ -22,7 +22,7 @@ import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAut
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.HttpHandlerAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.ReactiveWebServerFactoryAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.reactive.RouterFunctionAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.reactive.WebFluxAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.error.ErrorWebFluxAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,8 +36,7 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
 @SpringBootConfiguration(proxyBeanMethods = false)
 @Import({ ActuatorConfiguration.class, PropertyPlaceholderAutoConfiguration.class,
 		ConfigurationPropertiesAutoConfiguration.class, ReactiveWebServerFactoryAutoConfiguration.class,
-		RouterFunctionAutoConfiguration.class, ErrorWebFluxAutoConfiguration.class,
-		HttpHandlerAutoConfiguration.class })
+		WebFluxAutoConfiguration.class, ErrorWebFluxAutoConfiguration.class, HttpHandlerAutoConfiguration.class })
 public class SampleApplication {
 
 	@Value("${app.value}")

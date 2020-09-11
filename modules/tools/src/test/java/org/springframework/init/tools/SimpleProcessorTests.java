@@ -70,7 +70,7 @@ public class SimpleProcessorTests {
 		Set<JavaFile> files = processor.process(app("resource"));
 		assertThat(files).hasSize(4);
 		// System.err.println(files);
-		assertThat(files.toString()).contains("!context.getEnvironment().getProperty(");
+		assertThat(files.toString()).contains("!\"true\".equals(System.getProperty(");
 		assertThat(files.toString()).contains("new XmlInitializer(\"bar-config.xml\")");
 		assertThat(files.toString()).contains("spring.xml.ignore");
 	}
@@ -103,8 +103,10 @@ public class SimpleProcessorTests {
 		assertThat(files).hasSize(5);
 		// System.err.println(files);
 		assertThat(files.toString()).contains("bar(context.getBean(Foo.class))");
-		assertThat(files.toString()).contains("runner(BeanFactoryUtils.available(context, ResolvableType.forType(new ParameterizedTypeReference<Bar<Foo>>(){}))))");
-		assertThat(files.toString()).contains("BeanFactoryUtils.generic(new ParameterizedTypeReference<Bar<Collection<Foo>>>() {}");
+		assertThat(files.toString()).contains(
+				"runner(BeanFactoryUtils.available(context, ResolvableType.forType(new ParameterizedTypeReference<Bar<Foo>>(){}))))");
+		assertThat(files.toString())
+				.contains("BeanFactoryUtils.generic(new ParameterizedTypeReference<Bar<Collection<Foo>>>() {}");
 	}
 
 	@Test
@@ -236,6 +238,15 @@ public class SimpleProcessorTests {
 		assertThat(files).hasSize(2);
 		assertThat(files.toString()).containsOnlyOnce("context.registerBean(\"foo\"");
 		assertThat(files.toString()).containsOnlyOnce("context.registerBean(\"bar\"");
+	}
+
+	@Test
+	public void requestMapping() {
+		Set<JavaFile> files = new InitializerClassProcessor().process(app("mvc"));
+		// System.err.println(files);
+		assertThat(files).hasSizeGreaterThan(2);
+		assertThat(files.toString()).contains("ClassUtils.isPresent(\"javax.servlet.Servlet\", null)");
+		assertThat(files.toString()).containsOnlyOnce("private static final boolean requestMappingEnabled");
 	}
 
 	private Class<?> app(String pkg) {

@@ -15,6 +15,9 @@
  */
 package org.springframework.init.tools;
 
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterizedTypeName;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -54,9 +57,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.ParameterizedTypeName;
-
 /**
  * @author Dave Syer
  *
@@ -67,8 +67,7 @@ public class SpringClassNames {
 
 	public static final ClassName OBJECT_PROVIDER = ClassName.get(ObjectProvider.class);
 
-	public static final ClassName IMPORT_BEAN_DEFINITION_REGISTRAR = ClassName
-			.get(ImportBeanDefinitionRegistrar.class);
+	public static final ClassName IMPORT_BEAN_DEFINITION_REGISTRAR = ClassName.get(ImportBeanDefinitionRegistrar.class);
 
 	public static final ClassName ANNOTATION_METADATA = ClassName.get(AnnotationMetadata.class);
 
@@ -80,15 +79,15 @@ public class SpringClassNames {
 
 	public static final ClassName LAZY = ClassName.get(Lazy.class);
 
-	public static final ClassName BEAN_FACTORY_ANNOTATION_UTILS = ClassName
-			.get(BeanFactoryAnnotationUtils.class);
+	public static final ClassName BEAN_FACTORY_ANNOTATION_UTILS = ClassName.get(BeanFactoryAnnotationUtils.class);
 
 	public static final ClassName COMPONENT_SCAN = ClassName.get(ComponentScan.class);
 
 	public static final ClassName SPRING_BOOT_CONFIGURATION = ClassName.get("org.springframework.boot",
 			"SpringBootConfiguration");
-	
-	public static final ClassName ENABLE_AUTO_CONFIGURATION = ClassName.get("org.springframework.boot.autoconfigure", "EnableAutoConfiguration");
+
+	public static final ClassName ENABLE_AUTO_CONFIGURATION = ClassName.get("org.springframework.boot.autoconfigure",
+			"EnableAutoConfiguration");
 
 	public static final ClassName BEAN = ClassName.get(Bean.class);
 
@@ -129,7 +128,8 @@ public class SpringClassNames {
 	public static final ClassName WEB_APPLICATION_CONTEXT = ClassName.get("org.springframework.web.context",
 			"WebApplicationContext");
 
-	public static final ClassName CONFIGURABLE_APPLICATION_CONTEXT = ClassName.get(ConfigurableApplicationContext.class);
+	public static final ClassName CONFIGURABLE_APPLICATION_CONTEXT = ClassName
+			.get(ConfigurableApplicationContext.class);
 
 	public static final ClassName BEAN_FACTORY = ClassName.get(BeanFactory.class);
 
@@ -168,7 +168,8 @@ public class SpringClassNames {
 	public static final ClassName CONFIGURATION_PROPERTIES_BINDING_POST_PROCESSOR = ClassName
 			.get("org.springframework.boot.context.properties", "ConfigurationPropertiesBindingPostProcessor");
 
-	public static final ClassName AUTOCONFIGURATION_PACKAGES = ClassName.get("org.springframework.boot.autoconfigure", "AutoConfigurationPackages");
+	public static final ClassName AUTOCONFIGURATION_PACKAGES = ClassName.get("org.springframework.boot.autoconfigure",
+			"AutoConfigurationPackages");
 
 	public static final ClassName RESOLVABLE_TYPE = ClassName.get(ResolvableType.class);
 

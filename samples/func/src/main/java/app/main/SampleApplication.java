@@ -10,7 +10,7 @@ import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoCon
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.autoconfigure.web.reactive.HttpHandlerAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.ReactiveWebServerFactoryAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.reactive.RouterFunctionAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.reactive.WebFluxAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.error.ErrorWebFluxAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.system.ApplicationPid;
@@ -24,9 +24,10 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 import static org.springframework.web.reactive.function.server.ServerResponse.ok;
 
+// N.B. this would work with @SpringBootApplication (creates almost 2x as many beans)
 @SpringBootConfiguration
 @ImportAutoConfiguration({ PropertyPlaceholderAutoConfiguration.class, ConfigurationPropertiesAutoConfiguration.class,
-		ReactiveWebServerFactoryAutoConfiguration.class, RouterFunctionAutoConfiguration.class,
+		ReactiveWebServerFactoryAutoConfiguration.class, WebFluxAutoConfiguration.class,
 		ErrorWebFluxAutoConfiguration.class, HttpHandlerAutoConfiguration.class })
 @ComponentScan
 public class SampleApplication {
@@ -39,7 +40,8 @@ public class SampleApplication {
 	public static void main(String[] args) {
 		System.setProperty("io.netty.processId", new ApplicationPid().toString());
 		SpringApplication app = new SpringApplicationBuilder(SampleApplication.class)
-				.initializers(InfrastructureInitializer.priority().binding(ServerProperties.class, SampleApplication::bind))
+				.initializers(
+						InfrastructureInitializer.priority().binding(ServerProperties.class, SampleApplication::bind))
 				.build();
 		app.run(args);
 	}
