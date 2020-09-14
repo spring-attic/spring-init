@@ -116,7 +116,8 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		this.className = toInitializerNameFromConfigurationName(type);
 		this.pkg = ClassName.get(type).packageName();
 		type = imports.getImports().containsKey(type) && type.isAnnotation()
-				? imports.getImports().get(type).iterator().next() : type;
+				? imports.getImports().get(type).iterator().next()
+				: type;
 		this.configurationType = type;
 		this.imports = imports;
 		for (Class<?> imported : utils.getTypesFromAnnotation(type, SpringClassNames.IMPORT.toString(), "value")) {
@@ -187,8 +188,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 				for (Class<?> type : value) {
 					types.add(type.getName());
 				}
-			}
-			else if (entry.getKey().toString().equals("name")) {
+			} else if (entry.getKey().toString().equals("name")) {
 				String[] value = (String[]) entry.getValue();
 				for (String type : value) {
 					types.add(type);
@@ -211,8 +211,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 			code.add("$T.isPresent($S, null)", SpringClassNames.CLASS_UTILS, type);
 			if (i < types.size() - 1) {
 				code.add(" &&\n");
-			}
-			else {
+			} else {
 				code.add(";\n");
 			}
 		}
@@ -262,8 +261,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 				specs.addInitializer(imported);
 			}
 			builder.addStatement("registrars.defer(new $T())", initializerName);
-		}
-		else {
+		} else {
 			registerBean(builder, imported);
 		}
 	}
@@ -281,20 +279,16 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 				builder.addStatement("context.registerBean($T.class, () -> new $T())", type, type);
 				builder.endControlFlow();
 			}
-		}
-		else if (utils.isImportWithNoMetadata(imported)) {
+		} else if (utils.isImportWithNoMetadata(imported)) {
 			builder.addStatement(
 					"$T.invokeAwareMethods(new $T(), context.getEnvironment(), context, context).registerBeanDefinitions(null, context)",
 					SpringClassNames.INFRASTRUCTURE_UTILS, imported);
-		}
-		else if (utils.isImportSelector(imported)) {
+		} else if (utils.isImportSelector(imported)) {
 			addImportSelector(builder, imported);
-		}
-		else if (utils.isAutoConfigurationPackages(imported)) {
+		} else if (utils.isAutoConfigurationPackages(imported)) {
 			// TODO: extract base packages from configurationType
 			builder.addStatement("$T.register(context, $S)", SpringClassNames.AUTOCONFIGURATION_PACKAGES, pkg);
-		}
-		else if (utils.isImportBeanDefinitionRegistrar(imported)) {
+		} else if (utils.isImportBeanDefinitionRegistrar(imported)) {
 			boolean accessible = isAccessible(imported);
 			builder.beginControlFlow("try");
 			if (accessible) {
@@ -303,8 +297,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 						SpringClassNames.INFRASTRUCTURE_UTILS, imported, SpringClassNames.INFRASTRUCTURE_UTILS,
 						SpringClassNames.METADATA_READER_FACTORY, configurationType.getName(),
 						SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.BEAN_NAME_GENERATOR);
-			}
-			else {
+			} else {
 				builder.addStatement(
 						"(($T)$T.getOrCreate(context, $S)).registerBeanDefinitions($T.getBean(context.getBeanFactory(), $T.class).getMetadataReader($S).getAnnotationMetadata(), context, $T.getBean(context.getBeanFactory(), $T.class))",
 						SpringClassNames.IMPORT_BEAN_DEFINITION_REGISTRAR, SpringClassNames.INFRASTRUCTURE_UTILS,
@@ -314,8 +307,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 			}
 			builder.nextControlFlow("catch ($T e)", IOException.class)
 					.addStatement(" throw new IllegalStateException(e)").endControlFlow();
-		}
-		else if (utils.hasAnnotation(imported, SpringClassNames.CONFIGURATION.toString())
+		} else if (utils.hasAnnotation(imported, SpringClassNames.CONFIGURATION.toString())
 				&& utils.isIncluded(imported)) {
 			ClassName initializerName = InitializerSpec.toInitializerNameFromConfigurationName(imported);
 			if (!ClassUtils.isPresent(initializerName.toString(), null)) {
@@ -327,8 +319,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 				specs.addInitializer(imported);
 			}
 			builder.addStatement("new $T().initialize(context)", initializerName);
-		}
-		else {
+		} else {
 			registerBean(builder, imported);
 		}
 	}
@@ -339,8 +330,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 			AnnotationMetadata metadata;
 			try {
 				metadata = metadataReaderFactory.getMetadataReader(configurationType.getName()).getAnnotationMetadata();
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				throw new IllegalStateException("Cannot retrieve metadata for " + imported.getName(), e);
 			}
 			ImportSelector selector = utils.getImportSelector(imported);
@@ -366,8 +356,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 					addDeferredImport(builder, imported, type);
 				}
 				builder.endControlFlow();
-			}
-			else {
+			} else {
 				for (String selected : selector.selectImports(metadata)) {
 					if (ClassUtils.isPresent(selected, null)) {
 						addImport(builder, imported, ClassUtils.resolveClassName(selected, null));
@@ -375,8 +364,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 				}
 			}
 
-		}
-		else {
+		} else {
 			registerImport(builder, imported);
 		}
 	}
@@ -386,8 +374,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 			builder.addStatement("$T.getBean(context.getBeanFactory(), $T.class).add($T.class, $T.class)",
 					SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.IMPORT_REGISTRARS, configurationType,
 					imported);
-		}
-		else {
+		} else {
 			builder.addStatement("$T.getBean(context.getBeanFactory(), $T.class).add($T.class, types.getType($S))",
 					SpringClassNames.INFRASTRUCTURE_UTILS, SpringClassNames.IMPORT_REGISTRARS, configurationType,
 					imported.getCanonicalName());
@@ -405,8 +392,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		try {
 			accessible = ClassUtils.getPackageName(imported).equals(pkg)
 					|| java.lang.reflect.Modifier.isPublic(imported.getConstructor().getModifiers());
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			// ignore
 		}
 		return accessible;
@@ -433,8 +419,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 			for (Method method : getBeanMethods(type)) {
 				createBeanMethod(spec, code, method, type);
 			}
-		}
-		catch (Throwable e) {
+		} catch (Throwable e) {
 			logger.info("Cannot reflect on: " + type.getName());
 			return;
 		}
@@ -505,8 +490,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 							&& utils.isIncluded(imported)) {
 						builder.addStatement("new $T().initialize(context)",
 								InitializerSpec.toInitializerNameFromConfigurationName(imported));
-					}
-					else {
+					} else {
 						registerBean(builder, imported);
 					}
 					if (filtered) {
@@ -531,8 +515,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 				ParameterSpecs params = autowireParamsForMethod(constructor);
 				builder.addStatement("context.registerBean($T.class, () -> new $T(" + params.format + "))",
 						ArrayUtils.merge(imported, imported, params.args));
-			}
-			else {
+			} else {
 				if (conditional) {
 					builder.beginControlFlow("if (conditions.matches(types.getType($S)))", imported.getName());
 				}
@@ -548,8 +531,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 	private void includes(CodeBlock.Builder builder, Class<?> imported) {
 		if (isAccessible(imported)) {
 			builder.beginControlFlow("if (conditions.includes($T.class))", imported);
-		}
-		else {
+		} else {
 			builder.beginControlFlow("if (conditions.includes(types.getType($S)))", imported.getName());
 		}
 	}
@@ -566,50 +548,29 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		try {
 			Class<?> returnTypeElement = utils.getReturnType(beanMethod);
 			boolean maybe = MAYBE_BEANS.contains(beanMethod.getReturnType().getName());
-			boolean conditional = maybe || utils.hasAnnotation(beanMethod, SpringClassNames.CONDITIONAL.toString());
+			boolean conditional = utils.hasAnnotation(beanMethod, SpringClassNames.CONDITIONAL.toString());
 
-			if (java.lang.reflect.Modifier.isPrivate(returnTypeElement.getModifiers())) {
-
-				if (maybe) {
-					addStaticFlag(spec, "requestMappingEnabled", "spring.native.remove-request-mapping-support");
-					builder.beginControlFlow("if (requestMappingEnabled)");
-				}
-				if (conditional) {
-					builder.beginControlFlow("if (conditions.matches($T.class, types.getType($S)))", type,
-							returnTypeElement.getName());
-				}
-				logger.info("Generating source for bean method, type involved is private: "
-						+ beanMethod.getDeclaringClass() + "." + beanMethod);
-				String beanName = utils.getBeanName(beanMethod);
-				builder.addStatement("context.registerBean($S, types.getType($S))", beanName,
-						returnTypeElement.getName());
-
+			if (maybe) {
+				addStaticFlag(spec, "requestMappingEnabled", "spring.native.remove-request-mapping-support");
+				builder.beginControlFlow("if (requestMappingEnabled)");
 			}
-			else {
+			if (conditional) {
+				builder.beginControlFlow("if (conditions.matches($T.class, $T.class))", type, returnTypeElement);
+			}
+			ParameterSpecs params = autowireParamsForMethod(beanMethod);
 
-				if (maybe) {
-					addStaticFlag(spec, "requestMappingEnabled", "spring.native.remove-request-mapping-support");
-					builder.beginControlFlow("if (requestMappingEnabled)");
-				}
-				if (conditional) {
-					builder.beginControlFlow("if (conditions.matches($T.class, $T.class))", type, returnTypeElement);
-				}
-				ParameterSpecs params = autowireParamsForMethod(beanMethod);
-
-				String beanName = utils.getBeanName(beanMethod);
-				ResolvableType resolvable = ResolvableType.forMethodReturnType(beanMethod);
-				if (resolvable.hasGenerics()) {
-					builder.addStatement("context.registerBeanDefinition($S, $T.generic(new $T<$T>() {}, "
-							+ supplier(type, beanMethod, params.format) + customizer(type, beanMethod, params) + "))",
-							ArrayUtils.merge(params.args, beanName, SpringClassNames.BEAN_FACTORY_UTILS,
-									SpringClassNames.PARAMETERIZED_TYPE_REFERENCE, resolvable.getType(), type));
-				}
-				else {
-					builder.addStatement(
-							"context.registerBean($S, $T.class, " + supplier(type, beanMethod, params.format)
-									+ customizer(type, beanMethod, params) + ")",
-							ArrayUtils.merge(params.args, beanName, returnTypeElement, type));
-				}
+			String beanName = utils.getBeanName(beanMethod);
+			ResolvableType resolvable = ResolvableType.forMethodReturnType(beanMethod);
+			if (resolvable.hasGenerics()) {
+				builder.addStatement("context.registerBeanDefinition($S, $T.generic(new $T<$T>() {}, "
+						+ supplier(type, beanMethod, params.format) + customizer(type, beanMethod, params) + "))",
+						ArrayUtils.merge(params.args, beanName, SpringClassNames.BEAN_FACTORY_UTILS,
+								SpringClassNames.PARAMETERIZED_TYPE_REFERENCE, resolvable.getType(), type));
+			} else {
+				builder.addStatement(
+						"context.registerBean($S, $T.class, " + supplier(type, beanMethod, params.format)
+								+ customizer(type, beanMethod, params) + ")",
+						ArrayUtils.merge(params.args, beanName, returnTypeElement, type));
 			}
 
 			if (conditional) {
@@ -620,8 +581,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 			}
 
 			this.conditional |= conditional;
-		}
-		catch (Throwable t) {
+		} catch (Throwable t) {
 			throw new RuntimeException(
 					"Problem performing createBeanMethod for method " + type.toString() + "." + beanMethod.toString(),
 					t);
@@ -699,8 +659,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		String code;
 		if (!java.lang.reflect.Modifier.isStatic(beanMethod.getModifiers())) {
 			code = "context.getBean($T.class)." + beanMethod.getName() + "(" + parameterVariables + ")";
-		}
-		else {
+		} else {
 			code = "$T." + beanMethod.getName() + "(" + parameterVariables + ")";
 		}
 		if (exception) {
@@ -727,8 +686,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 						Type[] iterator = ((ParameterizedType) value).getActualTypeArguments();
 						value = iterator[1];
 						result.types.add(TypeName.get(value));
-					}
-					else if (value instanceof ParameterizedType
+					} else if (value instanceof ParameterizedType
 							&& ((ParameterizedType) value).getActualTypeArguments().length > 0) {
 						result.format = "context.getBeanProvider($T.forClassWithGenerics($T.class, "
 								+ Stream.of(((ParameterizedType) value).getActualTypeArguments())
@@ -746,41 +704,34 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 							// supported by adding calls to ResolvableType
 							if ("?".equals(v.toString())) {
 								result.types.add(TypeName.OBJECT);
-							}
-							else {
+							} else {
 								result.types.add(v);
 							}
 						});
-					}
-					else if (value instanceof Class && ((Class<?>) value).isArray()) {
+					} else if (value instanceof Class && ((Class<?>) value).isArray()) {
 						result.format = "$T.array(context, $T.class)";
 						result.types.add(SpringClassNames.BEAN_FACTORY_UTILS);
 						value = ((Class<?>) value).getComponentType();
 						result.types.add(TypeName.get(value));
-					}
-					else {
+					} else {
 						result.format = "context.getBeanProvider($T.class)";
 						result.types.add(TypeName.get(value));
 					}
 				}
 			}
-		}
-		else if (utils.implementsInterface(typeElement, ApplicationContext.class)
+		} else if (utils.implementsInterface(typeElement, ApplicationContext.class)
 				|| utils.implementsInterface(typeElement, ResourceLoader.class)
 				|| utils.implementsInterface(typeElement, ApplicationEventPublisher.class)
 				|| paramTypename.equals(SpringClassNames.CONFIGURABLE_APPLICATION_CONTEXT.toString())) {
 			if (utils.implementsInterface(typeElement, SpringClassNames.WEB_APPLICATION_CONTEXT)) {
 				result.format = "($T)context";
 				result.types.add(ClassName.get(typeElement));
-			}
-			else {
+			} else {
 				result.format = "context";
 			}
-		}
-		else if (utils.implementsInterface(typeElement, BeanFactory.class)) {
+		} else if (utils.implementsInterface(typeElement, BeanFactory.class)) {
 			result.format = "context.getBeanFactory()";
-		}
-		else if (utils.implementsInterface(typeElement, Optional.class)) {
+		} else if (utils.implementsInterface(typeElement, Optional.class)) {
 			result.format = "context.getBeanProvider($T.class)";
 			if (paramType instanceof ParameterizedType) {
 				ParameterizedType declaredType = (ParameterizedType) paramType;
@@ -795,8 +746,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 						result.types.add(SpringClassNames.RESOLVABLE_TYPE);
 						if ("?".equals(value.toString())) {
 							result.types.add(TypeName.OBJECT);
-						}
-						else {
+						} else {
 							result.types.add(value);
 						}
 						type = ((ParameterizedType) type).getActualTypeArguments()[0];
@@ -806,8 +756,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 							// be supported by adding calls to ResolvableType
 							type = ((ParameterizedType) type).getRawType();
 						}
-					}
-					else if (ResolvableType.forType(type).isArray()) {
+					} else if (ResolvableType.forType(type).isArray()) {
 						// TODO: something special with an array of generic types?
 					}
 					result.types.add(value);
@@ -815,16 +764,14 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 				result.format = "$T.ofNullable(" + result.format + ".getIfAvailable())";
 				result.types.add(0, ClassName.get(Optional.class));
 			}
-		}
-		else if (typeElement.isArray()) {
+		} else if (typeElement.isArray()) {
 			// Really?
 			result.format = "context.getBeanProvider($T.class).stream().collect($T.toList()).toArray(new $T[0])";
 			result.types.add(TypeName.get(typeElement.getComponentType()));
 			result.types.add(TypeName.get(Collectors.class));
 			result.types.add(TypeName.get(typeElement.getComponentType()));
 
-		}
-		else if (paramType instanceof ParameterizedType && (utils.implementsInterface(typeElement, List.class)
+		} else if (paramType instanceof ParameterizedType && (utils.implementsInterface(typeElement, List.class)
 				|| utils.implementsInterface(typeElement, Collection.class))) {
 			ParameterizedType declaredType = (ParameterizedType) paramType;
 			List<Type> args = Arrays.asList(declaredType.getActualTypeArguments());
@@ -846,19 +793,16 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 					// by adding calls to ResolvableType
 					if ("?".equals(value.toString())) {
 						result.types.add(TypeName.OBJECT);
-					}
-					else {
+					} else {
 						result.types.add(value);
 					}
 
-				}
-				else {
+				} else {
 					result.types.add(value);
 				}
 				result.types.add(TypeName.get(Collectors.class));
 			}
-		}
-		else if (utils.implementsInterface(typeElement, Map.class) && paramType instanceof ParameterizedType) {
+		} else if (utils.implementsInterface(typeElement, Map.class) && paramType instanceof ParameterizedType) {
 			ParameterizedType declaredType = (ParameterizedType) paramType;
 			List<Type> args = Arrays.asList(declaredType.getActualTypeArguments());
 			// TODO: make this work with more general collection elements types
@@ -868,8 +812,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 				result.format = "context.getBeansOfType($T.class)";
 				result.types.add(value);
 			}
-		}
-		else {
+		} else {
 			StringBuilder code = new StringBuilder();
 			String qualifier = utils.getQualifier(param);
 			Type rawType = paramType;
@@ -879,8 +822,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 				Type[] types = ((ParameterizedType) paramType).getActualTypeArguments();
 				if (Stream.of(types).noneMatch(type -> type instanceof TypeVariable)) {
 					resolvable = ResolvableType.forType(paramType);
-				}
-				else {
+				} else {
 					// We don't care any more. Sigh. Spring Session.
 				}
 			}
@@ -894,21 +836,18 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 					code.append("$T.qualifiedBeanOfType(context, $T.class, \"" + qualifier + "\")");
 					result.types.add(SpringClassNames.BEAN_FACTORY_ANNOTATION_UTILS);
 					result.types.add(TypeName.get(rawType));
-				}
-				else {
+				} else {
 					code.append("$T.available(context, $T.forType(new $T<$T>(){}), \"" + qualifier + "\")");
 					result.types.add(SpringClassNames.BEAN_FACTORY_UTILS);
 					result.types.add(SpringClassNames.RESOLVABLE_TYPE);
 					result.types.add(SpringClassNames.PARAMETERIZED_TYPE_REFERENCE);
 					result.types.add(TypeName.get(paramType));
 				}
-			}
-			else {
+			} else {
 				if (resolvable == null) {
 					code.append("context.getBean($T.class)");
 					result.types.add(TypeName.get(rawType));
-				}
-				else {
+				} else {
 					code.append("$T.available(context, $T.forType(new $T<$T>(){}))");
 					result.types.add(SpringClassNames.BEAN_FACTORY_UTILS);
 					result.types.add(SpringClassNames.RESOLVABLE_TYPE);

@@ -180,6 +180,10 @@ public class ElementUtils {
 					return element;
 				}
 			}
+			Class<?> base = type.getSuperclass();
+			if (Modifier.isPublic(base.getModifiers())) {
+				return base;
+			}
 		}
 		return type;
 	}
