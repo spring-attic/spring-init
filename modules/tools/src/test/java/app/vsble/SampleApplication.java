@@ -8,9 +8,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
-@SpringBootConfiguration
-@Import({ ConfigurationPropertiesAutoConfiguration.class,
-		PropertyPlaceholderAutoConfiguration.class })
+@SpringBootConfiguration(proxyBeanMethods = false)
+@Import({ ConfigurationPropertiesAutoConfiguration.class, PropertyPlaceholderAutoConfiguration.class })
 @ComponentScan
 public class SampleApplication {
 

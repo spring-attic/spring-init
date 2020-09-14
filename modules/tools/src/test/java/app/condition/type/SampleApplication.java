@@ -11,8 +11,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-@SpringBootConfiguration
-@Import({ SampleConfiguration.class, ConditionalConfiguration.class, ConfigurationPropertiesAutoConfiguration.class, PropertyPlaceholderAutoConfiguration.class})
+@SpringBootConfiguration(proxyBeanMethods = false)
+@Import({ SampleConfiguration.class, ConditionalConfiguration.class, ConfigurationPropertiesAutoConfiguration.class,
+		PropertyPlaceholderAutoConfiguration.class })
 public class SampleApplication {
 
 	public static void main(String[] args) {
@@ -22,7 +23,7 @@ public class SampleApplication {
 
 }
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 class SampleConfiguration {
 
 	@Bean

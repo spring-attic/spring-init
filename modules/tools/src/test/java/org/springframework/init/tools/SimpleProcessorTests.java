@@ -40,6 +40,7 @@ public class SimpleProcessorTests {
 	@Test
 	public void simpleConditional() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(ConditionalApplication.class);
+		// System.err.println(files);
 		assertThat(files).hasSize(3);
 		assertThat(files.toString()).contains("AutoConfigurationPackages.register(");
 	}
@@ -112,9 +113,21 @@ public class SimpleProcessorTests {
 	@Test
 	public void conditionalBean() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("condition.bean"));
+		// System.err.println(files);
 		assertThat(files).hasSize(5);
 		assertThat(files.toString()).contains("ConditionService conditions = InfrastructureUtils.getBean(");
 		assertThat(files.toString()).contains("conditions.matches(SampleConfiguration.class, Bar.class)");
+		assertThat(files.toString()).contains("SampleConfigurationCached.class");
+	}
+
+	@Test
+	public void variableType() {
+		Set<JavaFile> files = new InitializerClassProcessor().process(app("variable"));
+		// System.err.println(files);
+		assertThat(files).hasSize(3);
+		assertThat(files.toString()).contains("public Foo foo()");
+		assertThat(files.toString()).contains("super.foo()");
+		assertThat(files.toString()).contains("SampleConfigurationCached.class");
 	}
 
 	@Test
@@ -232,12 +245,33 @@ public class SimpleProcessorTests {
 	}
 
 	@Test
+	public void constructor() {
+		Set<JavaFile> files = new InitializerClassProcessor().process(app("construct"));
+		System.err.println(files);
+		assertThat(files).hasSize(3);
+		assertThat(files.toString()).containsOnlyOnce("context.getBean(SampleApplication.class).foo()");
+		assertThat(files.toString()).containsOnlyOnce("SampleConfigurationCached(Foo foo)");
+	}
+
+	@Test
 	public void overrideBean() {
 		Set<JavaFile> files = new InitializerClassProcessor().process(app("override"));
 		// System.err.println(files);
 		assertThat(files).hasSize(2);
+		assertThat(files.toString()).contains("SampleApplicationCached");
+		assertThat(files.toString()).containsOnlyOnce("public Foo foo()");
 		assertThat(files.toString()).containsOnlyOnce("context.registerBean(\"foo\"");
 		assertThat(files.toString()).containsOnlyOnce("context.registerBean(\"bar\"");
+	}
+
+	@Test
+	public void staticBeanMethod() {
+		Set<JavaFile> files = new InitializerClassProcessor().process(app("sttc"));
+		// System.err.println(files);
+		assertThat(files).hasSize(2);
+		assertThat(files.toString()).contains("SampleApplicationCached");
+		assertThat(files.toString()).containsOnlyOnce("SampleConfiguration.foo()");
+		assertThat(files.toString()).containsOnlyOnce("context.registerBean(\"foo\"");
 	}
 
 	@Test

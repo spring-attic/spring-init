@@ -31,11 +31,9 @@ public class SampleConfiguration {
 			System.out.println("Message: " + message);
 			System.out.println("Bar: " + bar);
 			System.out.println("Foo: " + bar.getFoo());
-			System.err.println("Class count: " + ManagementFactory.getClassLoadingMXBean()
-					.getTotalLoadedClassCount());
+			System.err.println("Class count: " + ManagementFactory.getClassLoadingMXBean().getTotalLoadedClassCount());
 			System.err.println("Bean count: " + beans.getBeanDefinitionNames().length);
-			System.err.println(
-					"Bean names: " + Arrays.asList(beans.getBeanDefinitionNames()));
+			System.err.println("Bean names: " + Arrays.asList(beans.getBeanDefinitionNames()));
 		};
 	}
 

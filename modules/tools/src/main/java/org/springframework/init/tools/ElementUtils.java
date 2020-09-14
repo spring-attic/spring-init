@@ -29,8 +29,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.squareup.javapoet.ClassName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
 import org.springframework.context.annotation.DeferredImportSelector;
@@ -47,8 +49,6 @@ import org.springframework.init.func.FunctionalInstallerListener;
 import org.springframework.init.func.InfrastructureUtils;
 import org.springframework.init.func.TypeService;
 import org.springframework.util.ClassUtils;
-
-import com.squareup.javapoet.ClassName;
 
 /**
  * @author Dave Syer
@@ -90,7 +90,8 @@ public class ElementUtils {
 						seen.add(annotation);
 						getAnnotations(annotation.annotationType(), type, set, seen);
 					}
-				} catch (Throwable t) {
+				}
+				catch (Throwable t) {
 					logger.warn("Problems working with annotation " + annotationTypename);
 				}
 			}
@@ -124,11 +125,13 @@ public class ElementUtils {
 								return annotation;
 							}
 						}
-					} catch (Throwable t) {
+					}
+					catch (Throwable t) {
 						logger.error("Problems working with annotation " + annotationTypename, t);
 					}
 				}
-			} catch (ArrayStoreException e) {
+			}
+			catch (ArrayStoreException e) {
 				// ignore
 			}
 		}
@@ -201,7 +204,8 @@ public class ElementUtils {
 					Object value = values.get(fieldname);
 					if (value instanceof Class<?>) {
 						collected.add((Class<?>) value);
-					} else if (value instanceof Object[]) {
+					}
+					else if (value instanceof Object[]) {
 						for (Object val : (Object[]) value) {
 							if (val instanceof Class<?>) {
 								collected.add((Class<?>) val);
@@ -223,7 +227,8 @@ public class ElementUtils {
 					Object value = values.get(fieldname);
 					if (value instanceof Annotation) {
 						collected.add((Annotation) value);
-					} else if (value instanceof Object[]) {
+					}
+					else if (value instanceof Object[]) {
 						for (Object val : (Object[]) value) {
 							if (val instanceof Annotation) {
 								collected.add((Annotation) val);
@@ -245,7 +250,8 @@ public class ElementUtils {
 					Object value = values.get(fieldname);
 					if (value instanceof String) {
 						collected.add((String) value);
-					} else if (value instanceof Object[]) {
+					}
+					else if (value instanceof Object[]) {
 						for (Object val : (Object[]) value) {
 							if (val instanceof String) {
 								collected.add((String) val);
@@ -427,6 +433,12 @@ public class ElementUtils {
 			}
 		}
 		return beanMethod.getName();
+	}
+
+	public boolean isProxyBeanMethods(Class<?> type) {
+		AnnotationAttributes attrs = AnnotatedElementUtils.getMergedAnnotationAttributes(type,
+				SpringClassNames.CONFIGURATION.toString(), true, true);
+		return (Boolean) attrs.get("proxyBeanMethods");
 	}
 
 }

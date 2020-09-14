@@ -4,14 +4,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration;
-import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
-@SpringBootConfiguration
-@Import({ ConfigurationPropertiesAutoConfiguration.class, PropertyPlaceholderAutoConfiguration.class })
+@SpringBootConfiguration(proxyBeanMethods = false)
 public class SampleApplication {
 
 	@Bean
@@ -26,8 +22,10 @@ public class SampleApplication {
 
 	@Configuration
 	protected static class SampleConfiguration {
+
 		@Value("${app.value}")
 		private String message;
+
 		private Foo foo;
 
 		public SampleConfiguration(Foo foo) {
@@ -47,5 +45,7 @@ public class SampleApplication {
 				System.out.println("Foo: " + bar.getFoo());
 			};
 		}
+
 	}
+
 }
