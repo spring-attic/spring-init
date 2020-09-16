@@ -51,6 +51,7 @@ import org.springframework.init.func.ConditionService;
 import org.springframework.init.func.ImportRegistrars;
 import org.springframework.init.func.InfrastructureProvider;
 import org.springframework.init.func.InfrastructureUtils;
+import org.springframework.init.func.InitializerLocator;
 import org.springframework.init.func.TypeService;
 import org.springframework.init.func.XmlInitializer;
 import org.springframework.lang.Nullable;
@@ -106,6 +107,8 @@ public class SpringClassNames {
 	public static final ClassName SIMPLE_CONDITION_SERVICE = ClassName.get(AnnotationMetadataConditionService.class);
 
 	public static final ClassName TYPE_SERVICE = ClassName.get(TypeService.class);
+
+	public static final ClassName INITIALIZER_LOCATOR = ClassName.get(InitializerLocator.class);
 
 	public static final ClassName INFRASTRUCTURE_UTILS = ClassName.get(InfrastructureUtils.class);
 

@@ -162,6 +162,7 @@ public class InitializerClassProcessor {
 					new ConditionServiceGenerator().process(type, result);
 				}
 				new TypeServiceGenerator().process(type, result);
+				new InitializerLocatorGenerator().process(type, result);
 				infras.addProvider(type);
 			}
 		}

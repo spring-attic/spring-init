@@ -33,12 +33,13 @@ public class SimpleInitializerLocator implements InitializerLocator {
 	public SimpleInitializerLocator(Map<String, ApplicationContextInitializer<GenericApplicationContext>> map) {
 		this.map.putAll(map);
 	}
-	
-	public SimpleInitializerLocator register(String name, ApplicationContextInitializer<GenericApplicationContext> initializer) {
+
+	public SimpleInitializerLocator register(String name,
+			ApplicationContextInitializer<GenericApplicationContext> initializer) {
 		this.map.put(name, initializer);
 		return this;
 	}
- 
+
 	@Override
 	public ApplicationContextInitializer<GenericApplicationContext> getInitializer(String name) {
 		if (this.map.containsKey(name)) {

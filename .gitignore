@@ -21,6 +21,9 @@ hs_err_pid*
 *.iml
 *.ipr
 
+## VSCode ###
+.vscode/
+
 ### NetBeans ###
 nbproject/private/
 build/

@@ -82,8 +82,16 @@ public class InfrastructureProviderSpec {
 	private void addInitializers(MethodSpec.Builder builder, Class<?> type) {
 		ClassName conditions = getConditionServiceName(type);
 		ClassName types = getTypeServiceName(type);
+		ClassName initializers = getInitializerLocatorName(type);
 		boolean hasConditions = false;
+		boolean hasInitialiers = false;
 		boolean hasTypes = false;
+		if (ClassUtils.isPresent(initializers.toString(), null)) {
+			builder.addStatement("$T initializers = context -> context.registerBean($T.class, () -> new $T(main))",
+					new ParameterizedTypeReference<ApplicationContextInitializer<GenericApplicationContext>>() {
+					}.getType(), SpringClassNames.INITIALIZER_LOCATOR, initializers);
+			hasInitialiers = true;
+		}
 		if (ClassUtils.isPresent(conditions.toString(), null)) {
 			builder.addStatement("$T conditions = context -> context.registerBean($T.class, () -> new $T(main))",
 					new ParameterizedTypeReference<ApplicationContextInitializer<GenericApplicationContext>>() {
@@ -99,6 +107,9 @@ public class InfrastructureProviderSpec {
 		builder.addCode("return $T.asList(", Arrays.class);
 		builder.addCode("context -> context.registerBean($T.class, () -> new $T())", getInitializerName(type),
 				getInitializerName(type));
+		if (hasInitialiers) {
+			builder.addCode(",\ninitializers", SpringClassNames.INITIALIZER_LOCATOR, conditions);
+		}
 		if (hasConditions) {
 			builder.addCode(",\nconditions", SpringClassNames.CONDITION_SERVICE, conditions);
 		}
@@ -110,6 +121,10 @@ public class InfrastructureProviderSpec {
 
 	private ClassName getInitializerName(Class<?> type) {
 		return ClassName.get(pkg, type.getSimpleName().replace("$", "_") + "Initializer");
+	}
+
+	private ClassName getInitializerLocatorName(Class<?> type) {
+		return ClassName.get(ClassUtils.getPackageName(type), "GeneratedInitializerLocator");
 	}
 
 	private ClassName getConditionServiceName(Class<?> type) {
