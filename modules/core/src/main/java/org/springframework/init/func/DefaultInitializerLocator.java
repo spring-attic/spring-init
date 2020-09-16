@@ -41,7 +41,7 @@ public class DefaultInitializerLocator implements InitializerLocator {
 		ServiceLoader.load(InitializerLocator.class, ClassUtils.getDefaultClassLoader())
 				.forEach(initializer -> this.loaders.add(initializer));
 	}
-	
+
 	public DefaultInitializerLocator register(InitializerLocator locator) {
 		this.loaders.add(locator);
 		return this;

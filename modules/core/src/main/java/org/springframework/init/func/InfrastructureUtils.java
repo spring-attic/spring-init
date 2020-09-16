@@ -108,7 +108,6 @@ public class InfrastructureUtils {
 				T bean = context.getAutowireCapableBeanFactory().createBean(type);
 				invokeAwareMethods(bean, context.getEnvironment(), context, context);
 				context.getBeanFactory().registerSingleton(name, bean);
-				// System.err.println(type);
 			}
 		}
 		return context.getBean(type);

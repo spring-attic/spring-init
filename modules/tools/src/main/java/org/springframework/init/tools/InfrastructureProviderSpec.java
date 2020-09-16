@@ -20,15 +20,15 @@ import java.util.Collection;
 
 import javax.lang.model.element.Modifier;
 
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.util.ClassUtils;
-
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeSpec.Builder;
+
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.util.ClassUtils;
 
 /**
  * @author Dave Syer
@@ -37,7 +37,9 @@ import com.squareup.javapoet.TypeSpec.Builder;
 public class InfrastructureProviderSpec {
 
 	private String pkg;
+
 	private Class<?> type;
+
 	private TypeSpec provider;
 
 	public InfrastructureProviderSpec(InfrastructureProviderSpecs infrastructureProviderSpecs, ElementUtils utils,

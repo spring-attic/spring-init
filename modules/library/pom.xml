@@ -13,7 +13,7 @@
 	</parent>
 
 	<properties>
-		<generated.version>2.4.0-SNAPSHOT</generated.version>
+		<generated.version>0.1.1-SNAPSHOT</generated.version>
 	</properties>
 
 	<dependencies>
@@ -80,7 +80,7 @@
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dependencies</artifactId>
-				<version>Hoxton.SR5</version>
+				<version>Hoxton.SR7</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>

@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -95,7 +96,8 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 			FunctionalInstallerListener.initialize(generic);
 			functional(generic);
 			apply(generic, initialized.getSpringApplication());
-		} else if (event instanceof ApplicationEnvironmentPreparedEvent) {
+		}
+		else if (event instanceof ApplicationEnvironmentPreparedEvent) {
 			ApplicationEnvironmentPreparedEvent prepared = (ApplicationEnvironmentPreparedEvent) event;
 			if (!isEnabled(prepared.getEnvironment())) {
 				return;
@@ -106,13 +108,16 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 				application.setApplicationContextFactory(type -> {
 					if (type == WebApplicationType.REACTIVE) {
 						return new ReactiveWebServerApplicationContext();
-					} else if (type == WebApplicationType.SERVLET) {
+					}
+					else if (type == WebApplicationType.SERVLET) {
 						return new ServletWebServerApplicationContext();
-					} else {
+					}
+					else {
 						return new GenericApplicationContext();
 					}
 				});
-			} else if (application.getWebApplicationType() == WebApplicationType.NONE) {
+			}
+			else if (application.getWebApplicationType() == WebApplicationType.NONE) {
 				application.setApplicationContextFactory(type -> new GenericApplicationContext());
 			}
 		}
@@ -148,8 +153,10 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 		for (Object source : application.getAllSources()) {
 			if (source instanceof Class<?>) {
 				Class<?> type = (Class<?>) source;
-				InitializerLocator locator = InfrastructureUtils.getBean(beans.getBeanFactory(), InitializerLocator.class);
-				ApplicationContextInitializer<GenericApplicationContext> initializer = locator.getInitializer(type.getName());
+				InitializerLocator locator = InfrastructureUtils.getBean(beans.getBeanFactory(),
+						InitializerLocator.class);
+				ApplicationContextInitializer<GenericApplicationContext> initializer = locator
+						.getInitializer(type.getName());
 				if (initializer != null) {
 					addInitializer(beans, initializer);
 					remove(application, source);
@@ -198,7 +205,8 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 				infrastructure.getBeanFactory().registerSingleton(InitializerLocator.class.getName(), locator);
 			}
 			if (!InfrastructureUtils.containsBean(context.getBeanFactory(), BeanNameGenerator.class)) {
-				infrastructure.getBeanFactory().registerSingleton(BeanNameGenerator.class.getName(), DefaultBeanNameGenerator.INSTANCE);
+				infrastructure.getBeanFactory().registerSingleton(BeanNameGenerator.class.getName(),
+						DefaultBeanNameGenerator.INSTANCE);
 			}
 			FunctionalInstallerImportRegistrars registrar = new FunctionalInstallerImportRegistrars();
 			infrastructure.getBeanFactory().registerSingleton(ImportRegistrars.class.getName(), registrar);
@@ -230,7 +238,8 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 	@SuppressWarnings("unchecked")
 	private void addInitializer(GenericApplicationContext beans,
 			ApplicationContextInitializer<GenericApplicationContext> initializer) {
-		Class<? extends ApplicationContextInitializer<?>> type = (Class<? extends ApplicationContextInitializer<?>>) initializer.getClass();
+		Class<? extends ApplicationContextInitializer<?>> type = (Class<? extends ApplicationContextInitializer<?>>) initializer
+				.getClass();
 		if (this.added.contains(type)) {
 			return;
 		}
@@ -246,9 +255,8 @@ public class FunctionalInstallerListener implements SmartApplicationListener {
 /**
  * Workaround for <a href=
  * "https://github.com/spring-projects/spring-boot/issues/13825">BeanDefinitionLoader
- * issue</a>. It needs to have setMetadataReaderFactory() so that Spring Boot
- * can post process its bean definition and "inject" a custom metadata reader
- * factory.
+ * issue</a>. It needs to have setMetadataReaderFactory() so that Spring Boot can post
+ * process its bean definition and "inject" a custom metadata reader factory.
  * 
  * @author Dave Syer
  *

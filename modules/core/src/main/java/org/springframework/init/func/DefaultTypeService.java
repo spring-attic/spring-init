@@ -45,6 +45,11 @@ public class DefaultTypeService implements TypeService {
 		this.classLoader = classLoader;
 	}
 
+	public DefaultTypeService register(String name, Class<?> type) {
+		this.types.put(name, type);
+		return this;
+	}
+
 	@Override
 	public boolean isPresent(String name) {
 		if (types.containsKey(name)) {
