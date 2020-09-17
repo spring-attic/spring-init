@@ -97,6 +97,9 @@
 						<inherited>false</inherited>
 					</execution>
 				</executions>
+				<configuration>
+					<closedWorld>true</closedWorld>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

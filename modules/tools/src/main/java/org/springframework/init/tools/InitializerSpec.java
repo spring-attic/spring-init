@@ -77,7 +77,11 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 					"org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter",
 					"org.springframework.web.method.support.CompositeUriComponentsContributor",
 					"org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter",
-					"org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping"));
+					"org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping",
+					"org.springframework.boot.actuate.endpoint.web.reactive.WebFluxEndpointHandlerMapping",
+					"org.springframework.boot.actuate.endpoint.web.reactive.ControllerEndpointHandlerMapping",
+					"org.springframework.boot.actuate.endpoint.web.servlet.WebMvcEndpointHandlerMapping",
+					"org.springframework.boot.actuate.endpoint.web.servlet.ControllerEndpointHandlerMapping"));
 
 	private static MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory();
 

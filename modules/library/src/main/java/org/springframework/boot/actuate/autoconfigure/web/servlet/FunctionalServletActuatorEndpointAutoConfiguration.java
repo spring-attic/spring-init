@@ -8,11 +8,14 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.boot.actuate.autoconfigure.web.SimpleEndpointLinksResolver;
+import org.springframework.boot.actuate.autoconfigure.web.server.ManagementContextAutoConfiguration;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.web.EndpointLinksResolver;
 import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.boot.actuate.info.InfoEndpoint;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type;
 import org.springframework.context.annotation.Bean;
@@ -26,11 +29,13 @@ import static org.springframework.web.servlet.function.ServerResponse.ok;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(Endpoint.class)
 @ConditionalOnWebApplication(type = Type.SERVLET)
+@AutoConfigureAfter(ManagementContextAutoConfiguration.class)
 public class FunctionalServletActuatorEndpointAutoConfiguration {
 
 	private static Log logger = LogFactory.getLog(FunctionalServletActuatorEndpointAutoConfiguration.class);
 
 	@Bean
+	@ConditionalOnMissingBean(name = "webEndpointServletHandlerMapping")
 	public RouterFunction<?> actuatorEndpoints(WebEndpointProperties endpoints, HealthEndpoint health,
 			InfoEndpoint info) {
 		String path = endpoints.getBasePath();

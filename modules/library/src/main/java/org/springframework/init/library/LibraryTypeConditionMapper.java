@@ -15,10 +15,12 @@
  */
 package org.springframework.init.library;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.boot.actuate.autoconfigure.availability.ProbesCondition;
+import org.springframework.boot.actuate.autoconfigure.web.reactive.ActuatorReactiveEndpointsCondition;
+import org.springframework.boot.actuate.autoconfigure.web.servlet.ActuatorServletEndpointsCondition;
 import org.springframework.init.func.TypeCondition;
 import org.springframework.init.func.TypeConditionMapper;
 
@@ -28,11 +30,23 @@ import org.springframework.init.func.TypeConditionMapper;
  */
 public class LibraryTypeConditionMapper implements TypeConditionMapper {
 
-	@Override
-	public Map<String, TypeCondition> get() {
-		return Collections.singletonMap(
+	private static Map<String, TypeCondition> CONDITIONS = new HashMap<>();
+
+	static {
+		CONDITIONS.put(
 				"org.springframework.boot.actuate.autoconfigure.availability.AvailabilityProbesAutoConfiguration",
 				new ProbesCondition());
+		CONDITIONS.put(
+				"org.springframework.boot.actuate.autoconfigure.web.reactive.FunctionalReactiveActuatorEndpointAutoConfiguration",
+				new ActuatorReactiveEndpointsCondition());
+		CONDITIONS.put(
+				"org.springframework.boot.actuate.autoconfigure.web.servlet.FunctionalServletActuatorEndpointAutoConfiguration",
+				new ActuatorServletEndpointsCondition());
+	}
+
+	@Override
+	public Map<String, TypeCondition> get() {
+		return CONDITIONS;
 	}
 
 }

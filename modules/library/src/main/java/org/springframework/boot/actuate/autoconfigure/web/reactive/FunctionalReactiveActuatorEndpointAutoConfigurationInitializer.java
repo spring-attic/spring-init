@@ -6,6 +6,7 @@ import org.springframework.boot.actuate.info.InfoEndpoint;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.init.func.ConditionService;
+import org.springframework.init.func.ImportRegistrars;
 import org.springframework.init.func.InfrastructureUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.reactive.function.server.RouterFunction;
@@ -24,16 +25,23 @@ public class FunctionalReactiveActuatorEndpointAutoConfigurationInitializer
 		if (FunctionalReactiveActuatorEndpointAutoConfigurationInitializer.enabled) {
 			ConditionService conditions = InfrastructureUtils.getBean(context.getBeanFactory(), ConditionService.class);
 			if (conditions.matches(FunctionalReactiveActuatorEndpointAutoConfiguration.class)) {
-				if (context.getBeanFactory()
-						.getBeanNamesForType(FunctionalReactiveActuatorEndpointAutoConfiguration.class).length == 0) {
-					context.registerBean(FunctionalReactiveActuatorEndpointAutoConfiguration.class,
-							() -> new FunctionalReactiveActuatorEndpointAutoConfiguration());
-					context.registerBean("actuatorEndpoints", RouterFunction.class,
-							() -> context.getBean(FunctionalReactiveActuatorEndpointAutoConfiguration.class)
-									.actuatorEndpoints(context.getBean(WebEndpointProperties.class),
-											context.getBean(HealthEndpoint.class),
-											context.getBean(InfoEndpoint.class)));
-				}
+				ImportRegistrars registrars = InfrastructureUtils.getBean(context.getBeanFactory(),
+						ImportRegistrars.class);
+				registrars.defer(main -> deferred((GenericApplicationContext) main, conditions));
+			}
+		}
+	}
+
+	private void deferred(GenericApplicationContext context, ConditionService conditions) {
+		if (context.getBeanFactory()
+				.getBeanNamesForType(FunctionalReactiveActuatorEndpointAutoConfiguration.class).length == 0) {
+			context.registerBean(FunctionalReactiveActuatorEndpointAutoConfiguration.class,
+					() -> new FunctionalReactiveActuatorEndpointAutoConfiguration());
+			if (conditions.matches(FunctionalReactiveActuatorEndpointAutoConfiguration.class, RouterFunction.class)) {
+				context.registerBean("actuatorEndpoints", RouterFunction.class,
+						() -> context.getBean(FunctionalReactiveActuatorEndpointAutoConfiguration.class)
+								.actuatorEndpoints(context.getBean(WebEndpointProperties.class),
+										context.getBean(HealthEndpoint.class), context.getBean(InfoEndpoint.class)));
 			}
 		}
 	}

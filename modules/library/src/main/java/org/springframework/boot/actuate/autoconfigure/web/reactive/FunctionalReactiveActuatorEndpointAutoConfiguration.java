@@ -9,12 +9,15 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.boot.actuate.autoconfigure.web.SimpleEndpointLinksResolver;
+import org.springframework.boot.actuate.autoconfigure.web.server.ManagementContextAutoConfiguration;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.web.EndpointLinksResolver;
 import org.springframework.boot.actuate.health.HealthComponent;
 import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.boot.actuate.info.InfoEndpoint;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type;
 import org.springframework.context.annotation.Bean;
@@ -28,11 +31,13 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(Endpoint.class)
 @ConditionalOnWebApplication(type = Type.REACTIVE)
+@AutoConfigureAfter(ManagementContextAutoConfiguration.class)
 public class FunctionalReactiveActuatorEndpointAutoConfiguration {
 
 	private static Log logger = LogFactory.getLog(FunctionalReactiveActuatorEndpointAutoConfiguration.class);
 
 	@Bean
+	@ConditionalOnMissingBean(name = "webEndpointReactiveHandlerMapping")
 	public RouterFunction<?> actuatorEndpoints(WebEndpointProperties endpoints, HealthEndpoint health,
 			InfoEndpoint info) {
 		String path = endpoints.getBasePath();

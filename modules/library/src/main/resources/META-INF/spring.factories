@@ -3,3 +3,7 @@ org.springframework.cloud.function.context.config.ContextFunctionCatalogDisabler
 
 org.springframework.init.func.TypeConditionMapper=\
 org.springframework.init.library.LibraryTypeConditionMapper
+
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+org.springframework.boot.actuate.autoconfigure.web.reactive.FunctionalReactiveActuatorEndpointAutoConfiguration,\
+org.springframework.boot.actuate.autoconfigure.web.servlet.FunctionalServletActuatorEndpointAutoConfiguration
