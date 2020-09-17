@@ -16,15 +16,18 @@
 package org.springframework.init.func;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.support.GenericApplicationContext;
 
 public class SimpleInitializerLocator implements InitializerLocator {
 
-	private Map<String, ApplicationContextInitializer<GenericApplicationContext>> map = new HashMap<>();
+	private Map<String, ApplicationContextInitializer<GenericApplicationContext>> map = new ConcurrentHashMap<>();
+
+	private Map<String, Supplier<ApplicationContextInitializer<GenericApplicationContext>>> lazy = new ConcurrentHashMap<>();
 
 	public SimpleInitializerLocator() {
 		this(Collections.emptyMap());
@@ -35,8 +38,8 @@ public class SimpleInitializerLocator implements InitializerLocator {
 	}
 
 	public SimpleInitializerLocator register(String name,
-			ApplicationContextInitializer<GenericApplicationContext> initializer) {
-		this.map.put(name, initializer);
+			Supplier<ApplicationContextInitializer<GenericApplicationContext>> initializer) {
+		this.lazy.put(name, initializer);
 		return this;
 	}
 
@@ -44,6 +47,11 @@ public class SimpleInitializerLocator implements InitializerLocator {
 	public ApplicationContextInitializer<GenericApplicationContext> getInitializer(String name) {
 		if (this.map.containsKey(name)) {
 			return this.map.get(name);
+		}
+		if (this.lazy.containsKey(name)) {
+			ApplicationContextInitializer<GenericApplicationContext> value = lazy.get(name).get();
+			map.put(name, value);
+			return value;
 		}
 		return null;
 	}

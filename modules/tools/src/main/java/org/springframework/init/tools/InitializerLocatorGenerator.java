@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import javax.lang.model.element.Modifier;
 
@@ -94,13 +95,18 @@ public class InitializerLocatorGenerator {
 	private MethodSpec createDefault() {
 		MethodSpec.Builder builder = MethodSpec.constructorBuilder();
 		builder.addModifiers(Modifier.PUBLIC);
-		return builder.addParameter(GenericApplicationContext.class, "context").addStatement("super(context)")
-				.addStatement("register(new $T(TYPES))", SimpleInitializerLocator.class).build();
+		builder.addParameter(GenericApplicationContext.class, "context").addStatement("super(context)")
+				.addStatement("$T locator = new $T()", SimpleInitializerLocator.class, SimpleInitializerLocator.class);
+		builder.beginControlFlow("for (String name : TYPES.keySet())");
+		builder.addStatement("locator.register(name, TYPES.get(name))");
+		builder.endControlFlow();
+		builder.addStatement("register(locator)");
+		return builder.build();
 	}
 
 	private FieldSpec typeMatcher() {
 		FieldSpec.Builder builder = FieldSpec.builder(
-				new ParameterizedTypeReference<Map<String, ApplicationContextInitializer<GenericApplicationContext>>>() {
+				new ParameterizedTypeReference<Map<String, Supplier<ApplicationContextInitializer<GenericApplicationContext>>>>() {
 				}.getType(), "TYPES", Modifier.PRIVATE, Modifier.STATIC);
 		builder.initializer("new $T<>()", HashMap.class);
 		return builder.build();
@@ -111,7 +117,7 @@ public class InitializerLocatorGenerator {
 		for (Class<?> type : applications) {
 			String initializer = type.getName().replace("$", "_") + "Initializer";
 			if (ClassUtils.isPresent(initializer, null)) {
-				code.addStatement("TYPES.put($S, new $T())", type.getName(),
+				code.addStatement("TYPES.put($S, () -> new $T())", type.getName(),
 						TypeName.get(ClassUtils.resolveClassName(initializer, null)));
 			}
 		}
