@@ -15,6 +15,7 @@
  */
 package org.springframework.init.tools;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -30,11 +31,9 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.init.func.DefaultInitializerLocator;
 import org.springframework.init.func.SimpleInitializerLocator;
 import org.springframework.util.ClassUtils;
@@ -46,7 +45,8 @@ import org.springframework.util.ClassUtils;
 public class InitializerLocatorGenerator {
 
 	public JavaFile process(Class<?> application) {
-		return JavaFile.builder(ClassUtils.getPackageName(application), generate(application)).build();
+		String packageName = ClassUtils.getPackageName(application);
+		return JavaFile.builder(packageName, generate(packageName, Collections.singleton(application), false)).build();
 	}
 
 	public void process(Class<?> application, Set<JavaFile> files) {
@@ -55,17 +55,47 @@ public class InitializerLocatorGenerator {
 		}
 	}
 
-	private TypeSpec generate(Class<?> application) {
-		TypeSpec.Builder builder = TypeSpec
-				.classBuilder(ClassName.get(ClassUtils.getPackageName(application), "GeneratedInitializerLocator"));
+	public JavaFile process(String packageName, Set<Class<?>> applications) {
+		return JavaFile.builder(packageName, generate(packageName, applications, true)).build();
+	}
+
+	public void process(String packageName, Set<Class<?>> applications, Set<JavaFile> files) {
+		if (applications.isEmpty()) {
+			return;
+		}
+		files.add(process(packageName, applications));
+	}
+
+	private TypeSpec generate(String packageName, Set<Class<?>> applications, boolean simple) {
+		TypeSpec.Builder builder = TypeSpec.classBuilder(ClassName.get(packageName, "GeneratedInitializerLocator"));
 		builder.addField(typeMatcher());
-		builder.addStaticBlock(initializers());
-		builder.superclass(DefaultInitializerLocator.class);
+		builder.addStaticBlock(initializers(applications));
 		builder.addModifiers(Modifier.PUBLIC);
-		builder.addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC)
-				.addParameter(GenericApplicationContext.class, "context").addStatement("super(context)")
-				.addStatement("register(new $T(TYPES))", SimpleInitializerLocator.class).build());
+		if (simple) {
+			builder.superclass(SimpleInitializerLocator.class);
+			builder.addMethod(createSimple());
+		}
+		else {
+			builder.superclass(DefaultInitializerLocator.class);
+			builder.addMethod(createDefault());
+		}
 		return builder.build();
+	}
+
+	private MethodSpec createSimple() {
+		MethodSpec.Builder builder = MethodSpec.constructorBuilder();
+		builder.addModifiers(Modifier.PUBLIC);
+		builder.beginControlFlow("for (String name : TYPES.keySet())");
+		builder.addStatement("register(name, TYPES.get(name))");
+		builder.endControlFlow();
+		return builder.build();
+	}
+
+	private MethodSpec createDefault() {
+		MethodSpec.Builder builder = MethodSpec.constructorBuilder();
+		builder.addModifiers(Modifier.PUBLIC);
+		return builder.addParameter(GenericApplicationContext.class, "context").addStatement("super(context)")
+				.addStatement("register(new $T(TYPES))", SimpleInitializerLocator.class).build();
 	}
 
 	private FieldSpec typeMatcher() {
@@ -76,12 +106,12 @@ public class InitializerLocatorGenerator {
 		return builder.build();
 	}
 
-	private CodeBlock initializers() {
+	private CodeBlock initializers(Set<Class<?>> applications) {
 		Builder code = CodeBlock.builder();
-		for (String type : SpringFactoriesLoader.loadFactoryNames(EnableAutoConfiguration.class, null)) {
-			String initializer = type.replace("$", "_") + "Initializer";
+		for (Class<?> type : applications) {
+			String initializer = type.getName().replace("$", "_") + "Initializer";
 			if (ClassUtils.isPresent(initializer, null)) {
-				code.addStatement("TYPES.put($S, new $T())", type,
+				code.addStatement("TYPES.put($S, new $T())", type.getName(),
 						TypeName.get(ClassUtils.resolveClassName(initializer, null)));
 			}
 		}

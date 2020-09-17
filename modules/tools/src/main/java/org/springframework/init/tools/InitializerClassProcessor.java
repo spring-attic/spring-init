@@ -15,9 +15,11 @@ import com.squareup.javapoet.JavaFile;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.util.ClassUtils;
 
 public class InitializerClassProcessor {
@@ -106,6 +108,22 @@ public class InitializerClassProcessor {
 				te -> !Modifier.isAbstract(te.getModifiers()) && !Modifier.isStatic(te.getModifiers()));
 		for (Class<?> type : types) {
 			result.addAll(process(type));
+		}
+		Set<Class<?>> autoconfigs = collectAutoConfigs(types);
+		new InitializerLocatorGenerator().process(packageName, autoconfigs, result);
+		return result;
+	}
+
+	private Set<Class<?>> collectAutoConfigs(Set<Class<?>> types) {
+		Set<Class<?>> result = new HashSet<>();
+		Map<String, Class<?>> input = new HashMap<>();
+		for (Class<?> type : types) {
+			input.put(type.getName(), type);
+		}
+		for (String auto : SpringFactoriesLoader.loadFactoryNames(EnableAutoConfiguration.class, null)) {
+			if (input.containsKey(auto)) {
+				result.add(input.get(auto));
+			}
 		}
 		return result;
 	}
