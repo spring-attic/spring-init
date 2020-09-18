@@ -39,16 +39,21 @@ public class SampleApplication {
 
 	public static void main(String[] args) {
 		System.setProperty("io.netty.processId", new ApplicationPid().toString());
-		SpringApplication app = new SpringApplicationBuilder(SampleApplication.class)
-				.initializers(
-						InfrastructureInitializer.priority().binding(ServerProperties.class, SampleApplication::bind))
+		SpringApplication app = new SpringApplicationBuilder(SampleApplication.class).initializers(
+				InfrastructureInitializer.priority().binding(ServerProperties.class, SampleApplication::bindServer)
+						.binding(Foo.class, SampleApplication::bindFoo))
 				.build();
-		app.run(args);
+		System.err.println(app.run(args).getEnvironment().getPropertySources());
 	}
 
-	private static ServerProperties bind(ServerProperties bean, Environment environment) {
+	private static ServerProperties bindServer(ServerProperties bean, Environment environment) {
 		bean.setPort(environment.getProperty("server.port", Integer.class,
 				environment.getProperty("SERVER_PORT", Integer.class, 8080)));
+		return bean;
+	}
+
+	private static Foo bindFoo(Foo bean, Environment environment) {
+		bean.setValue(environment.getProperty("app.value", environment.getProperty("APP_VALUE", "Hi")));
 		return bean;
 	}
 

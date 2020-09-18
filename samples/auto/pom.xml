@@ -80,7 +80,6 @@
 		<start-class>app.main.SampleApplication</start-class>
 	</properties>
 
-
 	<build>
 		<plugins>
 			<plugin>

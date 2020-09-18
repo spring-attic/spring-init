@@ -21,7 +21,7 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
 public class SampleApplication {
 
 	@Value("${app.value}")
-	private String value;
+	private String value = "NotBound";
 
 	@Bean
 	public RouterFunction<?> userEndpoints() {
