@@ -7,17 +7,13 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.autoconfigure.web.reactive.HttpHandlerAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.ReactiveWebServerFactoryAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.WebFluxAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.error.ErrorWebFluxAutoConfiguration;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.system.ApplicationPid;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.core.env.Environment;
-import org.springframework.init.func.InfrastructureInitializer;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
@@ -39,22 +35,7 @@ public class SampleApplication {
 
 	public static void main(String[] args) {
 		System.setProperty("io.netty.processId", new ApplicationPid().toString());
-		SpringApplication app = new SpringApplicationBuilder(SampleApplication.class).initializers(
-				InfrastructureInitializer.priority().binding(ServerProperties.class, SampleApplication::bindServer)
-						.binding(Foo.class, SampleApplication::bindFoo))
-				.build();
-		System.err.println(app.run(args).getEnvironment().getPropertySources());
-	}
-
-	private static ServerProperties bindServer(ServerProperties bean, Environment environment) {
-		bean.setPort(environment.getProperty("server.port", Integer.class,
-				environment.getProperty("SERVER_PORT", Integer.class, 8080)));
-		return bean;
-	}
-
-	private static Foo bindFoo(Foo bean, Environment environment) {
-		bean.setValue(environment.getProperty("app.value", environment.getProperty("APP_VALUE", "Hi")));
-		return bean;
+		SpringApplication.run(SampleApplication.class, args);
 	}
 
 }

@@ -23,6 +23,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.support.GenericApplicationContext;
@@ -169,6 +170,12 @@ public class InfrastructureUtils {
 
 		return target;
 
+	}
+
+	public static <T> ApplicationContextInitializer<GenericApplicationContext> binder(Class<T> type,
+			PropertiesBinder<T> binder) {
+		return infra -> InfrastructureUtils.getBean(infra.getBeanFactory(), PropertiesBinders.class).register(type,
+				binder);
 	}
 
 }
