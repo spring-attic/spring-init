@@ -40,6 +40,7 @@ import java.util.stream.Stream;
 
 import javax.lang.model.element.Modifier;
 
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -530,6 +531,10 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		MethodSpec.Builder spec = MethodSpec.methodBuilder(method.getName());
 		spec.addAnnotation(Override.class);
 		spec.addAnnotation(SpringClassNames.BEAN);
+		if (method.getGenericReturnType() instanceof ParameterizedType) {
+			spec.addAnnotation(
+					AnnotationSpec.builder(SuppressWarnings.class).addMember("value", "$S", "unchecked").build());
+		}
 		spec.addModifiers(Modifier.PUBLIC);
 		spec.returns(rawType(utils.getReturnType(method), method.getGenericReturnType()));
 		ParameterSpec params = new ParameterSpec();
@@ -540,7 +545,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 			spec.addParameter(rawType, param.getName());
 		}
 		spec.addStatement("return ($T) METHODS.computeIfAbsent($S, key -> super.$L(" + params.format() + "))",
-				method.getReturnType(), key(method), method.getName());
+				method.getGenericReturnType(), key(method), method.getName());
 		return spec.build();
 	}
 
