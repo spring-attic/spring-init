@@ -1,8 +1,8 @@
 #!/bin/bash
 
-BOOT_FUNC_VERSION=0.1.1-SNAPSHOT
-BOOT_LABEL=2.4.0-M2
-INIT_VERSION=0.1.1-SNAPSHOT
+BOOT_FUNC_VERSION=0.2.0-SNAPSHOT
+BOOT_LABEL=2.4.0-M3
+INIT_VERSION=0.2.0-SNAPSHOT
 
 function init() {
 
@@ -118,7 +118,7 @@ EOF
 		<dependency>
 			<groupId>org.springframework.experimental</groupId>
 			<artifactId>spring-boot-autoconfigure-func</artifactId>
-			<version>${version}</version>
+			<version>\${slim.version}</version>
 			<scope>provided</scope>
 		</dependency>
 EOF

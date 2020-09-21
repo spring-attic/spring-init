@@ -2,7 +2,7 @@
 
 ARTIFACT=auto
 MAINCLASS=app.main.SampleApplication
-VERSION=0.1.1-SNAPSHOT
+VERSION=0.2.0-SNAPSHOT
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'
