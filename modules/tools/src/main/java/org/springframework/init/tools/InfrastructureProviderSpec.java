@@ -100,13 +100,13 @@ public class InfrastructureProviderSpec {
 		builder.addCode("context -> context.registerBean($T.class, () -> new $T())", getInitializerName(type),
 				getInitializerName(type));
 		if (hasInitialiers) {
-			builder.addCode(",\ninitializers", SpringClassNames.INITIALIZER_LOCATOR, conditions);
+			builder.addCode(",\ninitializers");
 		}
 		if (hasConditions) {
-			builder.addCode(",\nconditions", SpringClassNames.CONDITION_SERVICE, conditions);
+			builder.addCode(",\nconditions");
 		}
 		if (hasTypes) {
-			builder.addCode(",\ntypes", SpringClassNames.TYPE_SERVICE, types);
+			builder.addCode(",\ntypes");
 		}
 		builder.addCode(");\n");
 	}
