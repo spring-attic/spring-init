@@ -28,8 +28,6 @@ public class InitializerClassProcessor {
 
 	private InitializerSpecs specs;
 
-	private InfrastructureProviderSpecs infras;
-
 	private ElementUtils utils;
 
 	private Imports imports;
@@ -41,7 +39,6 @@ public class InitializerClassProcessor {
 		this.imports = new Imports(this.utils);
 		this.components = new Components(this.utils);
 		this.specs = new InitializerSpecs(this.utils, this.imports, this.components);
-		this.infras = new InfrastructureProviderSpecs(this.utils);
 	}
 
 	private Set<Class<?>> collectTypes(Class<?> type, Predicate<Class<?>> typeSelectionCondition) {
@@ -181,16 +178,14 @@ public class InitializerClassProcessor {
 				}
 				new TypeServiceGenerator().process(type, result);
 				new InitializerLocatorGenerator().process(type, result);
-				infras.addProvider(type);
+				result.add(JavaFile
+						.builder(ClassUtils.getPackageName(type), new InfrastructureProviderSpec(type).getProvider())
+						.build());
 			}
 		}
 		for (InitializerSpec initializer : initializers.values()) {
 			logger.info("Writing Initializer " + initializer.getPackage() + "." + initializer.getInitializer().name);
 			result.add(JavaFile.builder(initializer.getPackage(), initializer.getInitializer()).build());
-		}
-		for (InfrastructureProviderSpec provider : infras.getProviders()) {
-			logger.info("Writing InfrastructureProvider " + provider.getPackage() + "." + provider.getProvider().name);
-			result.add(JavaFile.builder(provider.getPackage(), provider.getProvider()).build());
 		}
 		return result;
 	}

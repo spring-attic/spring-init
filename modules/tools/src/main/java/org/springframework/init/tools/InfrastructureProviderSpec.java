@@ -36,30 +36,22 @@ import org.springframework.util.ClassUtils;
  */
 public class InfrastructureProviderSpec {
 
-	private String pkg;
-
 	private Class<?> type;
 
 	private TypeSpec provider;
 
-	public InfrastructureProviderSpec(InfrastructureProviderSpecs infrastructureProviderSpecs, ElementUtils utils,
-			Class<?> type) {
+	public InfrastructureProviderSpec(Class<?> type) {
 		this.type = type;
-		this.pkg = ClassName.get(type).packageName();
-	}
-
-	public String getPackage() {
-		return pkg;
 	}
 
 	public TypeSpec getProvider() {
 		if (provider == null) {
-			this.provider = createProvider(type);
+			this.provider = createProviderSpec();
 		}
 		return provider;
 	}
 
-	private TypeSpec createProvider(Class<?> type2) {
+	private TypeSpec createProviderSpec() {
 		Builder builder = TypeSpec.classBuilder(getClassName());
 		builder.addSuperinterface(SpringClassNames.INFRASTRUCTURE_PROVIDER);
 		builder.addModifiers(Modifier.PUBLIC);
@@ -120,7 +112,7 @@ public class InfrastructureProviderSpec {
 	}
 
 	private ClassName getInitializerName(Class<?> type) {
-		return ClassName.get(pkg, type.getSimpleName().replace("$", "_") + "Initializer");
+		return ClassName.get(ClassUtils.getPackageName(type), type.getSimpleName().replace("$", "_") + "Initializer");
 	}
 
 	private ClassName getInitializerLocatorName(Class<?> type) {
@@ -136,7 +128,8 @@ public class InfrastructureProviderSpec {
 	}
 
 	private ClassName getClassName() {
-		return ClassName.get(pkg, type.getSimpleName().replace("$", "_") + "InfrastructureProvider");
+		return ClassName.get(ClassUtils.getPackageName(type),
+				type.getSimpleName().replace("$", "_") + "InfrastructureProvider");
 	}
 
 }
