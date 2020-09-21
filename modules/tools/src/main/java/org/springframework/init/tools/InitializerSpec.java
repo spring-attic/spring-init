@@ -531,12 +531,16 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		MethodSpec.Builder spec = MethodSpec.methodBuilder(method.getName());
 		spec.addAnnotation(Override.class);
 		spec.addAnnotation(SpringClassNames.BEAN);
-		if (method.getGenericReturnType() instanceof ParameterizedType) {
+		Type returnType = method.getGenericReturnType();
+		if (returnType instanceof ParameterizedType) {
 			spec.addAnnotation(
 					AnnotationSpec.builder(SuppressWarnings.class).addMember("value", "$S", "unchecked").build());
 		}
+		if (returnType instanceof TypeVariable) {
+			returnType = method.getReturnType();
+		}
 		spec.addModifiers(Modifier.PUBLIC);
-		spec.returns(rawType(utils.getReturnType(method), method.getGenericReturnType()));
+		spec.returns(rawType(utils.getReturnType(method), returnType));
 		ParameterSpec params = new ParameterSpec();
 		for (Parameter param : method.getParameters()) {
 			Type type = param.getParameterizedType();
@@ -545,7 +549,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 			spec.addParameter(rawType, param.getName());
 		}
 		spec.addStatement("return ($T) METHODS.computeIfAbsent($S, key -> super.$L(" + params.format() + "))",
-				method.getGenericReturnType(), key(method), method.getName());
+				returnType, key(method), method.getName());
 		return spec.build();
 	}
 
