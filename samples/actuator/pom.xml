@@ -92,6 +92,7 @@
 						<inherited>false</inherited>
 						<configuration>
 							<closedWorld>true</closedWorld>
+							<customBinders>true</customBinders>
 						</configuration>
 					</execution>
 				</executions>

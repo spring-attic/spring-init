@@ -2,15 +2,18 @@ package org.springframework.init.func;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
+import org.springframework.core.OrderComparator;
 import org.springframework.core.env.Environment;
 
 public class PropertiesBinders {
 
-	private Map<Class<?>, PropertiesBinder<?>> delegates = new HashMap<>();
+	private Map<Class<?>, SortedSet<PropertiesBinder<?>>> delegates = new HashMap<>();
 
 	public void register(Class<?> type, PropertiesBinder<?> binder) {
-		delegates.put(type, binder);
+		delegates.computeIfAbsent(type, key -> new TreeSet<>(OrderComparator.INSTANCE)).add(binder);
 	}
 
 	public boolean isBindable(Class<?> type) {
@@ -18,10 +21,12 @@ public class PropertiesBinders {
 	}
 
 	public <T> T bind(T bean, Environment environment) {
-		@SuppressWarnings("unchecked")
-		PropertiesBinder<T> binder = (PropertiesBinder<T>) delegates.get(bean.getClass());
-		if (binder != null) {
-			return binder.bind((T)bean, environment);
+		if (delegates.containsKey(bean.getClass())) {
+			for (PropertiesBinder<?> binder : delegates.get(bean.getClass())) {
+				@SuppressWarnings("unchecked")
+				PropertiesBinder<T> instance = (PropertiesBinder<T>) binder;
+				bean = instance.bind(bean, environment);
+			}
 		}
 		return bean;
 	}

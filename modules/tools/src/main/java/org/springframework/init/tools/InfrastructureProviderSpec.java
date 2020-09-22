@@ -38,9 +38,11 @@ import org.springframework.boot.configurationmetadata.ConfigurationMetadataPrope
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataRepository;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataRepositoryJsonBuilder;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataSource;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -102,22 +104,24 @@ public class InfrastructureProviderSpec {
 		}
 		ConfigurationMetadataRepository json = jsonBuilder.build();
 		Map<String, ConfigurationMetadataGroup> groups = json.getAllGroups();
-		Map<String, ConfigurationMetadataProperty> properties = json.getAllProperties();
 		for (Object key : props.keySet()) {
 			String name = (String) key;
 			for (String group : groups.keySet()) {
-				if (name.startsWith(group)) {
-					ConfigurationMetadataProperty property = properties.get(name);
+				if (StringUtils.hasText(group) && name.startsWith(group)) {
+					ConfigurationMetadataGroup meta = groups.get(group);
+					ConfigurationMetadataProperty property = meta.getProperties().get(name);
 					if (property != null && ClassUtils.isPresent(property.getType(), null)) {
-						for (ConfigurationMetadataSource source : groups.get(group).getSources().values()) {
+						for (ConfigurationMetadataSource source : meta.getSources().values()) {
 							if (source.getType() != null && ClassUtils.isPresent(source.getType(), null)
-									&& !source.getType().endsWith("ImportAsConfigurationPropertiesBean")) {
+									&& AnnotatedElementUtils.hasAnnotation(
+											ClassUtils.resolveClassName(source.getType(), null),
+											ConfigurationProperties.class)) {
 								Class<?> sourceType = ClassUtils.resolveClassName(source.getType(), null);
 								result.add(sourceType);
 								MethodSpec.Builder spec = methods.computeIfAbsent(sourceType,
 										propType -> binderSpec(propType));
-								spec.addStatement(setterSpec(ClassUtils.resolveClassName(property.getType(), null),
-										groups.get(group), name));
+								spec.addStatement(
+										setterSpec(ClassUtils.resolveClassName(property.getType(), null), meta, name));
 							}
 						}
 					}
