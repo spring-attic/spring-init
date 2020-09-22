@@ -101,6 +101,7 @@
 				</executions>
 				<configuration>
 					<closedWorld>true</closedWorld>
+					<customBinders>true</customBinders>
 				</configuration>
 			</plugin>
 			<plugin>

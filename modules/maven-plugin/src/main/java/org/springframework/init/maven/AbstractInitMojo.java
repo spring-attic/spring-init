@@ -39,8 +39,10 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.classworlds.realm.ClassRealm;
 import org.codehaus.plexus.util.Scanner;
+import org.json.JSONObject;
 import org.sonatype.plexus.build.incremental.BuildContext;
 
+import org.springframework.boot.configurationmetadata.ConfigurationMetadataRepository;
 import org.springframework.boot.loader.tools.MainClassFinder;
 import org.springframework.init.tools.InitializerApplication;
 import org.springframework.util.ClassUtils;
@@ -107,6 +109,15 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 	private boolean closedWorld;
 
 	/**
+	 * Set the custom binders flag - generate reflection-free property binders for
+	 * properties found in <code>application.properties</code>.
+	 * 
+	 * @since 1.3.2
+	 */
+	@Parameter(property = "spring-init.generate.custim-binders", defaultValue = "false")
+	private boolean customBinders;
+
+	/**
 	 * The name of the main class. If not specified the first compiled class found that
 	 * contains a 'main' method will be used.
 	 * 
@@ -157,6 +168,9 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 							goal("compile"), configuration(), executionEnvironment(project, session, pluginManager));
 				}
 				if (i == 2) {
+					if (customBinders) {
+						System.setProperty("spring.init.custom-binders", "true");
+					}
 					if (this.nativeImageDirectory != null) {
 						System.setProperty("spring.init.build-time-location",
 								FileUtils.getFile(this.nativeImageDirectory, "META-INF", "native-image",
@@ -265,6 +279,12 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 		}
 		if (!findJar(urls, "javapoet")) {
 			urls.add(ClassName.class.getProtectionDomain().getCodeSource().getLocation());
+		}
+		if (!findJar(urls, "spring-boot-configuration-metadata")) {
+			urls.add(ConfigurationMetadataRepository.class.getProtectionDomain().getCodeSource().getLocation());
+		}
+		if (!findJar(urls, "android-json")) {
+			urls.add(JSONObject.class.getProtectionDomain().getCodeSource().getLocation());
 		}
 	}
 
