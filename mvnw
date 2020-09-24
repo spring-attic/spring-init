@@ -230,12 +230,13 @@ else
     echo $MAVEN_ARGS | grep -q milestone && MAVEN_ARGS=$(echo $MAVEN_ARGS | sed -e 's/-Pmilestone//')
 fi
 
+# TODO: switch back to central when we get to 1.0.0
 if echo $VERSION | egrep -q '[0-9]*\.[0-9]*\.[0-9]*$'; then
-    echo Activating \"central\" profile for version=\"$VERSION\"
-    echo $MAVEN_ARGS | grep -q milestone || MAVEN_ARGS="$MAVEN_ARGS -Pcentral"
+    echo Activating \"milestone\" profile for version=\"$VERSION\"
+    echo $MAVEN_ARGS | grep -q milestone || MAVEN_ARGS="$MAVEN_ARGS -Pmilestone"
 else
-    echo Deactivating \"central\" profile for version=\"$VERSION\"
-    echo $MAVEN_ARGS | grep -q central && MAVEN_ARGS=$(echo $MAVEN_ARGS | sed -e 's/-Pcentral//')
+    echo Deactivating \"milestone\" profile for version=\"$VERSION\"
+    echo $MAVEN_ARGS | grep -q central && MAVEN_ARGS=$(echo $MAVEN_ARGS | sed -e 's/-Pmilestone//')
 fi
 
 exec "$JAVACMD" \
