@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - PetClinicApplication",
+            "request": "launch",
+            "mainClass": "org.springframework.samples.petclinic.PetClinicApplication",
+            "projectName": "init-spring-petclinic"
+        },
+        {
+            "type": "java",
             "name": "Debug (Launch)-PetClinicApplication<spring-petclinic>",
             "request": "launch",
             "cwd": "${workspaceFolder}",
