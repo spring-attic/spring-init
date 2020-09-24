@@ -141,7 +141,7 @@ Benchmark startup time (seconds) with annotations, with Spring Init (slim), and 
 
 ```
 class                              method  sample  beans    classes   heap    memory  median  mean   range
-com.example.bench.SlimBenchmarkIT  annos   demo    99.000   5022.000  8.418   50.813  0.802   0.817  0.015
+com.example.bench.SlimBenchmarkIT  annos   demo    99.000   50.2.1-SNAPSHOT00  8.418   50.813  0.802   0.817  0.015
 com.example.bench.SlimBenchmarkIT  annos   actr    185.000  5282.000  9.901   53.876  0.927   0.937  0.020
 com.example.bench.SlimBenchmarkIT  manual  demo    53.000   4729.000  6.996   47.400  0.681   0.696  0.026
 com.example.bench.SlimBenchmarkIT  manual  actr    100.000  4917.000  7.764   49.082  0.731   0.753  0.027

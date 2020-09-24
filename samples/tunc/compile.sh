@@ -2,7 +2,7 @@
 
 ARTIFACT=tunc
 MAINCLASS=app.main.SampleApplication
-VERSION=0.2.0
+VERSION=0.2.1-SNAPSHOT
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'
