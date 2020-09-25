@@ -160,9 +160,6 @@ public class InfrastructureProviderSpec {
 		builder.returns(bound);
 		builder.addParameter(bound, "bean");
 		builder.addParameter(Environment.class, "environment");
-		if (bound.getName().equals("org.springframework.boot.autoconfigure.web.ServerProperties")) {
-			builder.addStatement("bean.getServlet().setRegisterDefaultServlet(false)");
-		}
 		return builder;
 	}
 
