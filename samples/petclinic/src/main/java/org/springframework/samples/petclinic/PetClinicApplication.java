@@ -16,15 +16,9 @@
 
 package org.springframework.samples.petclinic;
 
-import java.util.Map;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.autoconfigure.orm.jpa.EntityManagerFactoryBuilderCustomizer;
-import org.springframework.context.annotation.Bean;
-import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 
 /**
  * PetClinic Spring Boot Application.
@@ -40,11 +34,4 @@ public class PetClinicApplication {
         SpringApplication.run(PetClinicApplication.class, args);
     }
 
-    @Bean
-    public EntityManagerFactoryBuilderCustomizer customEntityManagerFactoryBootstrapExecutorCustomizer(
-            Map<String, AsyncTaskExecutor> taskExecutors) {
-        return (builder) -> {
-            builder.setBootstrapExecutor(new ConcurrentTaskExecutor());
-        };
-    }
 }
