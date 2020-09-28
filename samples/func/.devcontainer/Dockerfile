@@ -31,3 +31,5 @@ RUN apt-get update \
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     apache2-utils python-setuptools python-dev python-pip python-tk \
     && pip install psrecord matplotlib
+
+COPY main.py /usr/local/lib/python2.7/dist-packages/psrecord/
