@@ -40,8 +40,17 @@ import java.util.stream.Stream;
 
 import javax.lang.model.element.Modifier;
 
+import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.TypeSpec.Builder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.ObjectProvider;
@@ -57,15 +66,6 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.ClassUtils;
-
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
-import com.squareup.javapoet.TypeSpec.Builder;
 
 /**
  * @author Dave Syer
@@ -548,8 +548,12 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 			params.add(param.getName(), rawType);
 			spec.addParameter(rawType, param.getName());
 		}
-		spec.addStatement("return ($T) METHODS.computeIfAbsent($S, key -> super.$L(" + params.format() + "))",
-				returnType, key(method), method.getName());
+		String key = key(method);
+		spec.beginControlFlow("if (!METHODS.containsKey($S))", key);
+		spec.addStatement("Object value = super.$L(" + params.format() + ")", method.getName());
+		spec.addStatement("METHODS.put($S, value)", key(method));
+		spec.endControlFlow();
+		spec.addStatement("return ($T) METHODS.get($S)", returnType, key(method));
 		return spec.build();
 	}
 
