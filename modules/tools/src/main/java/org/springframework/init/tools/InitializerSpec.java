@@ -550,8 +550,7 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 		}
 		String key = key(method);
 		spec.beginControlFlow("if (!METHODS.containsKey($S))", key);
-		spec.addStatement("Object value = super.$L(" + params.format() + ")", method.getName());
-		spec.addStatement("METHODS.put($S, value)", key(method));
+		spec.addStatement("METHODS.put($S, super.$L(" + params.format() + "))", key(method), method.getName());
 		spec.endControlFlow();
 		spec.addStatement("return ($T) METHODS.get($S)", returnType, key(method));
 		return spec.build();
