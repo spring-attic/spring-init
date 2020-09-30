@@ -82,7 +82,8 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 					"org.springframework.boot.actuate.endpoint.web.reactive.WebFluxEndpointHandlerMapping",
 					"org.springframework.boot.actuate.endpoint.web.reactive.ControllerEndpointHandlerMapping",
 					"org.springframework.boot.actuate.endpoint.web.servlet.WebMvcEndpointHandlerMapping",
-					"org.springframework.boot.actuate.endpoint.web.servlet.ControllerEndpointHandlerMapping"));
+					"org.springframework.boot.actuate.endpoint.web.servlet.ControllerEndpointHandlerMapping",
+					"org.springframework.boot.actuate.endpoint.web.ServletEndpointRegistrar"));
 
 	private static MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory();
 
@@ -409,15 +410,23 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 	}
 
 	private boolean isAccessible(Class<?> imported) {
-		boolean accessible = false;
 		try {
-			accessible = ClassUtils.getPackageName(imported).equals(pkg)
-					|| java.lang.reflect.Modifier.isPublic(imported.getConstructor().getModifiers());
+			if (ClassUtils.getPackageName(imported).equals(pkg)) {
+				return true;
+			}
+			if (!java.lang.reflect.Modifier.isPublic(imported.getModifiers())) {
+				return false;
+			}
+			for (Constructor<?> constructor : imported.getConstructors()) {
+				if (java.lang.reflect.Modifier.isPublic(constructor.getModifiers())) {
+					return true;
+				}
+			}
 		}
 		catch (Exception e) {
 			// ignore
 		}
-		return accessible;
+		return false;
 	}
 
 	private void addImportInvokers(CodeBlock.Builder builder, Class<?> element) {
