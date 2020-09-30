@@ -42,6 +42,7 @@ import org.springframework.context.annotation.DeferredImportSelector;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.context.annotation.ImportSelector;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.Ordered;
 import org.springframework.core.SpringProperties;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
@@ -53,7 +54,7 @@ import org.springframework.util.Assert;
  * @author Dave Syer
  *
  */
-public class FunctionalInstallerPostProcessor implements BeanDefinitionRegistryPostProcessor {
+public class FunctionalInstallerPostProcessor implements BeanDefinitionRegistryPostProcessor, Ordered {
 
 	private Set<Imported> deferred = new LinkedHashSet<>();
 
@@ -86,6 +87,11 @@ public class FunctionalInstallerPostProcessor implements BeanDefinitionRegistryP
 		this.metadataReaderFactory = InfrastructureUtils.containsBean(beanFactory, MetadataReaderFactory.class)
 				? (MetadataReaderFactory) InfrastructureUtils.getBean(beanFactory, MetadataReaderFactory.class)
 				: new CachingMetadataReaderFactory(context.getClassLoader());
+	}
+
+	@Override
+	public int getOrder() {
+		return 0;
 	}
 
 	@Override
