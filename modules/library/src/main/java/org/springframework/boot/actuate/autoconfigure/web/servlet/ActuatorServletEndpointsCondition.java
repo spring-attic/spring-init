@@ -23,7 +23,7 @@ import org.springframework.init.func.TypeCondition;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.ConfigurableWebEnvironment;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.reactive.function.server.RouterFunction;
+import org.springframework.web.servlet.function.RouterFunction;
 
 public class ActuatorServletEndpointsCondition implements TypeCondition {
 

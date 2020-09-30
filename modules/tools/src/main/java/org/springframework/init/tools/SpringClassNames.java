@@ -165,6 +165,12 @@ public class SpringClassNames {
 			"org.springframework.boot.autoconfigure.web.servlet",
 			"ServletWebServerFactoryAutoConfiguration.BeanPostProcessorsRegistrar");
 
+	public static final ClassName PRIMARY_DEFAULT_VALIDATOR_REGISTRAR = ClassName
+			.get("org.springframework.boot.autoconfigure.validation", "PrimaryDefaultValidatorPostProcessor");
+
+	public static final ClassName DATA_SOURCE_INITIALIZATION_REGISTRAR = ClassName
+			.get("org.springframework.boot.autoconfigure.jdbc", "DataSourceInitializationConfiguration.Registrar");
+
 	public static final ClassName CONFIGURATION_PROPERTIES = ClassName
 			.get("org.springframework.boot.context.properties", "ConfigurationProperties");
 

@@ -140,7 +140,9 @@ public class ElementUtils {
 
 	static Set<String> NO_METADATA_IMPORTS = new HashSet<>(
 			Arrays.asList(SpringClassNames.REACTIVE_BEAN_POST_PROCESSORS.reflectionName(),
-					SpringClassNames.SERVLET_BEAN_POST_PROCESSORS.reflectionName()));
+					SpringClassNames.SERVLET_BEAN_POST_PROCESSORS.reflectionName(),
+					SpringClassNames.PRIMARY_DEFAULT_VALIDATOR_REGISTRAR.reflectionName(),
+					SpringClassNames.DATA_SOURCE_INITIALIZATION_REGISTRAR.reflectionName()));
 
 	public boolean isImportWithNoMetadata(Class<?> imported) {
 		// TODO: There are some imported registrars that don't use the annotation
