@@ -21,6 +21,7 @@ import java.util.Map;
 import org.springframework.boot.actuate.autoconfigure.availability.ProbesCondition;
 import org.springframework.boot.actuate.autoconfigure.web.reactive.ActuatorReactiveEndpointsCondition;
 import org.springframework.boot.actuate.autoconfigure.web.servlet.ActuatorServletEndpointsCondition;
+import org.springframework.boot.autoconfigure.context.MessageSourceCondition;
 import org.springframework.init.func.TypeCondition;
 import org.springframework.init.func.TypeConditionMapper;
 
@@ -33,6 +34,8 @@ public class LibraryTypeConditionMapper implements TypeConditionMapper {
 	private static Map<String, TypeCondition> CONDITIONS = new HashMap<>();
 
 	static {
+		CONDITIONS.put("org.springframework.boot.autoconfigure.context.MessageSourceAutoConfiguration",
+				new MessageSourceCondition());
 		CONDITIONS.put(
 				"org.springframework.boot.actuate.autoconfigure.availability.AvailabilityProbesAutoConfiguration",
 				new ProbesCondition());

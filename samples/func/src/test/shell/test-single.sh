@@ -11,7 +11,7 @@ $1 &
 MY_PID=$!
 
 sleep 0.02
-psrecord $MY_PID --plot "target/plots/$3.png" --log "target/logs/$3.log" --interval 0.2 & PSRECORD_PID=$!
+psrecord $MY_PID --plot "target/plots/$3.png" --plottitle "$4" --log "target/logs/$3.log" --interval 0.2 & PSRECORD_PID=$!
 
 # sleep until ready
 while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' $2)" != "200" ]]; do sleep 0.02; done
@@ -25,7 +25,7 @@ sleep 1
 
 # start load-test using apache benchmarking tool
 time_start=$(date +%s%N)
-ab -c 5 -n 5000 $2
+hey -c 5 -n 5000 $2
 time_end=$(date +%s%N)
 time_spent=$((($time_end - $time_start)/1000000))
 echo "### load-test $time_spent ms"

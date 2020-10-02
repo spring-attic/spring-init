@@ -29,7 +29,8 @@ RUN apt-get update \
 
 # Install psrecord and ab
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    apache2-utils python-setuptools python-dev python-pip python-tk \
-    && pip install psrecord matplotlib
+    python-setuptools python-dev python-pip python-tk \
+    && pip install psrecord matplotlib \
+    && curl -sf https://gobinaries.com/rakyll/hey | sh
 
 COPY main.py /usr/local/lib/python2.7/dist-packages/psrecord/

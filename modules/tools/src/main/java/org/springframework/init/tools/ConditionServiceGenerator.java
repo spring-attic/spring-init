@@ -72,12 +72,19 @@ public class ConditionServiceGenerator {
 	private TypeSpec generate(Class<?> application) {
 		Class<?> initializerClass = ClassUtils.resolveClassName(application.getName().replace("$", "_") + "Initializer",
 				null);
+		String aop = System.setProperty("spring.aop.auto", "false");
 		@SuppressWarnings("unchecked")
 		ApplicationContextInitializer<GenericApplicationContext> initializer = (ApplicationContextInitializer<GenericApplicationContext>) InfrastructureUtils
 				.getOrCreate(getMain(), initializerClass);
 		initializer.initialize(getMain());
 		ImportRegistrars imports = InfrastructureUtils.getBean(main.getBeanFactory(), ImportRegistrars.class);
 		imports.processDeferred(main);
+		if (aop == null) {
+			System.clearProperty("spring.aop.auto");
+		}
+		else {
+			System.setProperty("spring.aop.auto", aop);
+		}
 		TypeSpec.Builder builder = TypeSpec
 				.classBuilder(ClassName.get(ClassUtils.getPackageName(application), "GeneratedConditionService"));
 		SimpleConditionService conditions = InfrastructureUtils.getBean(main.getBeanFactory(),
