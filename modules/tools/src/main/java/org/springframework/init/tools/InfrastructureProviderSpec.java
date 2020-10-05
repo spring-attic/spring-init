@@ -15,8 +15,10 @@
  */
 package org.springframework.init.tools;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.lang.model.element.Modifier;
@@ -29,6 +31,9 @@ import com.squareup.javapoet.TypeSpec.Builder;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -58,10 +63,31 @@ public class InfrastructureProviderSpec {
 		Builder builder = TypeSpec.classBuilder(getClassName());
 		builder.addSuperinterface(SpringClassNames.INFRASTRUCTURE_PROVIDER);
 		builder.addModifiers(Modifier.PUBLIC);
-		Set<MethodSpec> binders = this.binders.getBinders();
+		Set<MethodSpec> binders = this.binders.getBinders(getApplicationProperties());
 		builder.addMethods(binders);
 		builder.addMethod(createProvider(binders));
 		return builder.build();
+	}
+
+	private Properties getApplicationProperties() {
+		Properties props = new Properties();
+		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+		try {
+			for (Resource resource : resolver.getResources("file:./src/main/resources/application.properties")) {
+				if (resource.exists()) {
+					PropertiesLoaderUtils.fillProperties(props, resource);
+				}
+			}
+			for (Resource resource : resolver.getResources("classpath*:application.properties")) {
+				if (resource.exists()) {
+					PropertiesLoaderUtils.fillProperties(props, resource);
+				}
+			}
+		}
+		catch (IOException e) {
+			throw new IllegalStateException("Cannot resolve resources", e);
+		}
+		return props;
 	}
 
 	private MethodSpec createProvider(Set<MethodSpec> binders) {

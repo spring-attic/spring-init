@@ -15,11 +15,15 @@
  */
 package org.springframework.init.tools;
 
+import java.util.Properties;
+
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,13 +40,30 @@ public class CustomBindersTests {
 	}
 
 	@Test
-	public void scanSubPackage() {
-		TypeSpec.Builder type = TypeSpec.classBuilder("Generated");
-		type.addMethods(new CustomBinderBuilder().getBinders());
-		JavaFile file = JavaFile.builder("app.main", type.build()).build();
+	public void messageProperties() {
+		JavaFile file = generate("spring.messages.basename=messages/messages");
 		// System.err.println(file);
 		assertThat(file.toString())
+				.contains("import org.springframework.boot.autoconfigure.context.MessageSourceProperties;");
+		assertThat(file.toString())
 				.contains("MessageSourceProperties messageSourceProperties(MessageSourceProperties bean,");
+	}
+
+	private JavaFile generate(String... props) {
+		TypeSpec.Builder type = TypeSpec.classBuilder("Generated");
+		type.addMethods(new CustomBinderBuilder().getBinders(props(props)));
+		JavaFile file = JavaFile.builder("app.main", type.build()).build();
+		return file;
+	}
+
+	private Properties props(String... strings) {
+		Properties props = new Properties();
+		for (String string : strings) {
+			String[] split = StringUtils.split(string, "=");
+			String key = split[0];
+			props.setProperty(key, split.length > 1 ? split[1] : "");
+		}
+		return props;
 	}
 
 }

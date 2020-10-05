@@ -35,7 +35,6 @@ import org.springframework.boot.configurationmetadata.ConfigurationMetadataSourc
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -45,32 +44,21 @@ import org.springframework.util.StringUtils;
  */
 public class CustomBinderBuilder {
 
-	public Set<MethodSpec> getBinders() {
+	public Set<MethodSpec> getBinders(Properties props) {
 		Set<MethodSpec> result = new HashSet<>();
 		if (System.getProperty("spring.init.custom-binders", "false").equals("false")) {
 			return result;
 		}
 		Map<Class<?>, MethodSpec.Builder> methods = new HashMap<>();
-		Properties props = new Properties();
 		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 		ConfigurationMetadataRepositoryJsonBuilder jsonBuilder = ConfigurationMetadataRepositoryJsonBuilder.create();
 		try {
-			for (Resource resource : resolver.getResources("file:./src/main/resources/application.properties")) {
-				if (resource.exists()) {
-					PropertiesLoaderUtils.fillProperties(props, resource);
-				}
-			}
-			for (Resource resource : resolver.getResources("classpath*:application.properties")) {
-				if (resource.exists()) {
-					PropertiesLoaderUtils.fillProperties(props, resource);
-				}
-			}
 			for (Resource resource : resolver.getResources("classpath*:/META-INF/spring-configuration-metadata.json")) {
 				jsonBuilder.withJsonResource(resource.getInputStream());
 			}
 		}
 		catch (IOException e) {
-			throw new IllegalStateException("Cannot resolve resources", e);
+			throw new IllegalStateException("Cannot resolve JSON", e);
 		}
 		ConfigurationMetadataRepository json = jsonBuilder.build();
 		Map<String, ConfigurationMetadataGroup> groups = json.getAllGroups();
