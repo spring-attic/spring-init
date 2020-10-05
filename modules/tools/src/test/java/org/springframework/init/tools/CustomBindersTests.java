@@ -16,12 +16,10 @@
 package org.springframework.init.tools;
 
 import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.TypeSpec;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-import org.springframework.init.tools.manual.ManualApplication;
-import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,12 +37,12 @@ public class CustomBindersTests {
 
 	@Test
 	public void scanSubPackage() {
-		Class<?> type = ManualApplication.class;
-		JavaFile file = JavaFile
-				.builder(ClassUtils.getPackageName(type), new InfrastructureProviderSpec(type).getProvider()).build();
+		TypeSpec.Builder type = TypeSpec.classBuilder("Generated");
+		type.addMethods(new CustomBinderBuilder().getBinders());
+		JavaFile file = JavaFile.builder("app.main", type.build()).build();
 		// System.err.println(file);
-		assertThat(file.toString()).contains(
-				"context -> context.registerBean(ManualApplicationInitializer.class, () -> new ManualApplicationInitializer())");
+		assertThat(file.toString())
+				.contains("MessageSourceProperties messageSourceProperties(MessageSourceProperties bean,");
 	}
 
 }

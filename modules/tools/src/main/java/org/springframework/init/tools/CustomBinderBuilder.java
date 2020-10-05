@@ -32,8 +32,6 @@ import org.springframework.boot.configurationmetadata.ConfigurationMetadataPrope
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataRepository;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataRepositoryJsonBuilder;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataSource;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -62,6 +60,11 @@ public class CustomBinderBuilder {
 					PropertiesLoaderUtils.fillProperties(props, resource);
 				}
 			}
+			for (Resource resource : resolver.getResources("classpath*:application.properties")) {
+				if (resource.exists()) {
+					PropertiesLoaderUtils.fillProperties(props, resource);
+				}
+			}
 			for (Resource resource : resolver.getResources("classpath*:/META-INF/spring-configuration-metadata.json")) {
 				jsonBuilder.withJsonResource(resource.getInputStream());
 			}
@@ -79,10 +82,7 @@ public class CustomBinderBuilder {
 					ConfigurationMetadataProperty property = meta.getProperties().get(name);
 					if (property != null && ClassUtils.isPresent(property.getType(), null)) {
 						for (ConfigurationMetadataSource source : meta.getSources().values()) {
-							if (source.getType() != null && ClassUtils.isPresent(source.getType(), null)
-									&& AnnotatedElementUtils.hasAnnotation(
-											ClassUtils.resolveClassName(source.getType(), null),
-											ConfigurationProperties.class)) {
+							if (source.getType() != null && ClassUtils.isPresent(source.getType(), null)) {
 								Class<?> sourceType = ClassUtils.resolveClassName(source.getType(), null);
 								MethodSpec.Builder spec = methods.computeIfAbsent(sourceType,
 										propType -> binderSpec(propType));
