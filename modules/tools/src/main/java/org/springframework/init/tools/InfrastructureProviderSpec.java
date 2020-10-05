@@ -15,36 +15,20 @@
  */
 package org.springframework.init.tools;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.lang.model.element.Modifier;
 
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeSpec.Builder;
 
-import org.springframework.boot.configurationmetadata.ConfigurationMetadataGroup;
-import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.boot.configurationmetadata.ConfigurationMetadataRepository;
-import org.springframework.boot.configurationmetadata.ConfigurationMetadataRepositoryJsonBuilder;
-import org.springframework.boot.configurationmetadata.ConfigurationMetadataSource;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.env.Environment;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -57,6 +41,8 @@ public class InfrastructureProviderSpec {
 	private Class<?> type;
 
 	private TypeSpec provider;
+
+	private CustomBinderBuilder binders = new CustomBinderBuilder();
 
 	public InfrastructureProviderSpec(Class<?> type) {
 		this.type = type;
@@ -73,94 +59,9 @@ public class InfrastructureProviderSpec {
 		Builder builder = TypeSpec.classBuilder(getClassName());
 		builder.addSuperinterface(SpringClassNames.INFRASTRUCTURE_PROVIDER);
 		builder.addModifiers(Modifier.PUBLIC);
-		Set<Class<?>> binders = getBinders(builder);
+		Set<Class<?>> binders = this.binders.getBinders(builder);
 		builder.addMethod(createProvider(binders));
 		return builder.build();
-	}
-
-	private Set<Class<?>> getBinders(Builder builder) {
-		Set<Class<?>> result = new HashSet<>();
-		if (System.getProperty("spring.init.custom-binders", "false").equals("false")) {
-			return result;
-		}
-		Map<Class<?>, MethodSpec.Builder> methods = new HashMap<>();
-		Properties props = new Properties();
-		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-		ConfigurationMetadataRepositoryJsonBuilder jsonBuilder = ConfigurationMetadataRepositoryJsonBuilder.create();
-		try {
-			for (Resource resource : resolver.getResources("file:./src/main/resources/application.properties")) {
-				if (resource.exists()) {
-					PropertiesLoaderUtils.fillProperties(props, resource);
-				}
-			}
-			for (Resource resource : resolver.getResources("classpath*:application.properties")) {
-				if (resource.exists()) {
-					PropertiesLoaderUtils.fillProperties(props, resource);
-				}
-			}
-			for (Resource resource : resolver.getResources("classpath*:/META-INF/spring-configuration-metadata.json")) {
-				jsonBuilder.withJsonResource(resource.getInputStream());
-			}
-		}
-		catch (IOException e) {
-			throw new IllegalStateException("Cannot resolve resources", e);
-		}
-		ConfigurationMetadataRepository json = jsonBuilder.build();
-		Map<String, ConfigurationMetadataGroup> groups = json.getAllGroups();
-		for (Object key : props.keySet()) {
-			String name = (String) key;
-			for (String group : groups.keySet()) {
-				if (StringUtils.hasText(group) && name.startsWith(group)) {
-					ConfigurationMetadataGroup meta = groups.get(group);
-					ConfigurationMetadataProperty property = meta.getProperties().get(name);
-					if (property != null && ClassUtils.isPresent(property.getType(), null)) {
-						for (ConfigurationMetadataSource source : meta.getSources().values()) {
-							if (source.getType() != null && ClassUtils.isPresent(source.getType(), null)) {
-								Class<?> sourceType = ClassUtils.resolveClassName(source.getType(), null);
-								result.add(sourceType);
-								MethodSpec.Builder spec = methods.computeIfAbsent(sourceType,
-										propType -> binderSpec(propType));
-								spec.addStatement(
-										setterSpec(ClassUtils.resolveClassName(property.getType(), null), meta, name));
-							}
-						}
-					}
-				}
-			}
-		}
-		for (Class<?> propType : methods.keySet()) {
-			MethodSpec.Builder method = methods.get(propType);
-			method.addStatement("return bean");
-			builder.addMethod(method.build());
-		}
-		return result;
-	}
-
-	private CodeBlock setterSpec(Class<?> type, ConfigurationMetadataGroup group, String name) {
-		CodeBlock.Builder builder = CodeBlock.builder();
-		builder.add("bean");
-		String prop = name.substring(group.getId().length() + 1);
-		String[] subs = StringUtils.delimitedListToStringArray(prop, ".");
-		for (int i = 0; i < subs.length - 1; i++) {
-			String sub = camelCase(subs[i]);
-			builder.add(".get" + StringUtils.capitalize(sub) + "()");
-		}
-		String leaf = camelCase(subs[subs.length - 1]);
-		builder.add(".set" + StringUtils.capitalize(leaf) + "(environment.getProperty($S, $T.class))", name, type);
-		return builder.build();
-	}
-
-	private String camelCase(String sub) {
-		return Arrays.asList(StringUtils.delimitedListToStringArray(sub, "-")).stream()
-				.map(value -> StringUtils.capitalize(value)).collect(Collectors.joining());
-	}
-
-	private MethodSpec.Builder binderSpec(Class<?> bound) {
-		MethodSpec.Builder builder = MethodSpec.methodBuilder(StringUtils.uncapitalize(bound.getSimpleName()));
-		builder.returns(bound);
-		builder.addParameter(bound, "bean");
-		builder.addParameter(Environment.class, "environment");
-		return builder;
 	}
 
 	private MethodSpec createProvider(Set<Class<?>> binders) {
