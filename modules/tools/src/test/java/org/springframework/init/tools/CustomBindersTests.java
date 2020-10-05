@@ -42,7 +42,7 @@ public class CustomBindersTests {
 		Class<?> type = ManualApplication.class;
 		JavaFile file = JavaFile
 				.builder(ClassUtils.getPackageName(type), new InfrastructureProviderSpec(type).getProvider()).build();
-		System.err.println(file);
+		// System.err.println(file);
 		assertThat(file.toString()).contains(
 				"context -> context.registerBean(ManualApplicationInitializer.class, () -> new ManualApplicationInitializer())");
 	}
