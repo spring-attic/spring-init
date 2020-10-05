@@ -49,6 +49,38 @@ public class CustomBindersTests {
 				.contains("MessageSourceProperties messageSourceProperties(MessageSourceProperties bean,");
 	}
 
+	@Test
+	public void serverProperties() {
+		JavaFile file = generate("server.port=${PORT:8080}");
+		// System.err.println(file);
+		assertThat(file.toString()).contains("import org.springframework.boot.autoconfigure.web.ServerProperties;");
+		assertThat(file.toString())
+				.contains("bean.setPort(EnvironmentUtils.getProperty(environment, \"server.port\", Integer.class");
+		assertThat(file.toString()).contains("ServerProperties serverProperties(ServerProperties bean,");
+	}
+
+	@Test
+	public void dataSourceProperties() {
+		JavaFile file = generate("spring.datasource.name=foo");
+		// System.err.println(file);
+		assertThat(file.toString())
+				.contains("import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;");
+		assertThat(file.toString()).contains("bean.setName(");
+		assertThat(file.toString()).contains("DataSourceProperties dataSourceProperties(DataSourceProperties bean,");
+	}
+
+	@Test
+	// @Disabled
+	public void dataSourceSchema() {
+		JavaFile file = generate("spring.datasource.schema=classpath:/db/schema.sql");
+		// System.err.println(file);
+		assertThat(file.toString()).contains("@SuppressWarnings(\"unchecked\")");
+		assertThat(file.toString())
+				.contains("import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;");
+		assertThat(file.toString()).contains("bean.setSchema(");
+		assertThat(file.toString()).contains("DataSourceProperties dataSourceProperties(DataSourceProperties bean,");
+	}
+
 	private JavaFile generate(String... props) {
 		TypeSpec.Builder type = TypeSpec.classBuilder("Generated");
 		type.addMethods(new CustomBinderBuilder().getBinders(props(props)));

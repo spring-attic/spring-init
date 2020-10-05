@@ -48,6 +48,7 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.init.func.AnnotationMetadataConditionService;
 import org.springframework.init.func.BeanFactoryUtils;
 import org.springframework.init.func.ConditionService;
+import org.springframework.init.func.EnvironmentUtils;
 import org.springframework.init.func.ImportRegistrars;
 import org.springframework.init.func.InfrastructureProvider;
 import org.springframework.init.func.InfrastructureUtils;
@@ -63,6 +64,8 @@ import org.springframework.util.ClassUtils;
  *
  */
 public class SpringClassNames {
+
+	public static final ClassName ENVIRONMENT_UTILS = ClassName.get(EnvironmentUtils.class);
 
 	public static final ClassName IMPORT_SELECTOR = ClassName.get(ImportSelector.class);
 

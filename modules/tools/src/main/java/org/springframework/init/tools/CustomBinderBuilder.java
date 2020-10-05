@@ -24,6 +24,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 
@@ -68,14 +69,33 @@ public class CustomBinderBuilder {
 				if (StringUtils.hasText(group) && name.startsWith(group)) {
 					ConfigurationMetadataGroup meta = groups.get(group);
 					ConfigurationMetadataProperty property = meta.getProperties().get(name);
-					if (property != null && ClassUtils.isPresent(property.getType(), null)) {
+					if (property != null) {
+						String type = property.getType();
 						for (ConfigurationMetadataSource source : meta.getSources().values()) {
-							if (source.getType() != null && ClassUtils.isPresent(source.getType(), null)) {
-								Class<?> sourceType = ClassUtils.resolveClassName(source.getType(), null);
-								MethodSpec.Builder spec = methods.computeIfAbsent(sourceType,
-										propType -> binderSpec(propType));
-								spec.addStatement(
-										setterSpec(ClassUtils.resolveClassName(property.getType(), null), meta, name));
+							Class<?> sourceType = sourceType(source);
+							if (sourceType != null) {
+								if (ClassUtils.isPresent(type, null)) {
+									MethodSpec.Builder spec = methods.computeIfAbsent(sourceType,
+											propType -> binderSpec(propType));
+									spec.addStatement(setterSpec(ClassUtils.resolveClassName(type, null), meta, name));
+									break;
+								}
+								else if (type.contains("<")) {
+									String typeName = type.substring(0, type.indexOf("<"));
+									String elem = type.substring(type.indexOf("<"));
+									// Currently only works for collections of String
+									if (elem.equals("<java.lang.String>")) {
+										MethodSpec.Builder spec = methods.computeIfAbsent(sourceType,
+												propType -> binderSpec(propType));
+										if (spec.annotations.isEmpty()) {
+											spec.addAnnotation(AnnotationSpec.builder(SuppressWarnings.class)
+													.addMember("value", "$S", "unchecked").build());
+										}
+										spec.addStatement(
+												setterSpec(ClassUtils.resolveClassName(typeName, null), meta, name));
+										break;
+									}
+								}
 							}
 						}
 					}
@@ -88,6 +108,15 @@ public class CustomBinderBuilder {
 			result.add(method.build());
 		}
 		return result;
+	}
+
+	private Class<?> sourceType(ConfigurationMetadataSource source) {
+		if (source.getType() != null) {
+			if (ClassUtils.isPresent(source.getType(), null)) {
+				return ClassUtils.resolveClassName(source.getType(), null);
+			}
+		}
+		return null;
 	}
 
 	private MethodSpec.Builder binderSpec(Class<?> bound) {
@@ -108,7 +137,8 @@ public class CustomBinderBuilder {
 			builder.add(".get" + StringUtils.capitalize(sub) + "()");
 		}
 		String leaf = camelCase(subs[subs.length - 1]);
-		builder.add(".set" + StringUtils.capitalize(leaf) + "(environment.getProperty($S, $T.class))", name, type);
+		builder.add(".set" + StringUtils.capitalize(leaf) + "($T.getProperty(environment, $S, $T.class))",
+				SpringClassNames.ENVIRONMENT_UTILS, name, type);
 		return builder.build();
 	}
 
