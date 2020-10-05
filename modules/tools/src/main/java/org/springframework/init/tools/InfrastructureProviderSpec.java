@@ -30,7 +30,6 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * @author Dave Syer
@@ -59,12 +58,13 @@ public class InfrastructureProviderSpec {
 		Builder builder = TypeSpec.classBuilder(getClassName());
 		builder.addSuperinterface(SpringClassNames.INFRASTRUCTURE_PROVIDER);
 		builder.addModifiers(Modifier.PUBLIC);
-		Set<Class<?>> binders = this.binders.getBinders(builder);
+		Set<MethodSpec> binders = this.binders.getBinders();
+		builder.addMethods(binders);
 		builder.addMethod(createProvider(binders));
 		return builder.build();
 	}
 
-	private MethodSpec createProvider(Set<Class<?>> binders) {
+	private MethodSpec createProvider(Set<MethodSpec> binders) {
 		MethodSpec.Builder builder = MethodSpec.methodBuilder("getInitializers");
 		builder.addAnnotation(Override.class);
 		builder.addModifiers(Modifier.PUBLIC);
@@ -76,7 +76,7 @@ public class InfrastructureProviderSpec {
 		return builder.build();
 	}
 
-	private void addInitializers(MethodSpec.Builder builder, Class<?> type, Set<Class<?>> binders) {
+	private void addInitializers(MethodSpec.Builder builder, Class<?> type, Set<MethodSpec> binders) {
 		ClassName conditions = getConditionServiceName(type);
 		ClassName types = getTypeServiceName(type);
 		ClassName initializers = getInitializerLocatorName(type);
@@ -113,9 +113,9 @@ public class InfrastructureProviderSpec {
 		if (hasTypes) {
 			builder.addCode(",\ntypes");
 		}
-		for (Class<?> props : binders) {
-			builder.addCode(",\n$T.binder($T.class, this::$L)", SpringClassNames.INFRASTRUCTURE_UTILS, props,
-					StringUtils.uncapitalize(props.getSimpleName()));
+		for (MethodSpec props : binders) {
+			builder.addCode(",\n$T.binder($T.class, this::$L)", SpringClassNames.INFRASTRUCTURE_UTILS, props.returnType,
+					props.name);
 		}
 		builder.addCode(");\n");
 	}

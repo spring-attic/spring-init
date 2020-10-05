@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.TypeSpec.Builder;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataGroup;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
@@ -48,8 +47,8 @@ import org.springframework.util.StringUtils;
  */
 public class CustomBinderBuilder {
 
-	public Set<Class<?>> getBinders(Builder builder) {
-		Set<Class<?>> result = new HashSet<>();
+	public Set<MethodSpec> getBinders() {
+		Set<MethodSpec> result = new HashSet<>();
 		if (System.getProperty("spring.init.custom-binders", "false").equals("false")) {
 			return result;
 		}
@@ -85,7 +84,6 @@ public class CustomBinderBuilder {
 											ClassUtils.resolveClassName(source.getType(), null),
 											ConfigurationProperties.class)) {
 								Class<?> sourceType = ClassUtils.resolveClassName(source.getType(), null);
-								result.add(sourceType);
 								MethodSpec.Builder spec = methods.computeIfAbsent(sourceType,
 										propType -> binderSpec(propType));
 								spec.addStatement(
@@ -99,7 +97,7 @@ public class CustomBinderBuilder {
 		for (Class<?> propType : methods.keySet()) {
 			MethodSpec.Builder method = methods.get(propType);
 			method.addStatement("return bean");
-			builder.addMethod(method.build());
+			result.add(method.build());
 		}
 		return result;
 	}
