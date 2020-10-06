@@ -70,6 +70,16 @@ public class CustomBindersTests {
 	}
 
 	@Test
+	public void dataSourceUrl() {
+		JavaFile file = generate("spring.datasource.url=foo");
+		// System.err.println(file);
+		assertThat(file.toString())
+				.contains("import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;");
+		assertThat(file.toString()).contains("bean.setUrl(");
+		assertThat(file.toString()).contains("DataSourceProperties dataSourceProperties(DataSourceProperties bean,");
+	}
+
+	@Test
 	// @Disabled
 	public void dataSourceSchema() {
 		JavaFile file = generate("spring.datasource.schema=classpath:/db/schema.sql");

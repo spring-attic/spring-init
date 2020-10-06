@@ -73,12 +73,12 @@ public class InfrastructureProviderSpec {
 		Properties props = new Properties();
 		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 		try {
-			for (Resource resource : resolver.getResources("file:./src/main/resources/application.properties")) {
+			for (Resource resource : resolver.getResources("file:./src/main/resources/application*.properties")) {
 				if (resource.exists()) {
 					PropertiesLoaderUtils.fillProperties(props, resource);
 				}
 			}
-			for (Resource resource : resolver.getResources("classpath*:application.properties")) {
+			for (Resource resource : resolver.getResources("classpath*:application*.properties")) {
 				if (resource.exists()) {
 					PropertiesLoaderUtils.fillProperties(props, resource);
 				}
