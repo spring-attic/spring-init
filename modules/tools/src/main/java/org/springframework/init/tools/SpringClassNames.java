@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ApplicationEventPublisher;
@@ -138,6 +139,8 @@ public class SpringClassNames {
 			.get(ConfigurableApplicationContext.class);
 
 	public static final ClassName BEAN_FACTORY = ClassName.get(BeanFactory.class);
+
+	public static final ClassName ROOT_BEAN_DEFINITION = ClassName.get(RootBeanDefinition.class);
 
 	public static final ClassName LISTABLE_BEAN_FACTORY = ClassName.get(ListableBeanFactory.class);
 

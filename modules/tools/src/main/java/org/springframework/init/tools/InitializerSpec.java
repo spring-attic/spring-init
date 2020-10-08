@@ -767,6 +767,11 @@ public class InitializerSpec implements Comparable<InitializerSpec> {
 			params.addArg(factory);
 			body.append("{ def.setFactoryMethodName(\"" + methodName + "\"); ");
 			body.append("def.setFactoryBeanName(" + factoryName + ")");
+			if (utils.hasAnnotation(beanMethod, SpringClassNames.CONFIGURATION_PROPERTIES.toString())) {
+				body.append("; (($T)def).setTargetType($T.class)");
+				params.addArg(SpringClassNames.ROOT_BEAN_DEFINITION);
+				params.addArg(ClassName.get(beanMethod.getReturnType()));
+			}
 			hasInit = true;
 		}
 		if (body.length() > 0) {
