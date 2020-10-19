@@ -73,11 +73,12 @@ public class CustomBinderBuilder {
 						String type = property.getType();
 						for (ConfigurationMetadataSource source : meta.getSources().values()) {
 							Class<?> sourceType = sourceType(source);
+							String stem = stem(meta.getId(), source);
 							if (sourceType != null) {
 								if (ClassUtils.isPresent(type, null)) {
 									MethodSpec.Builder spec = methods.computeIfAbsent(sourceType,
 											propType -> binderSpec(propType));
-									spec.addStatement(setterSpec(ClassUtils.resolveClassName(type, null), meta, name));
+									spec.addStatement(setterSpec(ClassUtils.resolveClassName(type, null), stem, name));
 									break;
 								}
 								else if (type.contains("<")) {
@@ -92,7 +93,7 @@ public class CustomBinderBuilder {
 													.addMember("value", "$S", "unchecked").build());
 										}
 										spec.addStatement(
-												setterSpec(ClassUtils.resolveClassName(typeName, null), meta, name));
+												setterSpec(ClassUtils.resolveClassName(typeName, null), stem, name));
 										break;
 									}
 								}
@@ -113,10 +114,29 @@ public class CustomBinderBuilder {
 	private Class<?> sourceType(ConfigurationMetadataSource source) {
 		if (source.getType() != null) {
 			if (ClassUtils.isPresent(source.getType(), null)) {
-				return ClassUtils.resolveClassName(source.getType(), null);
+				Class<?> type = ClassUtils.resolveClassName(source.getType(), null);
+				while (type.getEnclosingClass() != null) {
+					type = type.getEnclosingClass();
+				}
+				return type;
 			}
 		}
 		return null;
+	}
+
+	private String stem(String name, ConfigurationMetadataSource source) {
+		String result = name;
+		if (source.getType() != null) {
+			if (ClassUtils.isPresent(source.getType(), null)) {
+				Class<?> type = ClassUtils.resolveClassName(source.getType(), null);
+				while (type.getEnclosingClass() != null) {
+					type = type.getEnclosingClass();
+					result = result.substring(0, result.lastIndexOf("."));
+				}
+				return result;
+			}
+		}
+		return result;
 	}
 
 	private MethodSpec.Builder binderSpec(Class<?> bound) {
@@ -127,10 +147,10 @@ public class CustomBinderBuilder {
 		return builder;
 	}
 
-	private CodeBlock setterSpec(Class<?> type, ConfigurationMetadataGroup group, String name) {
+	private CodeBlock setterSpec(Class<?> type, String group, String name) {
 		CodeBlock.Builder builder = CodeBlock.builder();
 		builder.add("bean");
-		String prop = name.substring(group.getId().length() + 1);
+		String prop = name.substring(group.length() + 1);
 		String[] subs = StringUtils.delimitedListToStringArray(prop, ".");
 		for (int i = 0; i < subs.length - 1; i++) {
 			String sub = camelCase(subs[i]);

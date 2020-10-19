@@ -60,6 +60,16 @@ public class CustomBindersTests {
 	}
 
 	@Test
+	public void nestedProperties() {
+		JavaFile file = generate("spring.resources.cache.cachecontrol.max-age=12h");
+		// System.err.println(file);
+		assertThat(file.toString()).contains("import org.springframework.boot.autoconfigure.web.ResourceProperties;");
+		assertThat(file.toString()).contains(
+				"bean.getCache().getCachecontrol().setMaxAge(EnvironmentUtils.getProperty(environment, \"spring.resources.cache.cachecontrol.max-age\", Duration.class");
+		assertThat(file.toString()).contains("ResourceProperties resourceProperties(ResourceProperties bean,");
+	}
+
+	@Test
 	public void dataSourceProperties() {
 		JavaFile file = generate("spring.datasource.name=foo");
 		// System.err.println(file);
