@@ -1,7 +1,7 @@
 #!/bin/bash
 
 BOOT_FUNC_VERSION=0.2.1-SNAPSHOT
-BOOT_LABEL=2.4.0-M4
+BOOT_LABEL=2.4.0-RC1
 INIT_VERSION=0.2.1-SNAPSHOT
 
 function init() {
@@ -9,8 +9,8 @@ function init() {
     module=$1; shift
     src=$1; shift
 
-    if [ -e $module/src ]; then
-        rm -rf $module/src/main
+    if [ -e $module/src/main/java ]; then
+        rm -rf $module/src/main/java
     fi
 
     mkdir -p $module/src/main
