@@ -2,7 +2,7 @@
 
 ARTIFACT=init-spring-petclinic
 MAINCLASS=org.springframework.samples.petclinic.PetClinicApplication
-VERSION=0.2.1
+VERSION=0.2.2-SNAPSHOT
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'

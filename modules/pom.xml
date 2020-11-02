@@ -11,7 +11,7 @@
 
 	<groupId>org.springframework.experimental</groupId>
 	<artifactId>spring-init-modules</artifactId>
-	<version>0.2.1</version>
+	<version>0.2.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Spring Init Modules</name>
 	<url>https://spring.io</url>
