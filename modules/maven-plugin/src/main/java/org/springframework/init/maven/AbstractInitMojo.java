@@ -114,7 +114,7 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 	 * 
 	 * @since 1.3.2
 	 */
-	@Parameter(property = "spring-init.generate.custim-binders", defaultValue = "false")
+	@Parameter(property = "spring-init.generate.custom-binders", defaultValue = "false")
 	private boolean customBinders;
 
 	/**
