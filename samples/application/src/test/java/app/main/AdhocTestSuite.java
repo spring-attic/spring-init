@@ -16,22 +16,18 @@
 
 package app.main;
 
-import org.junit.Ignore;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.platform.suite.api.SelectClasses;
-import org.junit.runner.RunWith;
-
 /**
  * A test suite for probing weird ordering problems in the tests.
  *
  * @author Dave Syer
  */
-@RunWith(JUnitPlatform.class)
-@SelectClasses({ //
-		MockFunctionalApplicationTests.class, //
-		FunctionalApplicationTests.class //
-})
-@Ignore
+// Causes issues: https://issues.apache.org/jira/browse/SUREFIRE-1679
+// @RunWith(JUnitPlatform.class)
+// @SelectClasses({ //
+// MockFunctionalApplicationTests.class, //
+// FunctionalApplicationTests.class //
+// })
+// @Ignore
 public class AdhocTestSuite {
 
 }
