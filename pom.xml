@@ -10,7 +10,7 @@
 
 	<groupId>org.springframework.experimental</groupId>
 	<artifactId>spring-init-parent</artifactId>
-	<version>0.2.2-SNAPSHOT</version>
+	<version>0.2.2</version>
 	<packaging>pom</packaging>
 	<name>Spring Init Parent</name>
 

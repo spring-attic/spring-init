@@ -9,11 +9,11 @@
 	<parent>
 		<groupId>org.springframework.experimental</groupId>
 		<artifactId>spring-init-modules</artifactId>
-		<version>0.2.2-SNAPSHOT</version>
+		<version>0.2.2</version>
 	</parent>
 
 	<properties>
-		<generated.version>0.2.2-SNAPSHOT</generated.version>
+		<generated.version>0.2.2</generated.version>
 	</properties>
 
 	<dependencies>

@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.springframework.experimental</groupId>
 	<artifactId>init-spring-petclinic</artifactId>
-	<version>0.2.2-SNAPSHOT</version>
+	<version>0.2.2</version>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -58,7 +58,7 @@
 		<dependency>
 			<groupId>org.springframework.experimental</groupId>
 			<artifactId>spring-graalvm-native</artifactId>
-			<version>0.8.3-SNAPSHOT</version>
+			<version>0.8.3-RC1</version>
 		</dependency>
 		<!-- Spring and Spring Boot dependencies -->
 		<dependency>
