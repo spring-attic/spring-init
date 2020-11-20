@@ -6,7 +6,7 @@
 
 	<groupId>org.springframework.experimental</groupId>
 	<artifactId>tomcat</artifactId>
-	<version>0.2.2</version>
+	<version>0.2.3-SNAPSHOT</version>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>

@@ -10,7 +10,7 @@
 
 	<groupId>org.springframework.experimental</groupId>
 	<artifactId>tests-parent</artifactId>
-	<version>0.2.2</version>
+	<version>0.2.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Tests Parent</name>
 

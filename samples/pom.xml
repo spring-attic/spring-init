@@ -10,7 +10,7 @@
 
 	<groupId>org.springframework.experimental</groupId>
 	<artifactId>spring-init-samples</artifactId>
-	<version>0.2.2</version>
+	<version>0.2.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Demo Samples</name>
 

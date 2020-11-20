@@ -6,7 +6,7 @@
 
 	<groupId>org.springframework.experimental</groupId>
 	<artifactId>spring-init-tests</artifactId>
-	<version>0.2.2</version>
+	<version>0.2.3-SNAPSHOT</version>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
