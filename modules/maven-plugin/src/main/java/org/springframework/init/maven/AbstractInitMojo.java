@@ -100,8 +100,8 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 	private boolean skip;
 
 	/**
-	 * Set the closed world flag - configuration can not be changed with classpath changes
-	 * or environment properties.
+	 * Set the closed world flag - configuration can not be changed with classpath
+	 * changes or environment properties.
 	 * 
 	 * @since 1.3.2
 	 */
@@ -118,8 +118,8 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 	private boolean customBinders;
 
 	/**
-	 * The name of the main class. If not specified the first compiled class found that
-	 * contains a 'main' method will be used.
+	 * The name of the main class. If not specified the first compiled class found
+	 * that contains a 'main' method will be used.
 	 * 
 	 * @since 1.0.0
 	 */
@@ -127,8 +127,8 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 	private String mainClass;
 
 	/**
-	 * The name of the main class. If not specified the first compiled class found that
-	 * contains a 'main' method will be used.
+	 * The name of the main class. If not specified the first compiled class found
+	 * that contains a 'main' method will be used.
 	 * 
 	 * @since 1.0.0
 	 */
@@ -153,19 +153,21 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 		if (scanner.getIncludedFiles().length > 0 || this.basePackage != null || !new File("src/main/java").exists()) {
 			String compilerVersion = project.getProperties().getProperty("maven-compiler-plugin.version", "3.8.1");
 			for (int i = 0; i < 3; i++) {
-				// Needs 3 passes to ensure everything is available at the end
-				if (getClass() == GenerateTestsMojo.class) {
-					executeMojo(
-							plugin(groupId("org.apache.maven.plugins"), artifactId("maven-compiler-plugin"),
-									version(compilerVersion)),
-							goal("testCompile"), configuration(),
-							executionEnvironment(project, session, pluginManager));
-				}
-				else {
-					executeMojo(
-							plugin(groupId("org.apache.maven.plugins"), artifactId("maven-compiler-plugin"),
-									version(compilerVersion)),
-							goal("compile"), configuration(), executionEnvironment(project, session, pluginManager));
+				if (i < 2) {
+					// Needs 3 passes to ensure everything is available at the end
+					if (getClass() == GenerateTestsMojo.class) {
+						executeMojo(
+								plugin(groupId("org.apache.maven.plugins"), artifactId("maven-compiler-plugin"),
+										version(compilerVersion)),
+								goal("testCompile"), configuration(),
+								executionEnvironment(project, session, pluginManager));
+					} else {
+						executeMojo(
+								plugin(groupId("org.apache.maven.plugins"), artifactId("maven-compiler-plugin"),
+										version(compilerVersion)),
+								goal("compile"), configuration(),
+								executionEnvironment(project, session, pluginManager));
+					}
 				}
 				if (i == 2) {
 					if (customBinders) {
@@ -186,8 +188,7 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 			resource.setDirectory(this.nativeImageDirectory.getAbsolutePath());
 			if (getClass() == GenerateTestsMojo.class) {
 				project.addTestResource(resource);
-			}
-			else {
+			} else {
 				project.addResource(resource);
 			}
 		}
@@ -209,8 +210,7 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 			if (closedWorld) {
 				getLog().info("Closed world");
 				System.setProperty("spring.init.closed-world", "true");
-			}
-			else {
+			} else {
 				getLog().info("Open world");
 			}
 			original = ClassUtils.overrideThreadContextClassLoader(loader);
@@ -219,12 +219,10 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 			type.getMethod("main", String[].class).invoke(null,
 					new Object[] { new String[] { start, getOutputDirectory().getAbsolutePath() } });
 			buildContext.refresh(getOutputDirectory());
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new MojoExecutionException("Cannot generate initializer class: " + SPRING_INIT_APPLICATION_CLASS_NAME,
 					e);
-		}
-		finally {
+		} finally {
 			System.clearProperty("spring.init.closed-world");
 			System.clearProperty("spring.init.build-time-location");
 			if (original != null) {
@@ -242,12 +240,10 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 				try {
 					mainClass = MainClassFinder.findSingleMainClass(getMainClassesDirectory(),
 							SPRING_BOOT_APPLICATION_CLASS_NAME);
-				}
-				catch (IOException ex) {
+				} catch (IOException ex) {
 					throw new MojoExecutionException(ex.getMessage(), ex);
 				}
-			}
-			else {
+			} else {
 				return this.basePackage;
 			}
 		}
@@ -267,8 +263,7 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 			addTools(urls);
 			getLog().debug("Classpath: " + urls);
 			return urls.toArray(new URL[0]);
-		}
-		catch (IOException ex) {
+		} catch (IOException ex) {
 			throw new MojoExecutionException("Unable to build classpath", ex);
 		}
 	}
@@ -301,8 +296,7 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 		urls.addAll(this.getClassesDirectories().stream().map(file -> {
 			try {
 				return file.toURI().toURL();
-			}
-			catch (MalformedURLException e) {
+			} catch (MalformedURLException e) {
 				throw new IllegalStateException(e);
 			}
 		}).collect(Collectors.toList()));
