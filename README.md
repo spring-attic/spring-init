@@ -81,7 +81,7 @@ and set the code generator up as a compiler plugin:
 
 ```
 
-To use functional versions of Spring Boot autoconfiguration you can include additional dependencies which have been pre-compiled. The versions are managed by the `spring-init-dependencies` BOM (where each version of Spring Init only supports one version of Spring Boot - 0.2.3 is paired with 2.5.0). An example of including the `func` dependencies in a project that uses `spring-boot-autoconfigure`:
+To use functional versions of Spring Boot autoconfiguration you can include additional dependencies which have been pre-compiled. The versions are managed by the `spring-init-dependencies` BOM (where each version of Spring Init only supports one version of Spring Boot - 0.2.3 is paired with 2.5.1). An example of including the `func` dependencies in a project that uses `spring-boot-autoconfigure`:
 
 ```
 		<dependency>
