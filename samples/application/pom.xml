@@ -6,7 +6,7 @@
 
 	<groupId>org.springframework.experimental</groupId>
 	<artifactId>spring-init-sample-application</artifactId>
-	<version>0.3.0</version>
+	<version>0.3.1-SNAPSHOT</version>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
