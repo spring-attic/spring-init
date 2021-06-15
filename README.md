@@ -138,7 +138,21 @@ You can then build and run everything from the command line, or from an IDE.
 
 ## Benchmarks
 
-Benchmark startup time (seconds) with annotations, with Spring Init (slim), and with manual configuration:
+Benchmark startup time (seconds) with annotations, with Spring Init (slim), and with manual configuration.
+
+Spring Boot 2.5.1:
+
+```
+class                              method sample  beans  classes    heap   memory  median mean   range
+com.example.bench.SlimBenchmarkIT  annos  demo  110.000  5758.000  10.143  62.527  0.940  0.972  0.033
+com.example.bench.SlimBenchmarkIT  annos  actr  185.000  6056.000  11.296  65.645  1.088  1.154  0.069
+com.example.bench.SlimBenchmarkIT  manual demo   56.000  5458.000  8.971   58.671  0.786  0.834  0.087
+com.example.bench.SlimBenchmarkIT  manual actr   94.000  5733.000  9.680   60.503  0.850  0.900  0.101
+com.example.bench.SlimBenchmarkIT  slim   demo  105.000  5876.000  10.230  62.581  0.916  0.943  0.029
+com.example.bench.SlimBenchmarkIT  slim   actr  180.000  6407.000  11.677  66.537  1.079  1.104  0.036
+```
+
+Spring Boot 2.4.3:
 
 ```
 class                              method  sample  beans    classes   heap    memory  median  mean   range
