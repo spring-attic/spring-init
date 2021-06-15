@@ -45,7 +45,7 @@ You then need a Spring application bootstrap utility that recognizes the `Applic
 			<dependency>
 				<groupId>org.springframework.experimental</groupId>
 				<artifactId>spring-init-dependencies</artifactId>
-				<version>0.2.3</version>
+				<version>0.3.0</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -67,7 +67,7 @@ and set the code generator up as a compiler plugin:
 			<plugin>
 				<groupId>org.springframework.experimental</groupId>
 				<artifactId>spring-init-maven-plugin</artifactId>
-				<version>0.2.3</version>
+				<version>0.3.0</version>
 				<executions>
 					<execution>
 						<id>sources</id>
@@ -81,7 +81,7 @@ and set the code generator up as a compiler plugin:
 
 ```
 
-To use functional versions of Spring Boot autoconfiguration you can include additional dependencies which have been pre-compiled. The versions are managed by the `spring-init-dependencies` BOM (where each version of Spring Init only supports one version of Spring Boot - 0.2.3 is paired with 2.5.1). An example of including the `func` dependencies in a project that uses `spring-boot-autoconfigure`:
+To use functional versions of Spring Boot autoconfiguration you can include additional dependencies which have been pre-compiled. The versions are managed by the `spring-init-dependencies` BOM (where each version of Spring Init only supports one version of Spring Boot - 0.3.0 is paired with 2.5.1). An example of including the `func` dependencies in a project that uses `spring-boot-autoconfigure`:
 
 ```
 		<dependency>
