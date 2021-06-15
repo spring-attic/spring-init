@@ -17,31 +17,42 @@ public class FunctionalReactiveActuatorEndpointAutoConfigurationInitializer
 	private static final boolean enabled;
 
 	static {
-		enabled = ClassUtils.isPresent("org.springframework.boot.actuate.endpoint.annotation.Endpoint", null);
+		enabled = ClassUtils.isPresent(
+				"org.springframework.boot.actuate.endpoint.annotation.Endpoint", null);
 	}
 
 	@Override
 	public void initialize(GenericApplicationContext context) {
 		if (FunctionalReactiveActuatorEndpointAutoConfigurationInitializer.enabled) {
-			ConditionService conditions = InfrastructureUtils.getBean(context.getBeanFactory(), ConditionService.class);
-			if (conditions.matches(FunctionalReactiveActuatorEndpointAutoConfiguration.class)) {
-				ImportRegistrars registrars = InfrastructureUtils.getBean(context.getBeanFactory(),
-						ImportRegistrars.class);
-				registrars.defer(main -> deferred((GenericApplicationContext) main, conditions));
+			ConditionService conditions = InfrastructureUtils
+					.getBean(context.getBeanFactory(), ConditionService.class);
+			if (conditions
+					.matches(FunctionalReactiveActuatorEndpointAutoConfiguration.class)) {
+				ImportRegistrars registrars = InfrastructureUtils
+						.getBean(context.getBeanFactory(), ImportRegistrars.class);
+				registrars.defer(
+						main -> deferred((GenericApplicationContext) main, conditions));
 			}
 		}
 	}
 
-	private void deferred(GenericApplicationContext context, ConditionService conditions) {
-		if (context.getBeanFactory()
-				.getBeanNamesForType(FunctionalReactiveActuatorEndpointAutoConfiguration.class).length == 0) {
-			context.registerBean(FunctionalReactiveActuatorEndpointAutoConfiguration.class,
+	private void deferred(GenericApplicationContext context,
+			ConditionService conditions) {
+		if (context.getBeanFactory().getBeanNamesForType(
+				FunctionalReactiveActuatorEndpointAutoConfiguration.class).length == 0) {
+			context.registerBean(
+					FunctionalReactiveActuatorEndpointAutoConfiguration.class,
 					() -> new FunctionalReactiveActuatorEndpointAutoConfiguration());
-			if (conditions.matches(FunctionalReactiveActuatorEndpointAutoConfiguration.class, RouterFunction.class)) {
+			if (conditions.matches(
+					FunctionalReactiveActuatorEndpointAutoConfiguration.class,
+					RouterFunction.class)) {
 				context.registerBean("actuatorEndpoints", RouterFunction.class,
-						() -> context.getBean(FunctionalReactiveActuatorEndpointAutoConfiguration.class)
-								.actuatorEndpoints(context.getBean(WebEndpointProperties.class),
-										context.getBean(HealthEndpoint.class), context.getBean(InfoEndpoint.class)));
+						() -> context.getBean(
+								FunctionalReactiveActuatorEndpointAutoConfiguration.class)
+								.actuatorEndpoints(
+										context.getBean(WebEndpointProperties.class),
+										context.getBean(HealthEndpoint.class),
+										context.getBeanProvider(InfoEndpoint.class)));
 			}
 		}
 	}

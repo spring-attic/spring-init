@@ -22,6 +22,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
+import org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.EnvironmentAware;
@@ -73,7 +74,8 @@ public class InfrastructureUtils {
 
 	public static <T> T getBean(SingletonBeanRegistry beans, Class<T> type) {
 		GenericApplicationContext context = getContext(beans);
-		if (context != null && !context.isActive() && context.getBeanFactory().containsSingleton(type.getName())) {
+		if (context != null && !context.isActive()
+				&& context.getBeanFactory().containsSingleton(type.getName())) {
 			@SuppressWarnings("unchecked")
 			T result = (T) context.getBeanFactory().getSingleton(type.getName());
 			return result;
@@ -86,10 +88,12 @@ public class InfrastructureUtils {
 		return context.getBean(type);
 	}
 
-	public static void install(SingletonBeanRegistry beans, GenericApplicationContext context) {
+	public static void install(SingletonBeanRegistry beans,
+			GenericApplicationContext context) {
 		if (!isInstalled(beans)) {
 			beans.registerSingleton(CONTEXT_NAME, context);
-			context.getBeanFactory().registerSingleton(CONTEXT_NAME, new ContextHolder(context));
+			context.getBeanFactory().registerSingleton(CONTEXT_NAME,
+					new ContextHolder(context));
 		}
 	}
 
@@ -97,16 +101,21 @@ public class InfrastructureUtils {
 		return beans.containsSingleton(CONTEXT_NAME);
 	}
 
-	public static <T> T getOrCreate(GenericApplicationContext main, String name, Class<T> type) {
+	public static <T> T getOrCreate(GenericApplicationContext main, String name,
+			Class<T> type) {
 		GenericApplicationContext context = getContext(main.getBeanFactory());
 		if (context.getBeanNamesForType(type, false, true).length == 0) {
 			if (main.isActive()) {
-				T bean = main.getAutowireCapableBeanFactory().createBean(type);
+				@SuppressWarnings("unchecked")
+				T bean = (T) main.getAutowireCapableBeanFactory().createBean(type,
+						AbstractAutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, false);
 				context.getBeanFactory().registerSingleton(name, bean);
 			}
 			else {
 				// Can't use beans to do this because it probably isn't active yet
-				T bean = context.getAutowireCapableBeanFactory().createBean(type);
+				@SuppressWarnings("unchecked")
+				T bean = (T) context.getAutowireCapableBeanFactory().createBean(type,
+						AbstractAutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, false);
 				invokeAwareMethods(bean, context.getEnvironment(), context, context);
 				context.getBeanFactory().registerSingleton(name, bean);
 			}
@@ -114,7 +123,8 @@ public class InfrastructureUtils {
 		return context.getBean(type);
 	}
 
-	public static <T> T getOrCreate(GenericApplicationContext main, Class<T> initializerType) {
+	public static <T> T getOrCreate(GenericApplicationContext main,
+			Class<T> initializerType) {
 		return getOrCreate(main, initializerType.getName(), initializerType);
 	}
 
@@ -134,13 +144,14 @@ public class InfrastructureUtils {
 				|| getContext(beans).getBeanNamesForType(type, false, false).length > 0;
 	}
 
-	public static <T> T invokeAwareMethods(T target, Environment environment, ResourceLoader resourceLoader,
-			GenericApplicationContext registry) {
+	public static <T> T invokeAwareMethods(T target, Environment environment,
+			ResourceLoader resourceLoader, GenericApplicationContext registry) {
 
 		if (target instanceof Aware) {
 			if (target instanceof BeanClassLoaderAware) {
 				ClassLoader classLoader = (registry instanceof ConfigurableBeanFactory
-						? ((ConfigurableBeanFactory) registry).getBeanClassLoader() : resourceLoader.getClassLoader());
+						? ((ConfigurableBeanFactory) registry).getBeanClassLoader()
+						: resourceLoader.getClassLoader());
 				if (classLoader != null) {
 					((BeanClassLoaderAware) target).setBeanClassLoader(classLoader);
 				}
@@ -164,7 +175,8 @@ public class InfrastructureUtils {
 				((InitializingBean) target).afterPropertiesSet();
 			}
 			catch (Exception e) {
-				throw new IllegalStateException("Cannot initialize: " + target.getClass(), e);
+				throw new IllegalStateException("Cannot initialize: " + target.getClass(),
+						e);
 			}
 		}
 
@@ -172,10 +184,11 @@ public class InfrastructureUtils {
 
 	}
 
-	public static <T> ApplicationContextInitializer<GenericApplicationContext> binder(Class<T> type,
-			PropertiesBinder<T> binder) {
-		return infra -> InfrastructureUtils.getBean(infra.getBeanFactory(), PropertiesBinders.class).register(type,
-				binder);
+	public static <T> ApplicationContextInitializer<GenericApplicationContext> binder(
+			Class<T> type, PropertiesBinder<T> binder) {
+		return infra -> InfrastructureUtils
+				.getBean(infra.getBeanFactory(), PropertiesBinders.class)
+				.register(type, binder);
 	}
 
 }

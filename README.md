@@ -45,7 +45,7 @@ You then need a Spring application bootstrap utility that recognizes the `Applic
 			<dependency>
 				<groupId>org.springframework.experimental</groupId>
 				<artifactId>spring-init-dependencies</artifactId>
-				<version>0.1.0</version>
+				<version>0.2.3</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -67,6 +67,7 @@ and set the code generator up as a compiler plugin:
 			<plugin>
 				<groupId>org.springframework.experimental</groupId>
 				<artifactId>spring-init-maven-plugin</artifactId>
+				<version>0.2.3</version>
 				<executions>
 					<execution>
 						<id>sources</id>
@@ -80,7 +81,7 @@ and set the code generator up as a compiler plugin:
 
 ```
 
-To use functional versions of Spring Boot autoconfiguration you can include additional dependencies which have been pre-compiled. The versions are managed by the `spring-init-dependencies` BOM (where each version of Spring Init only supports one version of Spring Boot - 0.1.0 is paired with 2.4.0-RC1). An example of including the `func` dependencies in a project that uses `spring-boot-autoconfigure`:
+To use functional versions of Spring Boot autoconfiguration you can include additional dependencies which have been pre-compiled. The versions are managed by the `spring-init-dependencies` BOM (where each version of Spring Init only supports one version of Spring Boot - 0.2.3 is paired with 2.5.0). An example of including the `func` dependencies in a project that uses `spring-boot-autoconfigure`:
 
 ```
 		<dependency>
@@ -121,7 +122,7 @@ $ java -jar samples/application/target/*.jar
  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
   '  |____| .__|_| |_|_| |_\__, | / / / /
  =========|_|==============|___/=/_/_/_/
- :: Spring Boot ::  (v2.4.0-RC1)
+ :: Spring Boot ::  (v2.5.0)
 
 ...
 Bar: com.acme.Bar@7c3ebc6b
@@ -141,7 +142,7 @@ Benchmark startup time (seconds) with annotations, with Spring Init (slim), and 
 
 ```
 class                              method  sample  beans    classes   heap    memory  median  mean   range
-com.example.bench.SlimBenchmarkIT  annos   demo    99.000   50.2.1-SNAPSHOT00  8.418   50.813  0.802   0.817  0.015
+com.example.bench.SlimBenchmarkIT  annos   demo    99.000   5022.000  8.418   50.813  0.802   0.817  0.015
 com.example.bench.SlimBenchmarkIT  annos   actr    185.000  5282.000  9.901   53.876  0.927   0.937  0.020
 com.example.bench.SlimBenchmarkIT  manual  demo    53.000   4729.000  6.996   47.400  0.681   0.696  0.026
 com.example.bench.SlimBenchmarkIT  manual  actr    100.000  4917.000  7.764   49.082  0.731   0.753  0.027

@@ -7,6 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.boot.actuate.autoconfigure.web.SimpleEndpointLinksResolver;
 import org.springframework.boot.actuate.autoconfigure.web.server.ManagementContextAutoConfiguration;
@@ -24,6 +25,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.reactive.function.server.RouterFunction;
+import org.springframework.web.reactive.function.server.RouterFunctions.Builder;
 
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 import static org.springframework.web.reactive.function.server.ServerResponse.ok;
@@ -34,28 +36,33 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
 @AutoConfigureAfter(ManagementContextAutoConfiguration.class)
 public class FunctionalReactiveActuatorEndpointAutoConfiguration {
 
-	private static Log logger = LogFactory.getLog(FunctionalReactiveActuatorEndpointAutoConfiguration.class);
+	private static Log logger = LogFactory
+			.getLog(FunctionalReactiveActuatorEndpointAutoConfiguration.class);
 
 	@Bean
 	@ConditionalOnMissingBean(name = "webEndpointReactiveHandlerMapping")
-	public RouterFunction<?> actuatorEndpoints(WebEndpointProperties endpoints, HealthEndpoint health,
-			InfoEndpoint info) {
+	public RouterFunction<?> actuatorEndpoints(WebEndpointProperties endpoints,
+			HealthEndpoint health, ObjectProvider<InfoEndpoint> info) {
 		String path = endpoints.getBasePath();
 		logger.info("Exposing 2 endpoint(s) beneath base path '" + path + "'");
 		EndpointLinksResolver resolver = new SimpleEndpointLinksResolver(endpoints);
-		return route().GET(path,
+		Builder builder = route().GET(path,
 				request -> ok().body(
-						Mono.just(Collections.singletonMap("_links", resolver.resolveLinks(request.uri().toString()))),
+						Mono.just(Collections.singletonMap("_links",
+								resolver.resolveLinks(request.uri().toString()))),
 						new ParameterizedTypeReference<Map<String, Object>>() {
 						})) //
-				.GET(path + "/health", request -> ok().body(Mono.just(health.health()), HealthComponent.class)) //
-				.GET(path + "/health/{path}",
-						request -> ok().body(Mono.just(health.healthForPath(request.pathVariable("path"))),
+				.GET(path + "/health",
+						request -> ok().body(Mono.just(health.health()),
 								HealthComponent.class)) //
-				.GET(path + "/info", request -> ok().body(Mono.just(info.info()),
+				.GET(path + "/health/{path}", request -> ok().body(
+						Mono.just(health.healthForPath(request.pathVariable("path"))),
+						HealthComponent.class));
+		info.ifAvailable(endpoint -> builder.GET(path + "/info",
+				request -> ok().body(Mono.just(endpoint.info()),
 						new ParameterizedTypeReference<Map<String, Object>>() {
-						})) //
-				.build();
+						}))); //
+		return builder.build();
 	}
 
 }

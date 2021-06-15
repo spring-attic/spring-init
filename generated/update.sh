@@ -1,8 +1,8 @@
 #!/bin/bash
 
-BOOT_FUNC_VERSION=0.2.2
-BOOT_LABEL=2.4.0
-INIT_VERSION=0.2.2
+BOOT_FUNC_VERSION=0.2.3-SNAPSHOT
+BOOT_LABEL=2.5.0
+INIT_VERSION=0.2.3-SNAPSHOT
 
 function init() {
 
@@ -165,7 +165,7 @@ if echo $BOOT_LABEL | grep -q SNAPSHOT; then
 else
 	(cd $cache; git fetch --tags && git checkout v$BOOT_LABEL)
 fi
-(cd $cache; ./gradlew publishMavenPublicationToMavenLocal -x test)
+(cd $cache; ./gradlew :spring-boot-project:spring-boot-actuator-autoconfigure:build; ./gradlew publishMavenPublicationToMavenLocal -x test)
 
 src=$cache/spring-boot-project/spring-boot-autoconfigure
 tgt=`dirname $0`/autoconfigure

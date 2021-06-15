@@ -11,7 +11,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.4.0</version>
+		<version>2.5.0</version>
 		<relativePath/>
 	</parent>
 
@@ -67,6 +67,7 @@
 		<java.version>1.8</java.version>
 		<start-class>app.main.SampleApplication</start-class>
 		<spring-init.version>${project.version}</spring-init.version>
+		<junit-jupiter.version>5.8.0-M1</junit-jupiter.version>
 	</properties>
 
 	<build>

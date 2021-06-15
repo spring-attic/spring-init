@@ -28,6 +28,13 @@ package app.main;
 // FunctionalApplicationTests.class //
 // })
 // @Ignore
+
+// Alternative:
+// @Suite
+// @SelectClasses({ //
+// MockFunctionalApplicationTests.class, //
+// FunctionalApplicationTests.class //
+// })
 public class AdhocTestSuite {
 
 }

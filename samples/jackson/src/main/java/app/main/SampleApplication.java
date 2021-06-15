@@ -1,5 +1,6 @@
 package app.main;
 
+import com.fasterxml.jackson.module.blackbird.BlackbirdModule;
 import reactor.core.publisher.Mono;
 
 import org.springframework.boot.SpringApplication;
@@ -22,6 +23,11 @@ public class SampleApplication {
 	@Bean
 	public RouterFunction<?> userEndpoints(Foo foo) {
 		return route(GET("/"), request -> ok().body(Mono.just(foo), Foo.class));
+	}
+
+	@Bean
+	public BlackbirdModule blackbirdModule() {
+		return new BlackbirdModule();
 	}
 
 	public static void main(String[] args) {

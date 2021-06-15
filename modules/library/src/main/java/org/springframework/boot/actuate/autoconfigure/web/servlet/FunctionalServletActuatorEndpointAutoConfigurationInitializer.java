@@ -17,31 +17,41 @@ public class FunctionalServletActuatorEndpointAutoConfigurationInitializer
 	private static final boolean enabled;
 
 	static {
-		enabled = ClassUtils.isPresent("org.springframework.boot.actuate.endpoint.annotation.Endpoint", null);
+		enabled = ClassUtils.isPresent(
+				"org.springframework.boot.actuate.endpoint.annotation.Endpoint", null);
 	}
 
 	@Override
 	public void initialize(GenericApplicationContext context) {
 		if (FunctionalServletActuatorEndpointAutoConfigurationInitializer.enabled) {
-			ConditionService conditions = InfrastructureUtils.getBean(context.getBeanFactory(), ConditionService.class);
-			if (conditions.matches(FunctionalServletActuatorEndpointAutoConfiguration.class)) {
-				ImportRegistrars registrars = InfrastructureUtils.getBean(context.getBeanFactory(),
-						ImportRegistrars.class);
-				registrars.defer(main -> deferred((GenericApplicationContext) main, conditions));
+			ConditionService conditions = InfrastructureUtils
+					.getBean(context.getBeanFactory(), ConditionService.class);
+			if (conditions
+					.matches(FunctionalServletActuatorEndpointAutoConfiguration.class)) {
+				ImportRegistrars registrars = InfrastructureUtils
+						.getBean(context.getBeanFactory(), ImportRegistrars.class);
+				registrars.defer(
+						main -> deferred((GenericApplicationContext) main, conditions));
 			}
 		}
 	}
 
-	private void deferred(GenericApplicationContext context, ConditionService conditions) {
-		if (context.getBeanFactory()
-				.getBeanNamesForType(FunctionalServletActuatorEndpointAutoConfiguration.class).length == 0) {
+	private void deferred(GenericApplicationContext context,
+			ConditionService conditions) {
+		if (context.getBeanFactory().getBeanNamesForType(
+				FunctionalServletActuatorEndpointAutoConfiguration.class).length == 0) {
 			context.registerBean(FunctionalServletActuatorEndpointAutoConfiguration.class,
 					() -> new FunctionalServletActuatorEndpointAutoConfiguration());
-			if (conditions.matches(FunctionalServletActuatorEndpointAutoConfiguration.class, RouterFunction.class)) {
+			if (conditions.matches(
+					FunctionalServletActuatorEndpointAutoConfiguration.class,
+					RouterFunction.class)) {
 				context.registerBean("actuatorEndpoints", RouterFunction.class,
-						() -> context.getBean(FunctionalServletActuatorEndpointAutoConfiguration.class)
-								.actuatorEndpoints(context.getBean(WebEndpointProperties.class),
-										context.getBean(HealthEndpoint.class), context.getBean(InfoEndpoint.class)));
+						() -> context.getBean(
+								FunctionalServletActuatorEndpointAutoConfiguration.class)
+								.actuatorEndpoints(
+										context.getBean(WebEndpointProperties.class),
+										context.getBean(HealthEndpoint.class),
+										context.getBeanProvider(InfoEndpoint.class)));
 			}
 		}
 	}
