@@ -1,4 +1,7 @@
-# Spring Init ![ci](https://github.com/spring-projects-experimental/spring-init/workflows/deploy/badge.svg)
+# This repository is no longer actively maintained by VMware, Inc.
+
+
+Spring Init ![ci](https://github.com/spring-projects-experimental/spring-init/workflows/deploy/badge.svg)
 
 This project implements a code generator (activated by a build plugin) that converts `@Configuration` to functional bean registrations, which are known to be faster and also more amenable to AOT compilation (native images).
 
